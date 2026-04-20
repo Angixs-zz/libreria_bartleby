@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+<div class="flex flex-col lg:flex-row" style="min-height: calc(100vh - 5rem); background-color: var(--bg);">
+
+    <!-- ══ PANEL IZQUIERDO: Escáner + Ticket ══════════════ -->
+    <section class="flex-1 lg:mr-[380px] overflow-y-auto">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+
+            <!-- Título de la página -->
+            <div class="mb-10">
+                <p class="text-xs font-label uppercase tracking-widest mb-2" style="color: var(--text-muted);">Staff Area · Caja</p>
+                <h1 class="font-headline italic text-5xl" style="color: var(--primary);">Punto de Venta</h1>
+            </div>
+
+            <!-- ── Input Escáner ───────────────────────── -->
+            <div class="rounded-xl mb-10 overflow-hidden"
+                 style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(27,28,26,0.06);">
+                <div class="flex items-center gap-4 px-6 py-5" style="border-bottom: 1px solid var(--border);">
+                    <span class="material-symbols-outlined text-2xl flex-shrink-0" style="color: var(--primary);">barcode_scanner</span>
+                    <input id="input-escaner"
+                           type="text"
+                           autocomplete="off"
+                           autofocus
+                           placeholder="Escanea el SKU / ISBN o escribe y presiona Enter..."
+                           class="flex-1 bg-transparent font-body text-lg focus:outline-none"
+                           style="border: none; padding: 0; color: var(--text); border-bottom: none;">
+                </div>
+                <div class="px-6 py-3 flex items-center gap-2" style="background-color: var(--bg-subtle);">
+                    <span class="material-symbols-outlined text-sm" style="color: var(--text-faint);">info</span>
+                    <p class="text-xs font-body" style="color: var(--text-faint);">El cursor permanece aquí automáticamente. Compatible con pistola láser.</p>
+                </div>
+            </div>
+
+            <!-- ── Notificación de error ───────────────── -->
+            <div id="notif-error" class="hidden items-center gap-3 px-5 py-4 rounded-xl mb-6 transition-all"
+                 style="background-color:rgba(186,26,26,0.07); border:1px solid rgba(186,26,26,0.18);">
+                <span class="material-symbols-outlined flex-shrink-0 text-xl" style="color:#ba1a1a;">error_outline</span>
+                <p id="notif-error-msg" class="text-sm font-body font-medium" style="color:#ba1a1a;"></p>
+            </div>
+
+            <!-- ── Lista del ticket ───────────────────── -->
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-headline italic text-2xl" style="color: var(--text);">Artículos en este ticket</h2>
+                <span id="contador-articulos" class="text-xs font-bold font-label uppercase tracking-widest px-3 py-1 rounded-full"
+                      style="background-color: var(--bg-subtle); color: var(--text-muted);">0 artículos</span>
+            </div>
+
+            <div id="lista-ticket">
+                <!-- Estado vacío -->
+                <div id="ticket-vacio" class="flex flex-col items-center justify-center py-24 text-center rounded-xl"
+                     style="border: 2px dashed var(--border);">
+                    <span class="material-symbols-outlined text-6xl block mb-4"
+                          style="color: var(--border); font-variation-settings:'wght' 100;">point_of_sale</span>
+                    <p class="font-headline italic text-xl mb-1" style="color: var(--text-muted);">El ticket está vacío</p>
+                    <p class="text-sm font-body" style="color: var(--text-faint);">Escanea un libro para comenzar</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══ PANEL DERECHO: Resumen fijo ════════════════════ -->
+    <aside class="lg:fixed lg:right-0 lg:top-20 lg:w-[380px] lg:h-[calc(100vh-5rem)] flex flex-col"
+           style="background-color: var(--surface); border-left: 1px solid var(--border);">
+
+        <!-- Contenido con scroll si hace falta -->
+        <div class="flex-1 overflow-y-auto px-8 py-10 flex flex-col gap-8">
+
+            <!-- Header resumen -->
+            <div>
+                <p class="text-xs font-label uppercase tracking-widest mb-1" style="color: var(--text-muted);">Resumen de venta</p>
+                <h2 class="font-headline italic text-3xl" style="color: var(--text);">Cobro</h2>
+            </div>
+
+            <!-- Desglose -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center py-3" style="border-bottom: 1px solid var(--border);">
+                    <span class="font-body text-sm" style="color: var(--text-muted);">Subtotal</span>
+                    <span id="resumen-subtotal" class="font-body font-bold" style="color: var(--text);">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center py-3" style="border-bottom: 1px solid var(--border);">
+                    <span class="font-body text-sm" style="color: var(--text-muted);">Descuento</span>
+                    <span class="font-body font-bold" style="color: var(--primary);">-$0.00</span>
+                </div>
+            </div>
+
+            <!-- Total grande -->
+            <div class="rounded-xl p-6" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                <p class="text-xs font-label uppercase tracking-widest mb-2" style="color: var(--text-muted);">Total a cobrar</p>
+                <span id="total-pagar" class="font-headline text-5xl font-bold tracking-tight" style="color: var(--primary);">$0.00</span>
+            </div>
+
+            <!-- Métodos de pago -->
+            <div>
+                <p class="text-xs font-label uppercase tracking-widest mb-3" style="color: var(--text-muted);">Método de pago</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="flex flex-col items-center gap-2 py-5 rounded-xl transition-all hover:opacity-80"
+                            style="border: 1px solid var(--border); color: var(--text-muted); background-color: var(--bg-subtle);">
+                        <span class="material-symbols-outlined text-2xl">payments</span>
+                        <span class="text-xs font-bold font-label uppercase">Efectivo</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-2 py-5 rounded-xl transition-all"
+                            style="border: 2px solid var(--primary); color: var(--primary); background-color: rgba(163,196,106,0.08);">
+                        <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">credit_card</span>
+                        <span class="text-xs font-bold font-label uppercase">Tarjeta</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones fijos abajo -->
+        <div class="px-8 pb-8 pt-4 space-y-3" style="border-top: 1px solid var(--border);">
+            <button onclick="completarVenta()" id="btn-cobrar"
+                    class="w-full py-5 rounded-xl flex items-center justify-center gap-3 transition-all hover:opacity-90 active:scale-95 group shadow-lg"
+                    style="background: linear-gradient(135deg, #3e5219, #556b2f); color: white;">
+                <span class="material-symbols-outlined text-2xl group-hover:translate-x-0.5 transition-transform">point_of_sale</span>
+                <span id="texto-btn-cobrar" class="font-bold text-lg tracking-wide">Cobrar Venta</span>
+            </button>
+
+            <button onclick="pedirCancelar()"
+                    class="w-full py-3 rounded-xl flex items-center justify-center gap-2 font-body text-sm transition-all hover:text-red-500"
+                    style="color: var(--text-faint);">
+                <span class="material-symbols-outlined text-lg">cancel</span>
+                Cancelar venta
+            </button>
+        </div>
+    </aside>
+</div>
+
+<!-- ══ Modal: Cancelar venta ══════════════════════════ -->
+<div id="modal-cancelar" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="modal-cancelar-content" class="w-full max-w-sm mx-4 p-8 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-300"
+         style="background-color: var(--surface); border: 1px solid var(--border);">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
+             style="background-color:rgba(186,26,26,0.1);">
+            <span class="material-symbols-outlined text-3xl" style="color:#ba1a1a;">cancel</span>
+        </div>
+        <h3 class="font-headline italic text-2xl mb-2" style="color: var(--text);">¿Cancelar la venta?</h3>
+        <p class="font-body text-sm mb-8" style="color: var(--text-muted);">Se eliminarán todos los artículos del ticket. Esta acción no se puede deshacer.</p>
+        <div class="flex gap-3">
+            <button onclick="cerrarModal('modal-cancelar','modal-cancelar-content')"
+                    class="flex-1 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+                    style="border: 1px solid var(--border); color: var(--text-muted);">
+                Regresar
+            </button>
+            <button onclick="confirmarCancelar()"
+                    class="flex-1 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:opacity-90"
+                    style="background-color:#ba1a1a; color:white;">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Modal: Venta exitosa ════════════════════════════ -->
+<div id="modal-exito" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="modal-exito-content" class="w-full max-w-sm mx-4 p-10 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-300"
+         style="background-color: var(--surface); border: 1px solid var(--border);">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
+             style="background-color:rgba(163,196,106,0.2);">
+            <span class="material-symbols-outlined text-4xl" style="color:var(--primary);">check_circle</span>
+        </div>
+        <h3 class="font-headline italic text-3xl mb-2" style="color: var(--text);">¡Venta completada!</h3>
+        <p class="font-body text-sm mb-8" style="color: var(--text-muted);">El inventario ha sido actualizado. Listo para el siguiente cliente.</p>
+        <button onclick="cerrarModalExito()"
+                class="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all"
+                style="background-color: var(--primary); color: white;">
+            Nuevo cliente
+        </button>
+    </div>
+</div>
+
+<script>
+    let carrito = [];
+    const inputEscaner = document.getElementById('input-escaner');
+
+    // Mantener foco en el escáner
+    document.addEventListener('click', (e) => {
+        const tag = e.target.tagName;
+        if (tag !== 'INPUT' && tag !== 'BUTTON' && tag !== 'A') inputEscaner.focus();
+    });
+
+    inputEscaner.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const codigo = this.value.trim();
+            if (codigo) buscarYAgregarLibro(codigo);
+            this.value = '';
+        }
+    });
+
+    function buscarYAgregarLibro(codigo) {
+        ocultarError();
+        inputEscaner.placeholder = "Buscando...";
+
+        fetch(`/inventario/api/pos/buscar/?codigo=${encodeURIComponent(codigo)}`)
+            .then(res => res.json())
+            .then(data => {
+                inputEscaner.placeholder = "Escanea el SKU / ISBN o escribe y presiona Enter...";
+                if (data.error) { mostrarError(data.error); return; }
+
+                const idx = carrito.findIndex(i => i.id === data.id);
+                if (idx !== -1) {
+                    if (carrito[idx].cantidad < data.stock) carrito[idx].cantidad++;
+                    else mostrarError(`Solo hay ${data.stock} ejemplar(es) disponibles.`);
+                } else {
+                    carrito.push({ id: data.id, titulo: data.titulo, precio: data.precio, cantidad: 1, stock_max: data.stock });
+                }
+                renderTicket();
+            })
+            .catch(() => {
+                inputEscaner.placeholder = "Escanea el SKU / ISBN o escribe y presiona Enter...";
+                mostrarError("Error de conexión al buscar.");
+            });
+    }
+
+    function renderTicket() {
+        const lista = document.getElementById('lista-ticket');
+        if (carrito.length === 0) {
+            lista.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-24 text-center rounded-xl"
+                     style="border: 2px dashed var(--border);">
+                    <span class="material-symbols-outlined text-6xl block mb-4"
+                          style="color:var(--border); font-variation-settings:'wght' 100;">point_of_sale</span>
+                    <p class="font-headline italic text-xl mb-1" style="color:var(--text-muted);">El ticket está vacío</p>
+                    <p class="text-sm font-body" style="color:var(--text-faint);">Escanea un libro para comenzar</p>
+                </div>`;
+            document.getElementById('total-pagar').textContent = '$0.00';
+            document.getElementById('resumen-subtotal').textContent = '$0.00';
+            document.getElementById('texto-btn-cobrar').textContent = 'Cobrar Venta';
+            document.getElementById('contador-articulos').textContent = '0 artículos';
+            return;
+        }
+
+        let total = 0, items = 0, html = '';
+        carrito.forEach((item, i) => {
+            const sub = item.precio * item.cantidad;
+            total += sub; items += item.cantidad;
+            html += `
+            <div class="group flex items-center gap-5 p-5 rounded-xl mb-4 transition-all"
+                 style="background-color:var(--surface); border:1px solid var(--border);">
+                <div class="w-14 h-[4.5rem] rounded-lg flex items-center justify-center flex-shrink-0"
+                     style="background-color:var(--bg-subtle); border:1px solid var(--border);">
+                    <span class="material-symbols-outlined text-2xl" style="color:var(--border);">menu_book</span>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <p class="font-headline italic text-xl leading-snug line-clamp-1 mb-1" style="color:var(--text);">${item.titulo}</p>
+                    <p class="text-sm font-body" style="color:var(--text-muted);">$${item.precio.toFixed(2)} por unidad</p>
+                </div>
+                <div class="flex-shrink-0 text-right">
+                    <p class="font-body font-bold text-lg" style="color:var(--text);">$${sub.toFixed(2)}</p>
+                    <p class="text-xs font-body mt-0.5" style="color:var(--text-faint);">×${item.cantidad}</p>
+                </div>
+                <button onclick="quitarItem(${i})"
+                        class="ml-2 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:text-red-500 flex-shrink-0"
+                        style="color:var(--text-faint);">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>`;
+        });
+
+        lista.innerHTML = html;
+        document.getElementById('total-pagar').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('resumen-subtotal').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('texto-btn-cobrar').textContent = `Cobrar $${total.toFixed(2)}`;
+        document.getElementById('contador-articulos').textContent = `${items} artículo${items !== 1 ? 's' : ''}`;
+    }
+
+    function quitarItem(i) { carrito.splice(i, 1); renderTicket(); inputEscaner.focus(); }
+
+    function mostrarError(msg) {
+        const n = document.getElementById('notif-error');
+        document.getElementById('notif-error-msg').textContent = msg;
+        n.classList.remove('hidden'); n.classList.add('flex');
+        setTimeout(ocultarError, 4500);
+    }
+    function ocultarError() {
+        const n = document.getElementById('notif-error');
+        n.classList.add('hidden'); n.classList.remove('flex');
+    }
+
+    function pedirCancelar() { if (carrito.length > 0) abrirModal('modal-cancelar', 'modal-cancelar-content'); }
+    function confirmarCancelar() { carrito = []; renderTicket(); cerrarModal('modal-cancelar','modal-cancelar-content'); inputEscaner.focus(); }
+    function cerrarModalExito() { cerrarModal('modal-exito','modal-exito-content'); carrito = []; renderTicket(); inputEscaner.focus(); }
+
+    function abrirModal(id, cid) {
+        const m = document.getElementById(id);
+        m.classList.remove('hidden'); m.classList.add('flex');
+        requestAnimationFrame(() => { m.classList.remove('opacity-0'); document.getElementById(cid).classList.remove('scale-95'); });
+    }
+    function cerrarModal(id, cid) {
+        const m = document.getElementById(id);
+        m.classList.add('opacity-0'); document.getElementById(cid).classList.add('scale-95');
+        setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+    }
+
+    function completarVenta() {
+        if (!carrito.length) { mostrarError('Añade al menos un libro para cobrar.'); return; }
+        const btn = document.getElementById('btn-cobrar');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined">progress_activity</span>&nbsp;Procesando...';
+
+        fetch('/inventario/api/pos/cobrar/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrf_token').value },
+            body: JSON.stringify({ carrito })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) abrirModal('modal-exito','modal-exito-content');
+            else mostrarError(d.error || 'Error al procesar la venta.');
+        })
+        .catch(() => mostrarError('Error de conexión.'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-2xl">point_of_sale</span><span id="texto-btn-cobrar" class="font-bold text-lg tracking-wide">Cobrar Venta</span>';
+            inputEscaner.focus();
+        });
+    }
+</script>
+{% endblock %}

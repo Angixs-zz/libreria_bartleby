@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex-grow flex items-center justify-center pt-24 pb-12 px-6">
+
+    <!-- Fondo decorativo -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-40 z-0">
+        <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl" style="background-color: var(--bg-subtle);"></div>
+        <div class="absolute top-1/2 -right-48 w-[500px] h-[500px] rounded-full blur-[100px]" style="background-color: var(--bg-subtle);"></div>
+    </div>
+
+    <div class="relative w-full max-w-md z-10">
+
+        <!-- Ícono decorativo flotante -->
+        <div class="absolute -top-12 -right-8 w-24 h-24 rounded-lg -rotate-12 flex items-center justify-center shadow-sm"
+             style="background-color: var(--bg-subtle);">
+            <span class="material-symbols-outlined text-4xl" style="color: var(--primary);">menu_book</span>
+        </div>
+
+        <!-- Card principal -->
+        <div class="p-10 md:p-12 shadow-[0_20px_50px_rgba(27,28,26,0.1)] rounded-lg relative z-10"
+             style="background-color: var(--surface); border: 1px solid var(--border);">
+
+            <div class="mb-10 text-center">
+                <h1 class="text-4xl md:text-5xl font-headline italic mb-3" style="color: var(--primary);">Bienvenido</h1>
+                <p class="font-body text-sm md:text-base tracking-wide" style="color: var(--text-muted);">Bienvenido de nuevo a la bitácora</p>
+            </div>
+
+            <form method="POST" action="{% url 'login' %}" class="space-y-8">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <p class="text-red-500 text-xs italic text-center">Tu usuario y contraseña no coinciden. Inténtalo de nuevo.</p>
+                {% endif %}
+
+                <!-- Usuario -->
+                <div class="relative group">
+                    <label class="block font-label text-[10px] uppercase tracking-[0.2em] mb-1 transition-colors group-focus-within:!text-[var(--primary)]"
+                           style="color: var(--text-muted);">Usuario</label>
+                    <div class="flex items-center py-2 transition-all duration-500"
+                         style="border-bottom: 1px solid var(--border);">
+                        <span class="material-symbols-outlined mr-3 text-xl transition-colors group-focus-within:!text-[var(--primary)]"
+                              style="color: var(--text-faint);">person</span>
+                        <input name="username" type="text" required
+                               class="w-full bg-transparent border-none focus:ring-0 font-body p-0 text-sm md:text-base"
+                               style="color: var(--text);"
+                               placeholder="Tu nombre de usuario"/>
+                    </div>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="relative group">
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="block font-label text-[10px] uppercase tracking-[0.2em] transition-colors group-focus-within:!text-[var(--primary)]"
+                               style="color: var(--text-muted);">Contraseña</label>
+                    </div>
+                    <div class="flex items-center py-2 transition-all duration-500"
+                         style="border-bottom: 1px solid var(--border);">
+                        <span class="material-symbols-outlined mr-3 text-xl transition-colors group-focus-within:!text-[var(--primary)]"
+                              style="color: var(--text-faint);">lock</span>
+                        <input name="password" type="password" required
+                               class="w-full bg-transparent border-none focus:ring-0 font-body p-0 text-sm md:text-base"
+                               style="color: var(--text);"
+                               placeholder="••••••••"/>
+                    </div>
+                </div>
+
+                <!-- Botón submit -->
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#3e5219] to-[#556b2f] text-white font-headline italic text-xl rounded-lg shadow-lg hover:opacity-90 transition-all duration-300">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="font-body text-sm" style="color: var(--text-muted);">
+                    <a href="{% url 'login_con_codigo' %}" class="font-bold hover:underline underline-offset-4 transition-all" style="color: var(--primary);">¿Entrar con código por email?</a>
+                </p>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="font-body text-sm" style="color: var(--text-muted);">
+                    ¿No tienes cuenta?
+                    <a href="{% url 'registrar' %}" class="font-bold hover:underline underline-offset-4 ml-1 transition-all" style="color: var(--primary);">Regístrate</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Cita Bartleby -->
+        <div class="mt-8 text-center italic font-headline text-sm tracking-tight relative z-10" style="color: var(--text-faint);">
+            "Preferiría no hacerlo" — Bartleby, el escribiente.
+        </div>
+    </div>
+</div>
+{% endblock %}

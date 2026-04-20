@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+    .serrated-edge {
+        background-image: radial-gradient(circle at 10px -5px, transparent 12px, var(--surface) 13px);
+        background-size: 20px 20px;
+        background-position: 0 0;
+        background-repeat: repeat-x;
+        height: 12px;
+        width: 100%;
+        position: absolute;
+        top: -12px;
+    }
+    .serrated-edge-bottom {
+        background-image: radial-gradient(circle at 10px 25px, transparent 12px, var(--surface) 13px);
+        background-size: 20px 20px;
+        background-position: 0 0;
+        background-repeat: repeat-x;
+        height: 12px;
+        width: 100%;
+        position: absolute;
+        bottom: -12px;
+    }
+</style>
+
+<main class="w-full max-w-md relative mx-auto pt-32 pb-24 px-4">
+
+    <div id="ticket-capture" class="shadow-[0_40px_80px_-20px_rgba(27,28,26,0.15)] relative rounded-sm px-8 pt-10 pb-8"
+         style="background-color: var(--surface);">
+
+        <div class="serrated-edge"></div>
+
+        <div class="text-center">
+            <h1 class="font-headline italic text-3xl tracking-tight" style="color: var(--primary);">Librería Bartleby</h1>
+            <p class="font-label uppercase tracking-widest text-[10px] mt-2 font-semibold" style="color: var(--text-faint);">Oaxaca de Juárez, México</p>
+            <div class="mt-6 flex justify-center">
+                <div class="w-16 h-[1px]" style="background-color: var(--border);"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 mb-8">
+            <p class="text-xs font-label uppercase tracking-wider mb-2" style="color: var(--text-muted);">Código de Reserva</p>
+            <p class="font-mono text-3xl font-bold tracking-tighter" style="color: var(--text);">{{ reserva.codigo_ticket }}</p>
+        </div>
+
+        <div class="flex justify-center mb-10">
+            <div class="p-3 rounded-lg shadow-sm" style="border: 1px solid var(--border); background-color: var(--surface);">
+                <div class="w-32 h-32 flex items-center justify-center">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ reserva.codigo_ticket }}&color=1b1c1a&bgcolor=ffffff" alt="Código QR de Reserva" crossorigin="anonymous" class="w-full h-full object-contain">
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4 py-6 mb-8" style="border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);">
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs font-label uppercase tracking-wider" style="color: var(--text-muted);">Cliente</span>
+                <span class="text-sm font-medium" style="color: var(--text);">{{ reserva.usuario.username }}</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs font-label uppercase tracking-wider" style="color: var(--text-muted);">Generado</span>
+                <span class="text-sm font-medium" style="color: var(--text);">{{ reserva.fecha_reserva|date:"d M, Y" }}</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs font-label uppercase tracking-wider" style="color: var(--text-muted);">Estado</span>
+                <span class="px-2 py-0.5 bg-[#d2eca2] text-[#131f00] text-[10px] font-bold rounded-full uppercase">
+                    {{ reserva.get_estado_display }}
+                </span>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xs font-label uppercase tracking-wider mb-4" style="color: var(--text-muted);">Artículos Reservados</h2>
+            <ul class="space-y-4">
+                {% for libro in reserva.libros.all %}
+                <li class="flex justify-between items-start gap-4">
+                    <div>
+                        <p class="text-sm font-headline italic leading-tight" style="color: var(--text);">{{ libro.titulo }}</p>
+                        <p class="text-[11px] font-label mt-0.5" style="color: var(--text-muted);">{{ libro.autor }}</p>
+                    </div>
+                    <span class="font-mono text-xs" style="color: var(--text-muted);">${{ libro.precio_referencia }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="pt-6 flex justify-between items-center mb-8" style="border-top: 1px solid var(--border);">
+            <span class="font-headline italic text-xl" style="color: var(--primary);">Total a pagar</span>
+            <span class="font-mono text-2xl font-bold" style="color: var(--text);">${{ reserva.total }}</span>
+        </div>
+
+        <div class="text-center">
+            <p class="text-[9px] font-label uppercase tracking-[0.2em]" style="color: var(--text-faint);">Ex Libris • Librería Bartleby</p>
+        </div>
+
+        <div class="serrated-edge-bottom"></div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="mt-8 space-y-3" data-html2canvas-ignore="true">
+        <div class="p-4 rounded-lg flex gap-3" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+            <span class="material-symbols-outlined text-xl" style="color: var(--primary);">info</span>
+            <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+                Guarda este boleto digital en tu galería. Los libros se mantendrán en reserva por un máximo de <span class="font-bold" style="color: var(--text);">48 horas</span>.
+            </p>
+        </div>
+
+        <button id="btn-descargar" onclick="descargarTicketImagen()"
+                class="w-full py-4 bg-[#3e5219] text-white rounded-lg font-label font-bold text-sm tracking-wide flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm">
+            <span class="material-symbols-outlined text-lg">image</span>
+            Guardar como Imagen
+        </button>
+
+        <a href="{% url 'lista_libros' %}"
+           class="w-full py-4 rounded-lg font-label font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-colors"
+           style="border: 1px solid var(--border); color: var(--primary);">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Volver al catálogo
+        </a>
+    </div>
+
+</main>
+
+<script>
+    function descargarTicketImagen() {
+        const boton = document.getElementById('btn-descargar');
+        const ticketElement = document.getElementById('ticket-capture');
+
+        boton.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">hourglass_empty</span> Generando...';
+
+        html2canvas(ticketElement, {
+            scale: 2,
+            backgroundColor: null,
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const imagenURL = canvas.toDataURL("image/png");
+            const enlaceDescarga = document.createElement('a');
+            enlaceDescarga.href = imagenURL;
+            enlaceDescarga.download = 'Bartleby_Ticket_{{ reserva.codigo_ticket }}.png';
+            document.body.appendChild(enlaceDescarga);
+            enlaceDescarga.click();
+            document.body.removeChild(enlaceDescarga);
+            boton.innerHTML = '<span class="material-symbols-outlined text-lg">image</span> Guardar como Imagen';
+        });
+    }
+</script>
+{% endblock %}

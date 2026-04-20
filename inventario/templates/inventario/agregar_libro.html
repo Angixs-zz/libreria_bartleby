@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="max-w-6xl mx-auto px-8 py-12 pt-32 min-h-screen" style="background-color: var(--bg); color: var(--text);">
+
+
+
+    <header class="mb-12 pb-8" style="border-bottom: 1px solid var(--border);">
+        <h1 class="text-4xl md:text-5xl font-headline italic leading-tight" style="color: var(--primary);">Ingreso de Ejemplar</h1>
+        <p class="mt-2 font-body" style="color: var(--text-muted);">Registra una obra nueva o añade un lote a una existente.</p>
+    </header>
+
+    <div class="p-8 rounded-xl shadow-sm mb-8" style="background-color: var(--surface); border: 1px solid var(--border);">
+        <h3 class="text-xs uppercase tracking-widest font-bold mb-6 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Paso 1: Búsqueda y Coincidencias</h3>
+        <div class="mb-6 pb-6" style="border-bottom: 1px solid var(--border);">
+            <label class="block text-xs font-bold mb-2 uppercase" style="color: var(--primary);">Búsqueda Rápida Inteligente</label>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="input-isbn-api" autocomplete="off"
+                    class="w-full md:w-2/3 border-0 py-3 font-mono text-lg focus:ring-0 bg-transparent"
+                    style="border-bottom: 1px solid var(--border); color: var(--text);"
+                    placeholder="Escanea o escribe el ISBN aquí (ej. 9788498380798)">
+                <button type="button" onclick="buscarPorISBN()" class="bg-[#d2eca2] text-[#131f00] px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-[#c4d9a0] transition-colors flex justify-center items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">qr_code_scanner</span>
+                    Autocompletar
+                </button>
+            </div>
+            <p id="isbn-status" class="hidden text-xs font-bold mt-2"></p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+            <div class="relative">
+                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Título del Libro (Manual)</label>
+                <input type="text" id="input-titulo" autocomplete="off"
+                    class="w-full border-0 py-3 text-lg font-headline italic focus:ring-0 bg-transparent"
+                    style="border-bottom: 1px solid var(--border); color: var(--text);"
+                    placeholder="Ej. Los Juegos del Hambre">
+                <div id="sugerencias" class="hidden absolute z-50 w-full rounded-xl shadow-lg mt-1 overflow-hidden"
+                     style="background-color: var(--surface); border: 1px solid var(--border);"></div>
+            </div>
+            <div class="relative">
+                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Autor (Manual)</label>
+                <input type="text" id="input-autor" autocomplete="off"
+                    class="w-full border-0 py-3 text-lg font-body focus:ring-0 bg-transparent"
+                    style="border-bottom: 1px solid var(--border); color: var(--text);"
+                    placeholder="Ej. Suzanne Collins">
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+            <button type="button" onclick="buscarLibro()" class="bg-[#3e5219] text-white px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">search</span>
+                Verificar Inventario
+            </button>
+        </div>
+    </div>
+
+    <div id="resultado-encontrado" class="hidden mb-8">
+        <div class="p-6 rounded-xl mb-4" style="background-color: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);">
+            <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1">Obra encontrada en el sistema</p>
+            <p id="libro-encontrado-nombre" class="text-xl font-headline italic" style="color: var(--primary);"></p>
+        </div>
+        <div id="lotes-existentes" class="mb-6"></div>
+        <div class="p-6 rounded-xl mb-4" style="background-color: var(--surface); border: 1px solid var(--border);">
+            <h4 class="text-xs uppercase font-bold mb-4" style="color: var(--text-faint);">Opción A — Sumar unidades a un lote existente</h4>
+            <form method="POST" class="flex flex-wrap gap-4 items-end">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="sumar_stock">
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Lote (SKU)</label>
+                    <select name="ejemplar_id" id="select-ejemplar" class="rounded-lg border-gray-300 p-2 text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cuántos llegan</label>
+                    <input type="number" name="cantidad" value="1" min="1" class="w-24 rounded-lg border-gray-200 p-2 font-mono text-sm">
+                </div>
+                <button type="submit" class="bg-[#3e5219] text-white px-5 py-2 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90">
+                    Sumar al stock
+                </button>
+            </form>
+        </div>
+        <div class="p-6 rounded-xl" style="background-color: var(--surface); border: 1px solid var(--border);">
+            <h4 class="text-xs uppercase font-bold mb-4" style="color: var(--text-faint);">Opción B — Registrar como lote diferente (otro estado/precio)</h4>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="nuevo_ejemplar">
+                <input type="hidden" name="libro_id" id="libro-id-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
+                        <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-2">
+                            <option value="nuevo">Nuevo</option>
+                            <option value="como_nuevo">Como nuevo</option>
+                            <option value="bueno">Bueno</option>
+                            <option value="aceptable">Aceptable</option>
+                            <option value="con_detalles">Con detalles</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio venta ($)</label>
+                        <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio costo ($)</label>
+                        <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad</label>
+                        <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada (opcional)</label>
+                        <input type="file" name="portada" class="text-xs text-gray-500">
+                    </div>
+                </div>
+                <button type="submit" class="mt-4 bg-[#3e5219] text-white px-5 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90">
+                    Crear nuevo lote
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="resultado-nuevo" class="hidden">
+        <div class="p-4 rounded-xl mb-6" style="background-color: rgba(163,196,106,0.12); border: 1px solid rgba(163,196,106,0.4);">
+            <p class="text-xs font-bold uppercase tracking-widest" style="color: var(--primary);">Obra nueva — no existe en el sistema</p>
+        </div>
+        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="crear_todo">
+            <div class="md:col-span-7 space-y-6 p-8 rounded-xl shadow-sm" style="background-color: var(--surface); border: 1px solid var(--border);">
+                <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Datos de la Obra</h3>
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Título</label>
+                    <input type="text" name="titulo" id="nuevo-titulo" required class="w-full border-0 py-3 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Autor</label>
+                    <input type="text" name="autor" id="nuevo-autor" required class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">ISBN</label>
+                        <input type="text" name="isbn" id="nuevo-isbn" class="w-full border-0 py-3 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="978-x-xxx...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Edición</label>
+                        <input type="text" name="edicion" class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
+                    <input type="text" name="categoria_texto" list="categorias_list" required
+                           class="w-full border-0 border-b border-gray-300 focus:ring-0 focus:border-[#3e5219] py-3"
+                           placeholder="Escribe o crea una nueva">
+                    <datalist id="categorias_list">
+                        {% for cat in categorias %}
+                            <option value="{{ cat.nombre }}">
+                        {% endfor %}
+                    </datalist>
+                    <p class="text-[10px] text-gray-400 mt-1 italic">Si no existe, se creará automáticamente.</p>
+                </div>
+            </div>
+            <div class="md:col-span-5 space-y-6">
+                <div class="p-8 rounded-xl" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                    <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Estado y Costos del Primer Lote</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
+                            <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-3">
+                                <option value="nuevo">Nuevo</option>
+                                <option value="como_nuevo">Como nuevo</option>
+                                <option value="bueno">Bueno</option>
+                                <option value="aceptable">Aceptable</option>
+                                <option value="con_detalles">Con detalles</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo ($)</label>
+                                <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Venta ($)</label>
+                                <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad inicial</label>
+                            <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada</label>
+                            <input type="file" name="portada" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#3e5219] file:text-white">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-[#3e5219] text-white py-4 rounded-lg font-bold uppercase tracking-widest hover:opacity-90 shadow-md">
+                    Guardar nueva obra
+                </button>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<script>
+let debounceTimer = null;
+
+document.getElementById('input-titulo').addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => buscarSugerencias(this.value), 250);
+});
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#input-titulo') && !e.target.closest('#sugerencias')) {
+        document.getElementById('sugerencias').classList.add('hidden');
+    }
+});
+
+function buscarSugerencias(query) {
+    if (query.length < 2) { document.getElementById('sugerencias').classList.add('hidden'); return; }
+    fetch(`/inventario/buscar-libro/?titulo=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(data => {
+            const box = document.getElementById('sugerencias');
+            if (data.libros.length === 0) { box.classList.add('hidden'); return; }
+            box.innerHTML = data.libros.map(libro => `
+                <div class="sugerencia-item px-4 py-3 hover:bg-[#f4f9ee] cursor-pointer border-b border-gray-100 last:border-0"
+                     data-libro='${JSON.stringify(libro)}'>
+                    <p class="font-headline italic text-[#3e5219] text-base leading-tight">${libro.titulo}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">${libro.autor}</p>
+                </div>
+            `).join('');
+            box.querySelectorAll('.sugerencia-item').forEach(el => {
+                el.addEventListener('click', function() { seleccionarLibro(JSON.parse(this.dataset.libro)); });
+            });
+            box.classList.remove('hidden');
+        });
+}
+
+function seleccionarLibro(libro) {
+    document.getElementById('input-titulo').value = libro.titulo;
+    document.getElementById('input-autor').value = libro.autor;
+    document.getElementById('sugerencias').classList.add('hidden');
+    document.getElementById('resultado-nuevo').classList.add('hidden');
+    mostrarLibroEncontrado(libro);
+}
+
+function buscarLibro() {
+    const titulo = document.getElementById('input-titulo').value.trim();
+    const autor  = document.getElementById('input-autor').value.trim();
+    if (!titulo || !autor) { alert('Escribe el título y el autor para buscar.'); return; }
+    fetch(`/inventario/buscar-libro/?titulo=${encodeURIComponent(titulo)}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('resultado-encontrado').classList.add('hidden');
+            document.getElementById('resultado-nuevo').classList.add('hidden');
+            const exacto = data.libros.find(l =>
+                l.titulo.toLowerCase() === titulo.toLowerCase() &&
+                l.autor.toLowerCase() === autor.toLowerCase()
+            );
+            if (exacto) {
+                mostrarLibroEncontrado(exacto);
+            } else {
+                document.getElementById('nuevo-titulo').value = titulo;
+                document.getElementById('nuevo-autor').value = autor;
+                document.getElementById('resultado-nuevo').classList.remove('hidden');
+            }
+        });
+}
+
+function mostrarLibroEncontrado(libro) {
+    document.getElementById('libro-encontrado-nombre').textContent = `${libro.titulo} — ${libro.autor}`;
+    document.getElementById('libro-id-hidden').value = libro.id;
+    let html = '<div class="overflow-x-auto mb-2"><table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">';
+    html += '<thead class="bg-gray-50"><tr><th class="text-left px-4 py-2 text-xs font-bold text-gray-400 uppercase">SKU</th><th class="text-left px-4 py-2 text-xs font-bold text-gray-400 uppercase">Estado</th><th class="text-left px-4 py-2 text-xs font-bold text-gray-400 uppercase">Precio venta</th><th class="text-left px-4 py-2 text-xs font-bold text-gray-400 uppercase">Stock actual</th></tr></thead><tbody>';
+    const selectEjemplar = document.getElementById('select-ejemplar');
+    selectEjemplar.innerHTML = '';
+    libro.ejemplares.forEach(e => {
+        html += `<tr class="border-t border-gray-100"><td class="px-4 py-3 font-mono text-xs">${e.sku}</td><td class="px-4 py-3">${e.estado}</td><td class="px-4 py-3 font-mono">$${e.precio_venta}</td><td class="px-4 py-3 font-bold">${e.stock}</td></tr>`;
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `${e.sku} — ${e.estado} ($${e.precio_venta}) | Stock: ${e.stock}`;
+        selectEjemplar.appendChild(opt);
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('lotes-existentes').innerHTML = html;
+    document.getElementById('resultado-encontrado').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+// BÚSQUEDA POR ISBN — 4 niveles, sin duplicados
+// ═══════════════════════════════════════════════════════════
+
+function mostrarStatus(el, texto, color) {
+    const colores = {
+        red:   'text-xs font-bold mt-2 text-red-500',
+        blue:  'text-xs font-bold mt-2 text-blue-500',
+        green: 'text-xs font-bold mt-2 text-[#3e5219]',
+        amber: 'text-xs font-bold mt-2 text-amber-600',
+    };
+    el.textContent = texto;
+    el.className = colores[color] || colores.blue;
+    el.classList.remove('hidden');
+}
+
+function aplicarResultado(resultado, cleanIsbn, statusEl) {
+    mostrarStatus(statusEl, '¡Libro encontrado! Revisa los datos.', 'green');
+    document.getElementById('input-titulo').value = resultado.titulo;
+    document.getElementById('input-autor').value  = resultado.autor;
+    const nt = document.getElementById('nuevo-titulo'); if (nt) nt.value = resultado.titulo;
+    const na = document.getElementById('nuevo-autor');  if (na) na.value = resultado.autor;
+    const ni = document.getElementById('nuevo-isbn');   if (ni) ni.value = cleanIsbn;
+    document.getElementById('resultado-encontrado').classList.add('hidden');
+    document.getElementById('resultado-nuevo').classList.remove('hidden');
+    setTimeout(() => statusEl.classList.add('hidden'), 4000);
+}
+
+async function intentarOpenLibraryDirecto(isbn) {
+    try {
+        const res = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || !data.title) return null;
+        let autor = 'Autor desconocido';
+        if (data.authors && data.authors.length > 0) {
+            try {
+                const autorRes = await fetch(`https://openlibrary.org${data.authors[0].key}.json`);
+                if (autorRes.ok) {
+                    const autorData = await autorRes.json();
+                    autor = autorData.name || autorData.personal_name || 'Autor desconocido';
+                }
+            } catch(e) {}
+        }
+        return { titulo: data.title, autor };
+    } catch(e) { return null; }
+}
+
+async function intentarOpenLibrarySearch(isbn) {
+    try {
+        const res = await fetch(`https://openlibrary.org/search.json?isbn=${isbn}&fields=title,author_name&limit=1`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data.docs || data.docs.length === 0) return null;
+        const doc = data.docs[0];
+        return {
+            titulo: doc.title || '',
+            autor: (doc.author_name && doc.author_name.length > 0) ? doc.author_name.join(', ') : 'Autor desconocido'
+        };
+    } catch(e) { return null; }
+}
+/*
+async function intentarGoogleBooks(isbn) {
+    const API_KEY = 'AIzaSyDhb3fJ_21KfxdA7Dc4FOxJD8N6RfJYbeI';
+    try {
+        // Intento 1: ISBN + idioma español
+        let res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&langRestrict=es&key=${API_KEY}`);
+        let data = await res.json();
+        if (data.items && data.items.length > 0) {
+            const info = data.items[0].volumeInfo;
+            return {
+                titulo: info.title || '',
+                autor: (info.authors && info.authors.length > 0) ? info.authors.join(', ') : 'Autor desconocido'
+            };
+        }
+        // Intento 2: ISBN sin restricción de idioma
+        res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${API_KEY}`);
+        data = await res.json();
+        if (data.items && data.items.length > 0) {
+            const info = data.items[0].volumeInfo;
+            return {
+                titulo: info.title || '',
+                autor: (info.authors && info.authors.length > 0) ? info.authors.join(', ') : 'Autor desconocido'
+            };
+        }
+        return null;
+    } catch(e) { return null; }
+}
+*/
+async function buscarEnAPIsExternas(cleanIsbn, statusEl) {
+    mostrarStatus(statusEl, 'Consultando Open Library...', 'blue');
+    let resultado = await intentarOpenLibraryDirecto(cleanIsbn);
+    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
+
+    mostrarStatus(statusEl, 'Buscando en catálogo mundial...', 'blue');
+    resultado = await intentarOpenLibrarySearch(cleanIsbn);
+    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
+
+    mostrarStatus(statusEl, 'Consultando Google Books...', 'blue');
+    resultado = await intentarGoogleBooks(cleanIsbn);
+    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
+
+    mostrarStatus(statusEl, 'No encontrado. Rellena los datos manualmente.', 'amber');
+    document.getElementById('resultado-encontrado').classList.add('hidden');
+    document.getElementById('resultado-nuevo').classList.remove('hidden');
+}
+
+function buscarPorISBN() {
+    const isbnInput = document.getElementById('input-isbn-api').value.trim();
+    const statusEl  = document.getElementById('isbn-status');
+    if (!isbnInput) { mostrarStatus(statusEl, 'Por favor, ingresa un ISBN.', 'red'); return; }
+    const cleanIsbn = isbnInput.replace(/[- ]/g, "");
+    mostrarStatus(statusEl, 'Buscando en tu inventario...', 'blue');
+
+    fetch(`/inventario/buscar-libro/?isbn=${encodeURIComponent(cleanIsbn)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.libros && data.libros.length > 0) {
+                mostrarStatus(statusEl, '¡Encontrado en tu inventario!', 'green');
+                const libro = data.libros[0];
+                document.getElementById('input-titulo').value = libro.titulo;
+                document.getElementById('input-autor').value  = libro.autor;
+                mostrarLibroEncontrado(libro);
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+                return;
+            }
+            mostrarStatus(statusEl, 'No está en inventario. Buscando en bases de datos...', 'blue');
+            buscarEnAPIsExternas(cleanIsbn, statusEl);
+        })
+        .catch(() => buscarEnAPIsExternas(cleanIsbn, statusEl));
+}
+
+document.getElementById('input-isbn-api').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); buscarPorISBN(); }
+});
+</script>
+{% endblock %}

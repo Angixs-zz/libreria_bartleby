@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<style>
+.inv-shell { --bs-body-bg: transparent; --bs-body-color: var(--text); }
+.surface-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,244,240,0.92));
+    border: 1px solid rgba(197,200,184,0.7);
+    box-shadow: 0 20px 60px rgba(23,29,15,0.08);
+    border-radius: 1rem;
+}
+.dark .surface-card {
+    background: linear-gradient(180deg, rgba(39,39,31,0.95), rgba(30,30,24,0.94));
+    border-color: rgba(80,85,60,0.6);
+}
+.badge-estado-ok { background: #d2eca2; color: #2e3d12; }
+.badge-estado-pend { background: #fff3cd; color: #664d03; }
+.book-row-added { border-left: 3px solid var(--primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inv-shell py-5">
+<div class="container py-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
+        <div>
+            <p class="text-uppercase fw-bold small mb-2" style="letter-spacing:.22em;color:var(--text-muted);">
+                Compras · Lote cerrado #{{ adquisicion.id }}
+            </p>
+            <h1 class="display-4 fst-italic mb-2" style="font-family:'Newsreader',serif;color:var(--primary);">
+                Inventariar lote
+            </h1>
+            <p class="mb-1" style="color:var(--text-muted);">
+                <strong>Proveedor:</strong> {{ adquisicion.proveedor.nombre }} &nbsp;·&nbsp;
+                <strong>Fecha:</strong> {{ adquisicion.fecha }} &nbsp;·&nbsp;
+                <span class="badge {% if adquisicion.estado == 'completado' %}badge-estado-ok{% else %}badge-estado-pend{% endif %} px-3 py-1 rounded-pill">
+                    {{ adquisicion.get_estado_display }}
+                </span>
+            </p>
+            {% if adquisicion.observaciones %}
+            <p class="small mb-0 fst-italic" style="color:var(--text-muted);">{{ adquisicion.observaciones }}</p>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'detalle_proveedor' adquisicion.proveedor_id %}" class="btn btn-outline-secondary">
+                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">arrow_back</span>
+                Volver al proveedor
+            </a>
+            {% if adquisicion.estado == 'por_inventariar' %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="completar">
+                <button type="submit" class="btn btn-success"
+                        onclick="return confirm('¿Marcar este lote como completado? Ya no se podrán agregar más libros.')">
+                    <span class="material-symbols-outlined align-middle" style="font-size:1rem;">check_circle</span>
+                    Lote completo ✓
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ── Columna izquierda: agregar libro ── -->
+        {% if adquisicion.estado == 'por_inventariar' %}
+        <div class="col-lg-5">
+            <div class="surface-card p-4">
+                <h2 class="h5 fw-semibold mb-4" style="font-family:'Newsreader',serif;">
+                    <span class="material-symbols-outlined align-middle me-1" style="font-size:1.2rem;color:var(--primary);">add_circle</span>
+                    Agregar libro al lote
+                </h2>
+
+                <form method="post" id="form-agregar-libro">
+                    {% csrf_token %}
+
+                    <!-- Selector de ejemplar existente -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">
+                            Libro / Ejemplar
+                        </label>
+                        <select name="ejemplar_id" id="select-ejemplar" class="form-select mb-2">
+                            <option value="">— Selecciona un ejemplar existente —</option>
+                            {% for ej in ejemplares %}
+                            <option value="{{ ej.id }}">{{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-sm btn-outline-primary w-100" id="btn-abrir-modal-libro">
+                            <span class="material-symbols-outlined align-middle" style="font-size:0.9rem;">auto_fix_high</span>
+                            Crear libro nuevo (no está en el sistema)
+                        </button>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">Cantidad</label>
+                            <input type="number" name="cantidad" min="1" value="1" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">Costo unitario</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="costo_unitario" min="0.01" step="0.01" class="form-control" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">add_shopping_cart</span>
+                        Agregar al lote
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Columna derecha: libros ya registrados ── -->
+        <div class="col-lg-{% if adquisicion.estado == 'por_inventariar' %}7{% else %}12{% endif %}">
+            <div class="surface-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h5 fw-semibold mb-0" style="font-family:'Newsreader',serif;">
+                        Libros registrados en este lote
+                    </h2>
+                    <span class="badge rounded-pill px-3 py-2" style="background:rgba(163,196,106,0.15);color:var(--primary);font-size:.85rem;">
+                        Total: <strong>${{ adquisicion.total }}</strong>
+                    </span>
+                </div>
+
+                {% if detalles %}
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Libro</th>
+                                <th>Estado</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-end">Costo unit.</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in detalles %}
+                            <tr class="book-row-added">
+                                <td>
+                                    <div class="fw-semibold">{{ d.ejemplar.libro.titulo }}</div>
+                                    <div class="small text-muted">{{ d.ejemplar.libro.autor }} · {{ d.ejemplar.sku }}</div>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ d.ejemplar.get_estado_fisico_display }}</span></td>
+                                <td class="text-center">{{ d.cantidad }}</td>
+                                <td class="text-end">${{ d.costo_unitario }}</td>
+                                <td class="text-end fw-semibold">${{ d.subtotal }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Total del lote</th>
+                                <th class="text-end">${{ adquisicion.total }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5" style="color:var(--text-faint);">
+                    <span class="material-symbols-outlined d-block mb-2" style="font-size:3rem;">inventory_2</span>
+                    <p class="mb-0">Todavía no hay libros registrados en este lote.</p>
+                    <p class="small">Usa el formulario de la izquierda para ir añadiéndolos.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ MODAL: Crear libro nuevo inline ════════════════════════════ -->
+<div class="modal fade" id="modal-libro-rapido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background:var(--surface);color:var(--text);border:1px solid var(--border);">
+            <div class="modal-header" style="border-color:var(--border);">
+                <h5 class="modal-title fw-bold" style="font-family:'Newsreader',serif;">
+                    <span class="material-symbols-outlined align-middle me-2" style="color:var(--primary);">auto_stories</span>
+                    Registrar nuevo libro
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Búsqueda por ISBN -->
+                <div class="mb-4 p-3 rounded-3" style="background:rgba(163,196,106,0.08);border:1px dashed rgba(163,196,106,0.4);">
+                    <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">
+                        <span class="material-symbols-outlined align-middle" style="font-size:.9rem;">barcode_scanner</span>
+                        Buscar por ISBN (opcional)
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="input-isbn-buscar" class="form-control" placeholder="9780743273565">
+                        <button type="button" class="btn btn-outline-primary" id="btn-buscar-isbn">
+                            Buscar
+                        </button>
+                    </div>
+                    <div id="isbn-feedback" class="mt-2 small" style="color:var(--text-muted);"></div>
+                </div>
+
+                <form id="form-libro-rapido">
+                    {% csrf_token %}
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Título <span class="text-danger">*</span></label>
+                            {{ libro_form.titulo }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">ISBN</label>
+                            {{ libro_form.isbn }}
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Autor <span class="text-danger">*</span></label>
+                            {{ libro_form.autor }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Edición</label>
+                            {{ libro_form.edicion }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Categoría</label>
+                            {{ libro_form.categoria }}
+                        </div>
+                    </div>
+
+                    <hr style="border-color:var(--border);">
+                    <p class="fw-bold small text-uppercase mb-3" style="letter-spacing:.08em;color:var(--text-muted);">
+                        Estado del ejemplar
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Condición <span class="text-danger">*</span></label>
+                            {{ ejemplar_form.estado_fisico }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Precio de venta <span class="text-danger">*</span></label>
+                            {{ ejemplar_form.precio_venta }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Notas del estado</label>
+                            {{ ejemplar_form.descripcion_estado }}
+                        </div>
+                    </div>
+
+                    <div id="modal-errores" class="mt-3 alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-color:var(--border);">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-guardar-libro-rapido">
+                    <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
+                    Crear y agregar al selector
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const modal = new bootstrap.Modal(document.getElementById('modal-libro-rapido'));
+const CSRF  = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Abrir modal
+document.getElementById('btn-abrir-modal-libro').addEventListener('click', () => modal.show());
+
+// ── Búsqueda por ISBN ──────────────────────────────────────────────
+document.getElementById('btn-buscar-isbn').addEventListener('click', async () => {
+    const isbn = document.getElementById('input-isbn-buscar').value.trim();
+    if (!isbn) return;
+    const fb = document.getElementById('isbn-feedback');
+    fb.textContent = 'Buscando…';
+
+    const res = await fetch(`{% url 'buscar_libro_isbn' %}?isbn=${encodeURIComponent(isbn)}`);
+    const data = await res.json();
+
+    if (data.ok) {
+        document.querySelector('#form-libro-rapido [name=titulo]').value  = data.titulo;
+        document.querySelector('#form-libro-rapido [name=autor]').value   = data.autor;
+        document.querySelector('#form-libro-rapido [name=isbn]').value    = isbn;
+        document.querySelector('#form-libro-rapido [name=edicion]').value = data.edicion || '';
+        if (data.categoria_id) {
+            document.querySelector('#form-libro-rapido [name=categoria]').value = data.categoria_id;
+        }
+        const fuente = data.fuente === 'local' ? '✅ Encontrado en tu catálogo' : '🌐 Encontrado en Open Library';
+        fb.innerHTML = `<span style="color:var(--primary);">${fuente}: <em>${data.titulo}</em></span>`;
+    } else {
+        fb.innerHTML = `<span style="color:#ba1a1a;">No encontrado. Llena los datos manualmente.</span>`;
+    }
+});
+
+// ── Guardar libro rápido vía AJAX ──────────────────────────────────
+document.getElementById('btn-guardar-libro-rapido').addEventListener('click', async () => {
+    const form = document.getElementById('form-libro-rapido');
+    const errDiv = document.getElementById('modal-errores');
+    errDiv.classList.add('d-none');
+    errDiv.textContent = '';
+
+    const fd = new FormData(form);
+    fd.append('csrfmiddlewaretoken', CSRF);
+
+    const res  = await fetch('{% url "crear_ejemplar_rapido" %}', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (data.ok) {
+        // Inyectar nueva opción en el select y seleccionarla
+        const sel = document.getElementById('select-ejemplar');
+        const opt = document.createElement('option');
+        opt.value = data.ejemplar_id;
+        opt.textContent = data.label;
+        opt.selected = true;
+        sel.appendChild(opt);
+        modal.hide();
+    } else {
+        const msgs = Object.values(data.errores).flat().join(' · ');
+        errDiv.textContent = msgs;
+        errDiv.classList.remove('d-none');
+    }
+});
+</script>
+{% endblock %}

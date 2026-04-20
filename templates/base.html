@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Catálogo Público | Librería Bartleby</title>
+
+<script>
+    // Aplicar el tema ANTES de que el navegador pinte la página (evita el flash)
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+
+    function toggleDarkMode() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.theme = isDark ? 'dark' : 'light';
+        // Actualizar el ícono del botón
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#3e5219",
+        background: "#faf9f5",
+        "on-surface": "#1b1c1a"
+      },
+      fontFamily: {
+        headline: ["Newsreader", "serif"],
+        body: ["Manrope", "sans-serif"]
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* ── Colores base ────────────────────────────────────── */
+:root {
+  --bg:          #faf9f5;
+  --bg-subtle:   #f4f4f0;
+  --surface:     #ffffff;
+  --border:      rgba(197, 200, 184, 0.4);
+  --text:        #1b1c1a;
+  --text-muted:  #75796b;
+  --text-faint:  #9ca3af;
+  --primary:     #3e5219;
+}
+
+html.dark {
+  --bg:          #141510;
+  --bg-subtle:   #1e1e18;
+  --surface:     #27271f;
+  --border:      rgba(80, 85, 60, 0.5);
+  --text:        #e8e8e0;
+  --text-muted:  #a5a99b;
+  --text-faint:  #6b7060;
+  --primary:     #a3c46a;
+}
+
+/* ── Transición suave global ──────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3 {
+  font-family: 'Newsreader', serif;
+}
+
+/* ── Inputs ───────────────────────────────────────────── */
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+}
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom-color: var(--primary);
+}
+input::placeholder { color: var(--text-faint); }
+
+/* ── Labels ───────────────────────────────────────────── */
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+    margin-bottom: 0.25rem;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ── Helptext ─────────────────────────────────────────── */
+.helptext {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-faint);
+    margin-top: 0.25rem;
+    font-style: italic;
+    line-height: 1.2;
+}
+
+/* ── Password hints ───────────────────────────────────── */
+form ul:not(.errorlist) {
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    list-style-type: disc;
+    opacity: 0.8;
+}
+form ul:not(.errorlist) li {
+    font-size: 0.65rem !important;
+    color: var(--text-faint) !important;
+    margin-bottom: 0.15rem;
+    line-height: 1.2;
+    font-style: italic;
+}
+
+/* ── Error list ───────────────────────────────────────── */
+ul.errorlist {
+    color: #ba1a1a;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    padding-left: 0;
+    list-style-type: none;
+    font-weight: bold;
+}
+
+/* ── Dark mode toggle button ──────────────────────────── */
+#dark-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s;
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+#dark-toggle:hover {
+    background: rgba(255,255,255,0.22);
+    transform: rotate(15deg) scale(1.08);
+}
+#dark-toggle .material-symbols-outlined {
+    font-size: 1.2rem;
+    color: white;
+    user-select: none;
+}
+
+.nav-link-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-link-soft:hover {
+    color: white;
+}
+
+.nav-chip-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown summary {
+    list-style: none;
+}
+
+.nav-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1rem;
+    border-radius: 14px;
+    background: rgba(210, 236, 162, 0.16);
+    border: 1px solid rgba(210, 236, 162, 0.22);
+    color: #f3f8df;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.nav-dropdown[open] .nav-dropdown-trigger,
+.nav-dropdown-trigger:hover {
+    background: rgba(210, 236, 162, 0.22);
+}
+
+.nav-dropdown-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.8rem);
+    min-width: 260px;
+    padding: 0.75rem;
+    border-radius: 20px;
+    background: rgba(32, 42, 11, 0.98);
+    border: 1px solid rgba(210, 236, 162, 0.18);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.9rem 0.95rem;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-item:hover {
+    background: rgba(210, 236, 162, 0.12);
+    color: white;
+}
+
+.nav-dropdown-item strong {
+    display: block;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+}
+
+.nav-dropdown-item span:last-child {
+    display: block;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.62);
+    margin-top: 0.1rem;
+}
+
+/* ── BlurText animation ───────────────────────────────── */
+.blur-text-word {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+  white-space: pre;
+}
+
+/* ── Scroll-reveal base ───────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s cubic-bezier(.22,.68,0,1.2),
+              transform 0.65s cubic-bezier(.22,.68,0,1.2);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-left.visible { opacity: 1; transform: none; }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* ── Stagger children ─────────────────────────────────── */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.22,.68,0,1.1);
+}
+.stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0ms; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:80ms; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:160ms; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:240ms; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:320ms; }
+.stagger.visible > *:nth-child(n+6) { opacity:1; transform:none; transition-delay:400ms; }
+
+/* ── Page enter transition ────────────────────────────── */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.page-enter {
+  animation: pageEnter 0.45s cubic-bezier(.22,.68,0,1.1) both;
+}
+
+/* ── Button shimmer on hover ──────────────────────────── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+}
+.btn-shine:hover::after { transform: translateX(100%); }
+
+/* ── Magnetic card lift ───────────────────────────────── */
+.card-lift {
+  transition: transform 0.3s cubic-bezier(.22,.68,0,1.2),
+              box-shadow 0.3s ease;
+}
+.card-lift:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+/* ── Nav link underline animate ──────────────────────── */
+.nav-animate {
+  position: relative;
+}
+.nav-animate::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: white;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+.nav-animate:hover::after { width: 100%; }
+
+/* ── Ripple button ────────────────────────────────────── */
+@keyframes ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+.ripple-origin {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  width: 60px; height: 60px;
+  margin-top: -30px; margin-left: -30px;
+  animation: ripple-anim 0.6s linear;
+  pointer-events: none;
+}
+
+/* ── Toast slide-in ───────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity:0; transform: translateY(-16px) scale(0.97); }
+  to   { opacity:1; transform: none; }
+}
+.toast-message {
+  animation: toastIn 0.35s cubic-bezier(.22,.68,0,1.2) both;
+}
+/* ── Header scroll shrink ─────────────────────────────── */
+#site-header {
+  transition: height 0.35s ease, background 0.35s ease,
+              box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+  height: 5.5rem;
+}
+#site-header.scrolled {
+  height: 4.25rem;
+  background: rgba(40, 58, 16, 0.96) !important;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.28);
+}
+
+/* ── Nav pill sliding indicator ───────────────────────── */
+#nav-pill {
+  position: absolute;
+  height: 100%;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.18);
+  pointer-events: none;
+  transition: left 0.35s cubic-bezier(.22,.68,0,1.15),
+              width 0.35s cubic-bezier(.22,.68,0,1.15);
+  top: 0;
+}
+.main-nav-link {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  transition: color 0.2s ease;
+}
+.main-nav-link:hover { color: white; }
+.main-nav-link.active { color: white; }
+
+/* ── Page exit animation ──────────────────────────────── */
+@keyframes pageExit {
+  to { opacity: 0; transform: translateY(-8px); filter: blur(2px); }
+}
+.page-exit {
+  animation: pageExit 0.28s ease forwards;
+  pointer-events: none;
+}
+
+/* ── Logo glow pulse ────────────────────────────────── */
+.logo-mark {
+  width: 2.1rem; height: 2.1rem;
+  border-radius: 8px;
+  background: rgba(210,236,162,0.18);
+  border: 1px solid rgba(210,236,162,0.32);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.25s, transform 0.25s;
+}
+.logo-mark:hover { background: rgba(210,236,162,0.28); transform: rotate(-6deg) scale(1.05); }
+
+/* ── User zone refinements ──────────────────────────── */
+.user-zone-divider {
+  width: 1px; height: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  margin: 0 0.5rem;
+}
+.header-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 2.2rem; height: 2.2rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, color 0.2s;
+}
+.header-icon-btn:hover {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  transform: scale(1.08);
+}
+</style>
+
+{% block extra_head %}{% endblock %}
+
+</head>
+
+<body class="min-h-screen flex flex-col" style="background-color: var(--bg); color: var(--text);">
+
+<!-- ═════════════ SITE HEADER ══════════════ -->
+<header id="site-header" class="fixed top-0 w-full z-50"
+        style="background: linear-gradient(135deg, #3e5219 0%, #2e3d12 100%);">
+
+  <!-- Bottom accent line -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:1px;
+               background:linear-gradient(90deg,transparent,rgba(210,236,162,0.4),transparent);"></div>
+
+  <nav class="flex items-center justify-between px-6 md:px-10 h-full max-w-screen-xl mx-auto w-full">
+
+    <!-- ── LEFT: Logo ────────────────────────────────────── -->
+    <a href="{% url 'lista_libros' %}" class="flex items-center gap-3 flex-shrink-0 group" style="text-decoration:none;">
+      <div class="logo-mark">
+        <span class="material-symbols-outlined text-[#d2eca2]" style="font-size:1.15rem;font-variation-settings:'wght' 300;">local_library</span>
+      </div>
+      <div class="leading-none">
+        <span class="block font-headline italic text-white text-xl tracking-tight">Librería Bartleby</span>
+        <span class="block text-[0.6rem] font-label uppercase tracking-[0.2em]" style="color:rgba(210,236,162,0.6);">Oaxaca &middot; desde 2024</span>
+      </div>
+    </a>
+
+    <!-- ── CENTER: Main Nav ──────────────────────────────── -->
+    <div class="hidden md:flex items-center" id="main-nav-wrap"
+         style="position:relative; background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.25rem;">
+      <div id="nav-pill"></div>
+
+      <a href="{% url 'conocenos' %}"
+         class="main-nav-link nav-page-link {% if request.resolver_match.url_name == 'conocenos' %}active{% endif %}"
+         data-nav="conocenos">
+        <span class="material-symbols-outlined" style="font-size:0.95rem;">info</span>
+        Conocenos
+      </a>
+
+      <a href="{% url 'lista_libros' %}"
+         class="main-nav-link nav-page-link {% if request.resolver_match.url_name == 'lista_libros' %}active{% endif %}"
+         data-nav="lista_libros">
+        <span class="material-symbols-outlined" style="font-size:0.95rem;">storefront</span>
+        Catálogo
+      </a>
+    </div>
+
+    <!-- ── RIGHT: Actions ───────────────────────────────── -->
+    <div class="flex items-center gap-2">
+
+      <!-- Dark mode -->
+      <button id="dark-toggle" class="header-icon-btn" onclick="toggleDarkMode()" title="Cambiar tema" aria-label="Cambiar modo">
+          <span id="theme-icon" class="material-symbols-outlined" style="font-size:1.1rem;">
+              {% if request.COOKIES.theme == 'dark' %}light_mode{% else %}dark_mode{% endif %}
+          </span>
+      </button>
+
+      {% if not user.is_staff %}
+        <!-- Carrito + Reservas -->
+        <div class="flex items-center gap-1 rounded-xl p-1" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);">
+          {% if user.is_authenticated %}
+          <a href="{% url 'mis_reservas' %}"
+             class="header-icon-btn" style="border-radius:8px;width:auto;padding:0 0.75rem;gap:0.4rem;font-size:0.7rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;"
+             title="Mis Reservas">
+            <span class="material-symbols-outlined" style="font-size:1rem;">confirmation_number</span>
+            <span class="hidden sm:inline">Reservas</span>
+          </a>
+          {% endif %}
+
+          <a href="{% url 'ver_carrito' %}"
+             class="relative flex items-center gap-1.5 font-black uppercase tracking-widest hover:scale-105 transition-all"
+             style="background:#d2eca2;color:#2e3d12;padding:0.45rem 1rem;border-radius:8px;font-size:0.7rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">shopping_bag</span>
+            <span>Bolsa</span>
+            {% with carrito_count=request.session.carrito|length %}
+            {% if carrito_count %}
+            <span class="absolute -top-2 -right-2 text-white text-[0.6rem] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-[#3e5219] leading-none"
+                  style="background:#e53935;">
+                {{ carrito_count }}
+            </span>
+            {% endif %}
+            {% endwith %}
+          </a>
+        </div>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        <div class="user-zone-divider"></div>
+
+        {% if user.is_staff %}
+          <details class="nav-dropdown">
+            <summary class="nav-dropdown-trigger" style="font-size:0.72rem;padding:0.55rem 0.85rem;border-radius:10px;">
+              <span class="material-symbols-outlined" style="font-size:1rem;">dashboard_customize</span>
+              Gestión
+              <span class="material-symbols-outlined" style="font-size:1rem;">expand_more</span>
+            </summary>
+            <div class="nav-dropdown-panel">
+              <a href="{% url 'gestion_inventario' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span><strong>Panel Admin</strong><span>Inventario y operaciones</span></span>
+              </a>
+              <a href="{% url 'directorio_proveedores' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span><strong>Proveedores</strong><span>Compras y adquisiciones</span></span>
+              </a>
+              <a href="{% url 'dashboard_reportes' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">monitoring</span>
+                <span><strong>Reportes</strong><span>Indicadores y métricas</span></span>
+              </a>
+              <a href="{% url 'centro_alertas' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">notification_important</span>
+                <span><strong>Alertas</strong><span>Seguimiento y riesgos</span></span>
+              </a>
+              <a href="{% url 'panel_clientes' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined">groups</span>
+                <span><strong>Clientes</strong><span>Reservas e historial</span></span>
+              </a>
+              {% if user.is_superuser %}
+                <a href="{% url 'panel_personal' %}" class="nav-dropdown-item">
+                  <span class="material-symbols-outlined">badge</span>
+                  <span><strong>Personal</strong><span>Staff y cuentas internas</span></span>
+                </a>
+                <a href="{% url 'panel_auditoria' %}" class="nav-dropdown-item">
+                  <span class="material-symbols-outlined">history</span>
+                  <span><strong>Auditoría</strong><span>Bitácora y control</span></span>
+                </a>
+              {% endif %}
+            </div>
+          </details>
+        {% endif %}
+
+        <!-- User pill -->
+        <a href="{% url 'mi_perfil' %}"
+           class="flex items-center gap-2 rounded-xl transition-all hover:opacity-90"
+           style="background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.14);padding:0.45rem 0.85rem;">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;color:rgba(210,236,162,0.9);">account_circle</span>
+          <span class="hidden sm:block">
+            <span class="block text-[0.62rem] font-label uppercase tracking-widest" style="color:rgba(255,255,255,0.5);">Hola</span>
+            <span class="block text-[0.78rem] font-bold italic text-white">{{ user.username }}</span>
+          </span>
+        </a>
+
+        <!-- Logout -->
+        <form method="POST" action="{% url 'logout' %}" class="m-0 p-0">
+          {% csrf_token %}
+          <button type="submit" class="header-icon-btn" title="Cerrar sesión" style="color:rgba(252,165,165,0.8);border-color:rgba(252,165,165,0.2);">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>
+          </button>
+        </form>
+
+      {% else %}
+        <a href="{% url 'login' %}"
+           class="btn-shine font-bold text-[#2e3d12] rounded-lg transition-all hover:scale-105 shadow-md"
+           style="background:#d2eca2;padding:0.5rem 1.3rem;font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;">
+          Ingresar
+        </a>
+      {% endif %}
+
+    </div>
+  </nav>
+</header>
+<!-- /SITE HEADER -->
+
+<main class="flex-grow relative" style="padding-top: 5.5rem;">
+    {% if messages %}
+    <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-2xl px-4 flex flex-col gap-3 pointer-events-none">
+        {% for message in messages %}
+        <div class="toast-message pointer-events-auto px-6 py-4 rounded-lg shadow-2xl font-body text-sm font-bold flex items-start justify-between border transition-all duration-500 transform translate-y-0 opacity-100
+             {% if message.tags == 'warning' or message.tags == 'error' %}
+                 bg-amber-100 border-amber-300 text-amber-900
+             {% else %}
+                 bg-[#d2eca2] border-[#c4d9a0] text-[#131f00]
+             {% endif %}">
+            
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined">
+                    {% if message.tags == 'warning' or message.tags == 'error' %}warning{% else %}check_circle{% endif %}
+                </span>
+                <span>{{ message }}</span>
+            </div>
+            
+            <button onclick="this.closest('.toast-message').style.opacity='0'; setTimeout(() => this.closest('.toast-message').remove(), 500);" class="hover:opacity-70 ml-4 transition-opacity">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        // Auto-eliminar notificaciones después de 4.5 segundos
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    setTimeout(() => toast.remove(), 500); // 500ms es la duración de la transición en Tailwind
+                }, 4500);
+            });
+        });
+    </script>
+    {% endif %}
+    
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer class="w-full" style="background-color: var(--bg-subtle); border-top: 1px solid var(--border);">
+  <div class="flex flex-col md:flex-row justify-between items-center gap-6 px-8 py-10 max-w-7xl mx-auto">
+
+    <div class="text-lg font-serif italic" style="color: var(--primary);">
+      Libreria Bartleby
+    </div>
+
+    <div class="flex flex-wrap items-center justify-center gap-6 text-sm" style="color: var(--text-muted);">
+      <a href="{% url 'aviso_privacidad' %}" class="hover:opacity-70 transition-opacity" style="color: var(--primary);">
+        Aviso de Privacidad
+      </a>
+      <a href="{% url 'terminos_condiciones' %}" class="hover:opacity-70 transition-opacity" style="color: var(--primary);">
+        Terminos y Condiciones
+      </a>
+      <span class="hidden md:inline-block" style="color: var(--border);">|</span>
+      <span>Proteccion de datos y uso responsable del sistema</span>
+    </div>
+
+    <p class="text-sm text-center md:text-right" style="color: var(--text-muted);">
+      2026 Libreria Bartleby. Todos los derechos reservados.
+    </p>
+
+  </div>
+</footer>
+
+<script>
+    // Sincronizar ícono al cargar la página
+    (function() {
+        const icon = document.getElementById('theme-icon');
+        if (!icon) return;
+        icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+    })();
+</script>
+
+{% block extra_js %}{% endblock %}
+
+<script>
+(function() {
+  /* ── BlurText ────────────────────────────────────── */
+  function blurText(el) {
+    const text      = el.textContent.trim();
+    const by        = el.dataset.blurBy || 'words';
+    const delay     = parseInt(el.dataset.delay || 150);
+    const direction = el.dataset.direction || 'top';
+    const step      = parseFloat(el.dataset.stepDuration || 0.35);
+    const segments  = by === 'words' ? text.split(' ') : text.split('');
+    el.textContent = '';
+    el.style.display = 'flex'; el.style.flexWrap = 'wrap'; el.style.alignItems = 'baseline';
+    segments.forEach((seg, i) => {
+      const span = document.createElement('span');
+      span.className = 'blur-text-word';
+      span.textContent = seg;
+      if (by === 'words' && i < segments.length - 1) span.textContent += ' ';
+      span.style.filter = 'blur(10px)'; span.style.opacity = '0';
+      span.style.transform = direction === 'top' ? 'translateY(-40px)' : 'translateY(40px)';
+      el.appendChild(span);
+    });
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        obs.unobserve(el);
+        el.querySelectorAll('.blur-text-word').forEach((span, i) => {
+          setTimeout(() => {
+            span.style.transition = `opacity ${step}s ease, filter ${step}s ease, transform ${step}s cubic-bezier(.22,.68,0,1.1)`;
+            span.style.filter = 'blur(0px)'; span.style.opacity = '1'; span.style.transform = 'translateY(0)';
+          }, i * delay);
+        });
+      });
+    }, { threshold: 0.15 });
+    obs.observe(el);
+  }
+
+  /* ── Scroll-reveal ───────────────────────────────── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal,.reveal-left,.reveal-scale,.stagger');
+    if (!els.length) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  /* ── Ripple ─────────────────────────────────────── */
+  function initRipple() {
+    document.querySelectorAll('.ripple-origin').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const r = document.createElement('span'); r.className = 'ripple-effect';
+        const rect = btn.getBoundingClientRect();
+        r.style.left = (e.clientX - rect.left) + 'px'; r.style.top = (e.clientY - rect.top) + 'px';
+        btn.appendChild(r); r.addEventListener('animationend', () => r.remove());
+      });
+    });
+  }
+
+  /* ── Page enter ─────────────────────────────────── */
+  function initPageEnter() {
+    const main = document.querySelector('main > *:first-child') || document.querySelector('main');
+    if (main) main.classList.add('page-enter');
+  }
+
+  /* ── Nav pill indicator ───────────────────────────── */
+  function initNavPill() {
+    const wrap = document.getElementById('main-nav-wrap');
+    const pill = document.getElementById('nav-pill');
+    if (!wrap || !pill) return;
+
+    function movePillTo(link) {
+      if (!link) { pill.style.width = '0'; pill.style.opacity = '0'; return; }
+      const wRect = wrap.getBoundingClientRect();
+      const lRect = link.getBoundingClientRect();
+      pill.style.opacity = '1';
+      pill.style.width   = lRect.width  + 'px';
+      pill.style.left    = (lRect.left - wRect.left) + 'px';
+    }
+
+    const active = wrap.querySelector('.main-nav-link.active');
+    // set initial position without transition
+    pill.style.transition = 'none';
+    movePillTo(active);
+    requestAnimationFrame(() => {
+      pill.style.transition = 'left 0.35s cubic-bezier(.22,.68,0,1.15), width 0.35s cubic-bezier(.22,.68,0,1.15), opacity 0.2s';
+    });
+
+    wrap.querySelectorAll('.main-nav-link').forEach(link => {
+      link.addEventListener('mouseenter', () => movePillTo(link));
+    });
+    wrap.addEventListener('mouseleave', () => movePillTo(active));
+  }
+
+  /* ── Header scroll shrink ──────────────────────────── */
+  function initHeaderShrink() {
+    const hdr = document.getElementById('site-header');
+    if (!hdr) return;
+    window.addEventListener('scroll', () => {
+      hdr.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+  }
+
+  /* ── Page-exit transition on nav links ──────────────── */
+  function initPageTransitions() {
+    document.querySelectorAll('a.nav-page-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = link.getAttribute('href');
+        if (!href || href === '#' || link.target === '_blank') return;
+        // same origin only
+        try { const u = new URL(href, location.origin); if (u.origin !== location.origin) return; } catch { return; }
+        // don't re-animate same page
+        if (href === location.pathname) return;
+        e.preventDefault();
+        const main = document.querySelector('main');
+        if (main) { main.classList.add('page-exit'); }
+        setTimeout(() => { location.href = href; }, 280);
+      });
+    });
+  }
+
+  /* ── Init all ────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-blur-text]').forEach(blurText);
+    initReveal();
+    initRipple();
+    initPageEnter();
+    initNavPill();
+    initHeaderShrink();
+    initPageTransitions();
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<div class="p-5 flex flex-col h-full">
+    <div class="flex justify-between items-start mb-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase {{ urgencia_badge }}">
+                {{ reserva.usuario.username|first|default:"U" }}
+            </div>
+            <div>
+                <p class="text-sm font-bold text-[#1b1c1a] dark:text-white line-clamp-1">
+                    {{ reserva.usuario.get_full_name|default:reserva.usuario.username }}
+                </p>
+                <p class="text-xs font-mono text-gray-500">Ticket: {{ reserva.codigo_ticket }}</p>
+            </div>
+        </div>
+        <span class="material-symbols-outlined {{ urgencia_badge }} p-1 rounded-md">{{ timer_icon }}</span>
+    </div>
+
+    <div class="flex items-center gap-4 mb-6 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+        <span class="material-symbols-outlined text-gray-400 text-3xl">menu_book</span>
+        <div class="flex-grow overflow-hidden">
+            <p class="text-sm font-headline italic font-bold text-[#3e5219] dark:text-[#d2eca2] line-clamp-1">
+                {{ reserva.ejemplar.libro.titulo|default:"Título del libro" }}
+            </p>
+            <p class="text-xs font-body text-gray-500 line-clamp-1">
+                {{ reserva.ejemplar.libro.autor|default:"Autor no registrado" }}
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-auto border-t border-gray-100 dark:border-gray-800 pt-4 flex flex-col gap-3">
+        <div class="flex justify-between items-center text-xs">
+            <span class="text-gray-500 font-bold uppercase tracking-widest">Tiempo Restante:</span>
+            <span class="font-mono font-bold text-lg countdown-admin" data-expiry="{{ reserva.fecha_vencimiento|date:'c' }}">
+                Calculando...
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <form action="#" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="button" class="w-full flex items-center justify-center gap-1 py-2 bg-[#3e5219] dark:bg-[#d2eca2] text-white dark:text-[#3e5219] rounded-lg text-xs font-bold hover:opacity-90 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Entregado
+                </button>
+            </form>
+            
+            <form action="#" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="button" class="w-full flex items-center justify-center gap-1 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-900 transition-colors">
+                    <span class="material-symbols-outlined text-sm">cancel</span> Liberar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

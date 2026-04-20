@@ -1,0 +1,110 @@
+ {% extends 'base.html' %}
+
+{% block content %}
+<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12 md:py-20 mt-10">
+
+    <header class="mb-16">
+        <h1 class="text-4xl md:text-5xl font-serif italic leading-tight mb-4" style="color: var(--primary);">Mis Bitácoras de Apartado</h1>
+        <p class="font-body text-lg max-w-2xl pl-6" style="color: var(--text-muted); border-left: 2px solid var(--border);">
+            Historial de libros resguardados y pendientes de recolección.
+        </p>
+    </header>
+
+    {% if reservas %}
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {% for reserva in reservas %}
+
+            <div class="rounded-lg p-8 shadow-sm flex flex-col md:flex-row gap-6 relative overflow-hidden group {% if reserva.estado == 'cancelada' %}opacity-80{% endif %}"
+                 style="background-color: var(--surface); border: 1px solid var(--border);">
+
+                <!-- Barra coloreada izquierda -->
+                <div class="absolute top-0 left-0 w-1 h-full
+                    {% if reserva.estado == 'pendiente' %}bg-orange-500
+                    {% elif reserva.estado == 'completada' %}bg-emerald-600
+                    {% else %}bg-red-500{% endif %}">
+                </div>
+
+                <div class="flex-grow">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <span class="block font-mono text-xs uppercase tracking-widest mb-1" style="color: var(--text-faint);">Registro de Archivo</span>
+                            <h2 class="font-mono text-xl font-bold" style="color: var(--primary);">{{ reserva.codigo_ticket }}</h2>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                            {% if reserva.estado == 'pendiente' %}bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300
+                            {% elif reserva.estado == 'completada' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300
+                            {% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+                            {{ reserva.get_estado_display }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div>
+                            <span class="block text-[10px] uppercase font-bold tracking-tighter" style="color: var(--text-faint);">Fecha de Solicitud</span>
+                            <span class="font-mono" style="color: var(--text);">{{ reserva.fecha_reserva|date:"d M, Y" }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] uppercase font-bold tracking-tighter" style="color: var(--text-faint);">Total de Resguardo</span>
+                            <span class="text-2xl font-serif font-bold" style="color: var(--text);">${{ reserva.total }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        {% if reserva.estado == 'cancelada' %}
+                            <button disabled class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold opacity-60 cursor-not-allowed"
+                                    style="border: 1px solid var(--border); color: var(--text-muted);">
+                                <span class="material-symbols-outlined text-lg">block</span>
+                                Archivo Cerrado
+                            </button>
+                        {% else %}
+                            <a href="{% url 'detalle_ticket' reserva.id %}"
+                               class="flex items-center gap-2 px-5 py-2.5 bg-[#3e5219] text-white rounded-lg text-sm font-bold hover:bg-[#556b2f] transition-all shadow-md">
+                                <span class="material-symbols-outlined text-lg">confirmation_number</span>
+                                Ver Ticket
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Portada del primer libro -->
+                <div class="hidden md:flex w-32 h-44 rounded-sm overflow-hidden shrink-0 items-center justify-center"
+                     style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                    {% if reserva.libros.first.portada %}
+                        <img src="{{ reserva.libros.first.portada.url }}" alt="Portada" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
+                    {% else %}
+                        <span class="material-symbols-outlined text-4xl" style="color: var(--text-faint);">auto_stories</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+        </section>
+
+    {% else %}
+        <section class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="relative mb-10">
+                <div class="w-24 h-32 rounded-lg flex items-center justify-center relative"
+                     style="border: 2px solid var(--border); background-color: var(--bg-subtle);">
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-10 h-1 rounded" style="background-color: var(--border);"></div>
+                    <span class="material-symbols-outlined text-5xl" style="color: var(--primary); opacity: 0.3;">book_5</span>
+                </div>
+                <div class="absolute -bottom-4 -right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
+                     style="background-color: var(--surface); border: 1px solid var(--border);">
+                    <span class="material-symbols-outlined" style="color: var(--primary); opacity: 0.4;">search_off</span>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-serif italic mb-3" style="color: var(--primary);">Tu bitácora está limpia</h3>
+            <p class="font-body max-w-sm mb-10 leading-relaxed" style="color: var(--text-muted);">
+                Aún no has solicitado ningún resguardo en nuestro archivo editorial. Explora nuestro catálogo actual.
+            </p>
+
+            <a href="{% url 'lista_libros' %}" class="inline-flex items-center gap-3 px-8 py-3.5 bg-[#3e5219] text-white rounded-lg text-sm font-bold hover:bg-[#556b2f] transition-all shadow-lg">
+                Explorar Catálogo
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </section>
+    {% endif %}
+
+</main>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load catalogo_tags %}
+
+{% block content %}
+<main class="pt-20">
+
+    <!-- Hero -->
+    <section class="relative overflow-hidden py-20 lg:py-32" style="background-color: var(--bg);">
+        <div class="max-w-7xl mx-auto px-8 relative z-10">
+            <div class="max-w-2xl">
+                <h1
+                  data-blur-text
+                  data-delay="140"
+                  data-direction="top"
+                  class="text-5xl lg:text-7xl font-headline italic tracking-tight leading-tight mb-6"
+                  style="color: var(--primary);">
+                    Descubre tu próxima gran lectura
+                </h1>
+                <p class="reveal text-xl lg:text-2xl font-body leading-relaxed opacity-90" style="color: var(--text-muted);">
+                    Dale una segunda vida a los libros en el corazón de Oaxaca. Curación literaria para almas inquietas.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Buscador Inteligente -->
+    <section class="py-6" style="background-color: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="max-w-7xl mx-auto px-8">
+            <form method="GET" action="{% url 'lista_libros' %}" class="flex flex-col md:flex-row gap-4 items-end">
+                
+                <!-- Búsqueda por texto -->
+                <div class="flex-grow w-full md:w-auto">
+                    <label for="q" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Buscar libro, autor o ISBN</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute text-gray-400" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-faint);">search</span>
+                        <input type="text" name="q" id="q" value="{{ query }}" placeholder="Ej. Borges, Aleph..." 
+                               class="w-full pr-4 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow"
+                               style="padding-left: 2.5rem; background-color: var(--surface); border: 1px solid var(--border); color: var(--text);">
+                    </div>
+                </div>
+
+                <!-- Filtro por Género (Categoría) -->
+                <div class="w-full md:w-48">
+                    <label for="genero" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Género</label>
+                    <select name="genero" id="genero" class="w-full px-4 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow cursor-pointer" style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text);">
+                        <option value="">Todos los géneros</option>
+                        {% for cat in categorias %}
+                            <option value="{{ cat.id }}" {% if cat.id == genero_seleccionado %}selected{% endif %}>{{ cat.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Precio Máximo -->
+                <div class="w-full md:w-48">
+                    <label for="precio_max" class="block text-sm font-label mb-2 flex justify-between" style="color: var(--text-muted);">
+                        <span>Precio Max</span>
+                        <span id="precio_display">${{ precio_max_seleccionado|default:"2000" }}</span>
+                    </label>
+                    <input type="range" name="precio_max" id="precio_max" min="50" max="5000" step="50" 
+                           value="{{ precio_max_seleccionado|default:'2000' }}"
+                           oninput="document.getElementById('precio_display').innerText = '$' + this.value"
+                           class="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                           style="background-color: var(--border); accent-color: #a3c46a;">
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="w-full md:w-auto flex gap-2">
+                    <button type="submit" class="px-6 py-2 rounded-lg font-label font-bold transition-all hover:opacity-90 flex-grow" style="background-color: var(--primary); color: white;">
+                        Buscar
+                    </button>
+                    {% if query or genero_seleccionado or precio_max_seleccionado %}
+                    <a href="{% url 'lista_libros' %}" class="px-4 py-2 rounded-lg font-label transition-all flex items-center justify-center hover:opacity-80" style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);" title="Limpiar filtros">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+            </form>
+        </div>
+    </section>
+
+    <!-- Grid de libros -->
+    <section class="py-16" style="background-color: var(--bg);">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+
+                {% for ejemplar in ejemplares %}
+                {% with venc=ejemplares_reservados|get_item:ejemplar.id %}
+                <div class="group flex flex-col cursor-pointer reveal" id="item-{{ ejemplar.id }}"
+                     style="transition-delay: {{ forloop.counter0 }}00ms;"
+                     onclick="window.location='{% url 'detalle_libro' ejemplar.id %}'">
+
+                    <!-- Portada — el efecto de elevación va SOLO aquí -->
+                    <div class="aspect-[3/4] mb-6 overflow-hidden relative"
+                         style="background-color: var(--bg-subtle);
+                                border: 1px solid var(--border);
+                                border-radius: 4px;
+                                transition: transform 0.45s cubic-bezier(.22,.68,0,1.15),
+                                            box-shadow 0.45s ease;
+                                will-change: transform, box-shadow;"
+                         onmouseenter="this.style.transform='translateY(-14px) scale(1.025)';
+                                       this.style.boxShadow='0 28px 60px rgba(0,0,0,0.22), 0 4px 14px rgba(0,0,0,0.12)';"
+                         onmouseleave="this.style.transform='';
+                                       this.style.boxShadow='';">
+                        {% if ejemplar.libro.portada %}
+                            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 {% if venc %}opacity-40 grayscale{% endif %}"
+                                 src="{{ ejemplar.libro.portada.url }}" alt="{{ ejemplar.libro.titulo }}">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center {% if venc %}opacity-30{% endif %}">
+                                <span class="material-symbols-outlined text-6xl" style="color: var(--border);">menu_book</span>
+                            </div>
+                        {% endif %}
+
+                        {% if venc %}
+                        <!-- Overlay reservado -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                             style="background: linear-gradient(to top, rgba(27,28,26,0.75) 0%, rgba(27,28,26,0.25) 100%);">
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                                  style="background-color: rgba(186,26,26,0.85); color: white;">
+                                ● Reservado
+                            </span>
+                            <p class="text-white/80 text-xs font-body">Libre en:</p>
+                            <p class="font-mono text-white font-bold text-sm countdown-timer"
+                               data-expiry="{{ venc }}">--:--:--</p>
+                        </div>
+                        {% else %}
+                        <!-- Hover: ver detalle -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(to top, rgba(27,28,26,0.6) 0%, transparent 60%);">
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1"
+                                  style="background-color: rgba(255,255,255,0.18); backdrop-filter: blur(6px); color: white; border: 1px solid rgba(255,255,255,0.25);">
+                                <span class="material-symbols-outlined text-xs">open_in_new</span>
+                                Ver detalles
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info del libro -->
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-label tracking-widest uppercase px-2 py-0.5 rounded-full"
+                              style="color: var(--primary); background-color: rgba(163,196,106,0.2);">
+                            {{ ejemplar.libro.categoria.nombre|default:"General" }}
+                        </span>
+                        <span class="text-[10px] font-label italic" style="color: var(--text-faint);">
+                            {{ ejemplar.get_estado_fisico_display }}
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-headline mb-1 line-clamp-2" style="color: var(--text);">{{ ejemplar.libro.titulo }}</h3>
+                    <p class="text-sm font-body mb-4" style="color: var(--text-muted);">{{ ejemplar.libro.autor }}</p>
+
+                    <!-- Precio + Acción -->
+                    <div class="mt-auto flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
+                        <span class="text-lg font-body font-bold" style="color: var(--primary);">${{ ejemplar.precio_venta }}</span>
+
+                        {% if venc %}
+                        <span class="px-4 py-2 rounded-lg text-xs font-label flex items-center gap-1"
+                              style="background-color: rgba(186,26,26,0.08); color:#ba1a1a; border: 1px solid rgba(186,26,26,0.2);">
+                            <span class="material-symbols-outlined text-sm">schedule</span>
+                            Reservado
+                        </span>
+                        {% else %}
+                        <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0"
+                              onclick="event.stopPropagation()">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 text-white btn-shine ripple-origin"
+                                    style="background-color: var(--primary);">
+                                <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                                Añadir
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% endwith %}
+
+
+                {% empty %}
+                <div class="col-span-full py-20 flex flex-col items-center text-center">
+                    <span class="material-symbols-outlined text-5xl mb-4" style="color: var(--border);">inventory_2</span>
+                    <h3 class="text-2xl font-headline italic mb-2" style="color: var(--text-muted);">El archivo está vacío</h3>
+                    <p class="font-body" style="color: var(--text-faint);">Aún no hay ejemplares disponibles para la venta.</p>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Newsletter -->
+    <section class="bg-[#3e5219] dark:bg-[#1f2d0a] text-[#d0eba1] py-20">
+        <div class="max-w-7xl mx-auto px-8 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div class="max-w-xl">
+                <h2 class="text-4xl font-headline italic mb-4 text-white">Únete a nuestra bitácora</h2>
+                <p class="font-body opacity-90 leading-relaxed text-white">Recibe recomendaciones mensuales seleccionadas por nuestros curadores y anuncios de nuevos libros.</p>
+            </div>
+            <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
+                <input class="bg-white/10 border-b border-[#d0eba1]/30 text-white placeholder:text-[#d0eba1]/70 px-4 py-3 min-w-[300px] focus:outline-none focus:border-[#d0eba1] transition-all" placeholder="Tu correo electrónico" type="email"/>
+                <button class="bg-[#d0eba1] text-[#3e5219] font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-all">
+                    Suscribirse
+                </button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+// Countdown timers para libros reservados
+function actualizarCountdowns() {
+    document.querySelectorAll('.countdown-timer').forEach(el => {
+        const expiry = new Date(el.dataset.expiry);
+        const ahora = new Date();
+        const diff = expiry - ahora;
+
+        if (diff <= 0) {
+            el.textContent = 'Disponible pronto';
+            return;
+        }
+
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    });
+}
+
+if (document.querySelectorAll('.countdown-timer').length > 0) {
+    actualizarCountdowns();
+    setInterval(actualizarCountdowns, 1000);
+}
+</script>
+{% endblock %}
