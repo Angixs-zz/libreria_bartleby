@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-7xl mx-auto">
+
+    <!-- ── Page Header ───────────────────────────────────── -->
+    <section class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 py-10 mb-8"
+             style="border-bottom: 1px solid var(--border);">
+        <div>
+            <p class="text-xs font-label uppercase tracking-widest mb-2" style="color: var(--text-muted);">
+                Catálogo Digital · Staff Area
+            </p>
+            <h1
+              data-blur-text
+              data-delay="110"
+              data-direction="top"
+              class="font-headline italic text-5xl md:text-6xl leading-tight mb-3"
+              style="color: var(--primary);">
+                Panel de Inventario
+            </h1>
+            <p class="reveal font-body max-w-lg text-base" style="color: var(--text-muted);">
+                Administra el catálogo, revisa el stock y registra nuevos ejemplares para Bartleby.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3 items-center">
+            <a href="{% url 'directorio_proveedores' %}"
+               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-base">local_shipping</span>
+                Proveedores
+            </a>
+            <a href="{% url 'dashboard_reportes' %}"
+               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-base">monitoring</span>
+                Reportes
+            </a>
+            <a href="{% url 'panel_clientes' %}"
+               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-base">groups</span>
+                Clientes
+            </a>
+            <a href="{% url 'gestor_reservas' %}"
+               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-base">confirmation_number</span>
+                Reservas
+            </a>
+            <a href="{% url 'pos' %}"
+               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--primary);">
+                <span class="material-symbols-outlined text-base">point_of_sale</span>
+                Punto de Venta
+            </a>
+            <a href="{% url 'agregar_libro' %}"
+               class="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-sm font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+               style="background-color: var(--primary); color: white;">
+                <span class="material-symbols-outlined text-base">add</span>
+                Agregar Libro
+            </a>
+        </div>
+    </section>
+
+    <!-- ── Stats Cards ─────────────────────────────────────── -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12 stagger">
+
+        <!-- Total Ejemplares -->
+        <div class="relative overflow-hidden rounded-sm p-8 group"
+             style="background-color: var(--surface); border: 1px solid var(--border);">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Volumen Actual</p>
+                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Total de Lotes</h2>
+                </div>
+                <div class="p-2 rounded-lg" style="background-color: rgba(163,196,106,0.15);">
+                    <span class="material-symbols-outlined text-2xl" style="color: var(--primary);">library_books</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-headline text-5xl font-bold" style="color: var(--primary);">{{ total_ejemplares }}</span>
+                <span class="text-xs font-body" style="color: var(--text-muted);">en inventario</span>
+            </div>
+            <!-- Ghost icon -->
+            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">auto_stories</span>
+        </div>
+
+        <!-- Ejemplares Agotados -->
+        <div class="relative overflow-hidden rounded-sm p-8 group"
+             style="background-color: var(--surface); border: 1px solid var(--border);">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Archivo Histórico</p>
+                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Lotes Agotados</h2>
+                </div>
+                <div class="p-2 rounded-lg" style="background-color: rgba(186,26,26,0.1);">
+                    <span class="material-symbols-outlined text-2xl" style="color:#ba1a1a;">inventory_2</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-headline text-5xl font-bold" style="color:#ba1a1a;">{{ agotados }}</span>
+                <span class="text-xs font-body" style="color: var(--text-muted);">obras sin existencia</span>
+            </div>
+            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">block</span>
+        </div>
+
+        <!-- Reservas Pendientes -->
+        <div class="relative overflow-hidden rounded-sm p-8 group"
+             style="background-color: var(--surface); border: 1px solid var(--border);">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Logística</p>
+                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Reservas Activas</h2>
+                </div>
+                <div class="p-2 rounded-lg" style="background-color: rgba(59,130,246,0.1);">
+                    <span class="material-symbols-outlined text-2xl" style="color:#3b82f6;">confirmation_number</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-headline text-5xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</span>
+                <span class="text-xs font-body" style="color: var(--text-muted);">esperando retiro</span>
+            </div>
+            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">bookmark</span>
+        </div>
+
+    </section>
+
+    <!-- ── Table Section ─────────────────────────────────── -->
+    <section class="rounded-sm overflow-hidden" style="background-color: var(--surface); border: 1px solid var(--border);">
+
+        <!-- Table toolbar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 py-5"
+             style="border-bottom: 1px solid var(--border);">
+            <div class="relative w-full sm:w-80">
+                <span class="material-symbols-outlined absolute text-sm"
+                      style="left:0.75rem; top:50%; transform:translateY(-50%); color:var(--text-faint);">search</span>
+                <input type="text"
+                       id="filtro-tabla"
+                       placeholder="Filtrar por título, autor o ISBN..."
+                       oninput="filtrarTabla(this.value)"
+                       class="w-full rounded-lg text-sm font-body focus:ring-1 transition-shadow"
+                       style="padding: 0.6rem 1rem 0.6rem 2.5rem !important; background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text);">
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <a href="{% url 'agregar_libro' %}"
+                   class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all"
+                   style="background-color: var(--primary); color: white;">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    Nuevo
+                </a>
+                <a href="{% url 'lista_libros' %}"
+                   class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-all"
+                   style="border: 1px solid var(--border); color: var(--text-muted);">
+                    <span class="material-symbols-outlined text-sm">storefront</span>
+                    Ver Tienda
+                </a>
+            </div>
+        </div>
+
+        <!-- Responsive table wrapper -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left" id="tabla-inventario" style="border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: var(--bg-subtle);">
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Portada</th>
+                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Detalles</th>
+                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold hidden md:table-cell" style="color: var(--text-muted);">ISBN / SKU</th>
+                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Stock</th>
+                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold text-right hidden sm:table-cell" style="color: var(--text-muted);">Precio</th>
+                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-center" style="color: var(--text-muted);">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ejemplar in ejemplares %}
+                    <tr class="fila-libro hover:opacity-80 transition-opacity"
+                        style="border-top: 1px solid var(--border);">
+
+                        <!-- Portada -->
+                        <td class="px-6 py-5">
+                            <div class="w-12 h-[4.5rem] rounded-sm overflow-hidden flex items-center justify-center flex-shrink-0"
+                                 style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                {% if ejemplar.libro.portada %}
+                                    <img src="{{ ejemplar.libro.portada.url }}" alt="{{ ejemplar.libro.titulo }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <span class="material-symbols-outlined text-2xl" style="color: var(--border);">menu_book</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Detalles -->
+                        <td class="px-4 py-5 max-w-xs">
+                            <p class="font-headline italic text-lg leading-snug mb-0.5 dato-libro" style="color: var(--text);">{{ ejemplar.libro.titulo }}</p>
+                            <p class="text-sm font-body mb-1 dato-libro" style="color: var(--text-muted);">{{ ejemplar.libro.autor }}</p>
+                            {% if ejemplar.libro.categoria %}
+                            <span class="inline-block text-[10px] font-bold font-label uppercase tracking-widest px-2 py-0.5 rounded-full"
+                                  style="background-color: rgba(163,196,106,0.18); color: var(--primary);">
+                                {{ ejemplar.libro.categoria.nombre }}
+                            </span>
+                            {% endif %}
+                            <!-- Precio visible en móvil -->
+                            <p class="sm:hidden mt-1 text-sm font-bold" style="color: var(--primary);">${{ ejemplar.precio_venta }}</p>
+                        </td>
+
+                        <!-- ISBN / SKU (hidden on mobile) -->
+                        <td class="px-4 py-5 hidden md:table-cell">
+                            {% if ejemplar.libro.isbn %}
+                            <p class="font-mono text-xs mb-1 dato-libro" style="color: var(--text-muted);">{{ ejemplar.libro.isbn }}</p>
+                            {% endif %}
+                            <p class="font-mono text-xs" style="color: var(--text-faint);">{{ ejemplar.sku }}</p>
+                        </td>
+
+                        <!-- Stock badge -->
+                        <td class="px-4 py-5">
+                            {% if ejemplar.stock == 0 %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
+                                      style="background-color:rgba(186,26,26,0.1); color:#ba1a1a;">
+                                    <span class="material-symbols-outlined text-xs">block</span> Agotado
+                                </span>
+                            {% elif ejemplar.stock == 1 %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
+                                      style="background-color:rgba(163,196,106,0.18); color: var(--primary);">
+                                    <span class="material-symbols-outlined text-xs">star</span> Único Ejemplar
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
+                                      style="background-color:rgba(163,196,106,0.18); color: var(--primary);">
+                                    <span class="material-symbols-outlined text-xs">check_circle</span> {{ ejemplar.stock }} uds.
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Precio (hidden on mobile, shown in detail col) -->
+                        <td class="px-4 py-5 text-right hidden sm:table-cell">
+                            <span class="font-headline text-xl font-bold" style="color: var(--text);">${{ ejemplar.precio_venta }}</span>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td class="px-6 py-5">
+                            <div class="flex items-center justify-center gap-1">
+                                <a href="{% url 'detalle_ejemplar' ejemplar.id %}"
+                                   class="p-2 rounded-full transition-all hover:scale-110 hover:bg-[rgba(163,196,106,0.15)]"
+                                   style="color: var(--primary);"
+                                   title="Ver / Editar ejemplar">
+                                    <span class="material-symbols-outlined text-xl">open_in_new</span>
+                                </a>
+                                <form method="POST" action="{% url 'eliminar_ejemplar' ejemplar.id %}" id="form-delete-{{ ejemplar.id }}" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="button" onclick="openDeleteModal('{{ ejemplar.id }}', '{{ ejemplar.sku }}', '{{ ejemplar.libro.titulo|escapejs }}')" class="p-2 rounded-full transition-all hover:scale-110 text-red-500/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Eliminar lote">
+                                        <span class="material-symbols-outlined text-xl">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-24 text-center">
+                            <span class="material-symbols-outlined text-6xl block mb-4" style="color: var(--border); font-variation-settings:'wght' 100;">inventory_2</span>
+                            <h3 class="font-headline italic text-2xl mb-2" style="color: var(--text-muted);">El archivo está vacío</h3>
+                            <p class="text-sm font-body mb-8" style="color: var(--text-faint);">Aún no hay ejemplares en el inventario.</p>
+                            <a href="{% url 'agregar_libro' %}"
+                               class="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all"
+                               style="background-color: var(--primary); color: white;">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                                Registrar el primero
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table footer -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-5"
+             style="border-top: 1px solid var(--border);">
+            <p class="text-sm font-body" style="color: var(--text-muted);">
+                <strong style="color: var(--text);">{{ total_ejemplares }}</strong> lote{% if total_ejemplares != 1 %}s{% endif %} en el inventario
+                {% if agotados %}&nbsp;·&nbsp; <span style="color:#ba1a1a;"><strong>{{ agotados }}</strong> sin existencia</span>{% endif %}
+            </p>
+            <a href="{% url 'agregar_libro' %}"
+               class="inline-flex items-center gap-1 text-sm font-bold hover:underline transition-all"
+               style="color: var(--primary);">
+                <span class="material-symbols-outlined text-base">add_circle</span>
+                Registrar nuevo ejemplar
+            </a>
+        </div>
+    </section>
+
+</div>
+</main>
+
+<!-- Modal de Borrado Fino -->
+<div id="delete-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="delete-modal-content" class="w-full max-w-md p-8 rounded-xl shadow-2xl transform scale-95 transition-transform duration-300" 
+         style="background-color: var(--surface); border: 1px solid var(--border);">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: rgba(186,26,26,0.1); color: #ba1a1a;">
+                <span class="material-symbols-outlined text-2xl">delete_forever</span>
+            </div>
+            <div>
+                <h3 class="font-headline italic text-2xl" style="color: var(--text);">Confirmar purga</h3>
+            </div>
+        </div>
+        
+        <p class="font-body text-sm mb-2" style="color: var(--text-muted);">
+            Estás a punto de borrar definitivamente del archivo digital el lote <strong id="modal-sku" class="font-mono text-xs px-1 py-0.5 rounded" style="background-color: var(--bg-subtle); color: var(--text);"></strong>.
+        </p>
+        <p class="font-body italic text-sm mb-8" id="modal-title" style="color: var(--text-faint);"></p>
+        
+        <div class="flex justify-end gap-3">
+            <button onclick="closeDeleteModal()" type="button" class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800" style="border: 1px solid var(--border); color: var(--text-muted);">
+                Cancelar
+            </button>
+            <button id="confirm-delete-btn" type="button" class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-all" style="background-color: #ba1a1a; color: white;">
+                Eliminar Registro
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrarTabla(q) {
+    const filas = document.querySelectorAll('.fila-libro');
+    const term = q.toLowerCase().trim();
+    filas.forEach(fila => {
+        const textos = Array.from(fila.querySelectorAll('.dato-libro'))
+                            .map(el => el.textContent.toLowerCase()).join(' ');
+        fila.style.display = (!term || textos.includes(term)) ? '' : 'none';
+    });
+}
+
+let currentDeleteFormId = null;
+
+function openDeleteModal(id, sku, titulo) {
+    currentDeleteFormId = 'form-delete-' + id;
+    document.getElementById('modal-sku').innerText = sku;
+    document.getElementById('modal-title').innerText = '"' + titulo + '"';
+    
+    const modal = document.getElementById('delete-modal');
+    const content = document.getElementById('delete-modal-content');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Animar entrada
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    const content = document.getElementById('delete-modal-content');
+    
+    // Animar salida
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        currentDeleteFormId = null;
+    }, 300);
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+    if (currentDeleteFormId) {
+        document.getElementById(currentDeleteFormId).submit();
+    }
+});
+</script>
+{% endblock %}

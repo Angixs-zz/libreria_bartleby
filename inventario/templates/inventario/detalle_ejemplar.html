@@ -1,0 +1,483 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+.field-group {
+    margin-bottom: 1.5rem;
+}
+.field-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+    margin-top: 0;
+}
+.field-input {
+    width: 100%;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(163,196,106,0.15);
+}
+.field-input[type="number"] { -moz-appearance: textfield; }
+.field-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+select.field-input { cursor: pointer; }
+textarea.field-input { resize: vertical; min-height: 90px; }
+
+.section-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+.section-title {
+    font-family: 'Newsreader', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.badge-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.portada-preview {
+    width: 120px;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 0.4rem;
+    border: 1px solid var(--border);
+}
+.portada-placeholder {
+    width: 120px;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-subtle);
+    border: 2px dashed var(--border);
+    border-radius: 0.4rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-5xl mx-auto">
+
+    <!-- ── Breadcrumb ──────────────────────────────────── -->
+    <nav class="flex items-center gap-2 text-xs font-body mb-8" style="color: var(--text-faint);">
+        <a href="{% url 'gestion_inventario' %}" class="hover:opacity-80 transition-opacity" style="color: var(--text-muted);">
+            Panel de Inventario
+        </a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span style="color: var(--text);">{{ ejemplar.sku }}</span>
+    </nav>
+
+    <!-- ── Page Header ────────────────────────────────── -->
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-10"
+         style="border-bottom: 1px solid var(--border); padding-bottom: 2rem;">
+        <div class="flex items-start gap-5">
+            <!-- Portada -->
+            <div class="flex-shrink-0">
+                {% if ejemplar.libro.portada %}
+                    <img src="{{ ejemplar.libro.portada.url }}" alt="{{ ejemplar.libro.titulo }}"
+                         class="portada-preview shadow-md">
+                {% else %}
+                    <div class="portada-placeholder">
+                        <span class="material-symbols-outlined text-4xl" style="color: var(--border);">menu_book</span>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Info -->
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color: var(--text-faint);">
+                    Lote · {{ ejemplar.sku }}
+                </p>
+                <h1 class="font-headline italic text-3xl md:text-4xl leading-tight mb-1" style="color: var(--primary);">
+                    {{ ejemplar.libro.titulo }}
+                </h1>
+                <p class="font-body text-base mb-3" style="color: var(--text-muted);">{{ ejemplar.libro.autor }}</p>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Estado físico badge -->
+                    {% with estado=ejemplar.estado_fisico %}
+                    <span class="badge-estado"
+                          style="background-color: rgba(163,196,106,0.15); color: var(--primary);">
+                        <span class="material-symbols-outlined text-xs">verified</span>
+                        {{ ejemplar.get_estado_fisico_display }}
+                    </span>
+                    {% endwith %}
+
+                    <!-- Stock badge -->
+                    {% if ejemplar.stock == 0 %}
+                    <span class="badge-estado" style="background-color: rgba(186,26,26,0.1); color:#ba1a1a;">
+                        <span class="material-symbols-outlined text-xs">block</span>
+                        Agotado
+                    </span>
+                    {% else %}
+                    <span class="badge-estado" style="background-color: rgba(163,196,106,0.15); color: var(--primary);">
+                        <span class="material-symbols-outlined text-xs">inventory</span>
+                        {{ ejemplar.stock }} en stock
+                    </span>
+                    {% endif %}
+
+                    <!-- Categoría -->
+                    {% if ejemplar.libro.categoria %}
+                    <span class="badge-estado" style="background-color: rgba(59,130,246,0.1); color:#3b82f6;">
+                        {{ ejemplar.libro.categoria.nombre }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="mt-3 flex items-center gap-4">
+                    <span class="font-headline text-2xl font-bold" style="color: var(--text);">${{ ejemplar.precio_venta }}</span>
+                    {% if ejemplar.precio_compra > 0 %}
+                    <span class="text-xs font-body" style="color: var(--text-faint);">
+                        Compra: ${{ ejemplar.precio_compra }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'gestion_inventario' %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+               style="border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Volver
+            </a>
+            <form method="POST" action="{% url 'eliminar_ejemplar' ejemplar.id %}" id="form-delete-header">
+                {% csrf_token %}
+                <button type="button"
+                        onclick="openDeleteModal()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:scale-105"
+                        style="background-color: rgba(186,26,26,0.1); color:#ba1a1a; border: 1px solid rgba(186,26,26,0.2);">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                    Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Formulario de Edición ──────────────────────── -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Columna izquierda: Libro (2 cols) -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Información del libro -->
+                <div class="section-card">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined text-lg" style="color: var(--primary);">auto_stories</span>
+                        Datos del Libro
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2 field-group">
+                            <label class="field-label" for="titulo">Título</label>
+                            <input type="text" id="titulo" name="titulo" class="field-input"
+                                   value="{{ ejemplar.libro.titulo }}">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="autor">Autor</label>
+                            <input type="text" id="autor" name="autor" class="field-input"
+                                   value="{{ ejemplar.libro.autor }}">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="isbn">ISBN</label>
+                            <input type="text" id="isbn" name="isbn" class="field-input"
+                                   value="{{ ejemplar.libro.isbn|default:'' }}"
+                                   placeholder="ISBN-10 o ISBN-13">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="edicion">Edición</label>
+                            <input type="text" id="edicion" name="edicion" class="field-input"
+                                   value="{{ ejemplar.libro.edicion|default:'' }}"
+                                   placeholder="Ej. 3ª edición, 2018">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="categoria_texto">Categoría</label>
+                            <input type="text" id="categoria_texto" name="categoria_texto" class="field-input"
+                                   value="{{ ejemplar.libro.categoria.nombre|default:'' }}"
+                                   list="categorias-list"
+                                   placeholder="Ej. Narrativa, Poesía...">
+                            <datalist id="categorias-list">
+                                {% for cat in categorias %}
+                                <option value="{{ cat.nombre }}">
+                                {% endfor %}
+                            </datalist>
+                        </div>
+
+                        <div class="sm:col-span-2 field-group">
+                            <label class="field-label" for="descripcion">Descripción / Sinopsis</label>
+                            <textarea id="descripcion" name="descripcion" class="field-input"
+                                      rows="4">{{ ejemplar.libro.descripcion|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Portada -->
+                        <div class="sm:col-span-2 field-group">
+                            <label class="field-label">Portada</label>
+                            <div class="flex items-start gap-4">
+                                <div id="portada-preview-wrap">
+                                    {% if ejemplar.libro.portada %}
+                                        <img id="portada-preview-img" src="{{ ejemplar.libro.portada.url }}"
+                                             alt="portada actual" class="portada-preview">
+                                    {% else %}
+                                        <div class="portada-placeholder" id="portada-preview-img">
+                                            <span class="material-symbols-outlined text-3xl" style="color: var(--border);">image</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow">
+                                    <label for="portada"
+                                           class="flex flex-col items-center justify-center gap-2 p-6 rounded-lg cursor-pointer transition-all hover:opacity-80"
+                                           style="border: 2px dashed var(--border); background-color: var(--bg-subtle);">
+                                        <span class="material-symbols-outlined text-2xl" style="color: var(--text-faint);">upload</span>
+                                        <span class="text-xs font-body text-center" style="color: var(--text-muted);">
+                                            Haz clic para subir una nueva portada<br>
+                                            <span style="color: var(--text-faint);">JPG, PNG · Máx. 5 MB</span>
+                                        </span>
+                                    </label>
+                                    <input type="file" id="portada" name="portada" accept="image/*" class="hidden" onchange="previewPortada(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Ejemplar -->
+            <div class="space-y-6">
+
+                <!-- Datos del ejemplar -->
+                <div class="section-card">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined text-lg" style="color: var(--primary);">inventory_2</span>
+                        Datos del Lote
+                    </h2>
+
+                    <div class="field-group">
+                        <label class="field-label">SKU</label>
+                        <div class="field-input font-mono text-sm" style="background-color: var(--bg); cursor: default; color: var(--text-faint);">
+                            {{ ejemplar.sku }}
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="estado_fisico">Estado Físico</label>
+                        <select id="estado_fisico" name="estado_fisico" class="field-input">
+                            {% for val, display in ejemplar.ESTADOS %}
+                            <option value="{{ val }}" {% if ejemplar.estado_fisico == val %}selected{% endif %}>
+                                {{ display }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="descripcion_estado">Notas del Estado</label>
+                        <textarea id="descripcion_estado" name="descripcion_estado" class="field-input" rows="3"
+                                  placeholder="Detalles sobre el estado físico...">{{ ejemplar.descripcion_estado|default:'' }}</textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="stock">Stock en Inventario</label>
+                        <input type="number" id="stock" name="stock" class="field-input"
+                               value="{{ ejemplar.stock }}" min="0">
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="precio_venta">Precio de Venta ($)</label>
+                        <input type="number" id="precio_venta" name="precio_venta" class="field-input"
+                               value="{{ ejemplar.precio_venta }}" step="0.01" min="0.01">
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="precio_compra">Precio de Compra ($)</label>
+                        <input type="number" id="precio_compra" name="precio_compra" class="field-input"
+                               value="{{ ejemplar.precio_compra }}" step="0.01" min="0">
+                    </div>
+
+                    <!-- Fechas (solo lectura) -->
+                    <div class="mt-4 pt-4" style="border-top: 1px solid var(--border);">
+                        <p class="text-[10px] uppercase tracking-widest font-bold mb-3" style="color: var(--text-faint);">Registro</p>
+                        <div class="space-y-1">
+                            <p class="text-xs font-body flex justify-between" style="color: var(--text-muted);">
+                                <span>Creado</span>
+                                <span>{{ ejemplar.creado_en|date:"d/m/Y H:i" }}</span>
+                            </p>
+                            <p class="text-xs font-body flex justify-between" style="color: var(--text-muted);">
+                                <span>Actualizado</span>
+                                <span>{{ ejemplar.actualizado_en|date:"d/m/Y H:i" }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón guardar -->
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest shadow-lg hover:opacity-90 hover:-translate-y-0.5 transition-all"
+                        style="background-color: var(--primary); color: white;">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- ── Reservas Asociadas ──────────────────────────── -->
+    {% if reservas %}
+    <div class="section-card mt-6">
+        <h2 class="section-title">
+            <span class="material-symbols-outlined text-lg" style="color: #3b82f6;">confirmation_number</span>
+            Reservas Recientes de este Ejemplar
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm font-body" style="border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: var(--bg-subtle);">
+                        <th class="px-4 py-3 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Ticket</th>
+                        <th class="px-4 py-3 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Cliente</th>
+                        <th class="px-4 py-3 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Fecha</th>
+                        <th class="px-4 py-3 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reservas %}
+                    <tr style="border-top: 1px solid var(--border);">
+                        <td class="px-4 py-3 font-mono text-xs" style="color: var(--text);">{{ r.codigo_ticket }}</td>
+                        <td class="px-4 py-3" style="color: var(--text);">{{ r.usuario.username }}</td>
+                        <td class="px-4 py-3 text-xs" style="color: var(--text-muted);">{{ r.fecha_reserva|date:"d/m/Y H:i" }}</td>
+                        <td class="px-4 py-3">
+                            {% if r.estado == 'pendiente' %}
+                            <span class="badge-estado" style="background-color:rgba(59,130,246,0.1); color:#3b82f6;">Pendiente</span>
+                            {% elif r.estado == 'completada' %}
+                            <span class="badge-estado" style="background-color:rgba(163,196,106,0.15); color: var(--primary);">Completada</span>
+                            {% else %}
+                            <span class="badge-estado" style="background-color:rgba(186,26,26,0.1); color:#ba1a1a;">{{ r.estado|capfirst }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+</main>
+
+<!-- Modal de Borrado -->
+<div id="delete-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="delete-modal-content" class="w-full max-w-md p-8 rounded-xl shadow-2xl transform scale-95 transition-transform duration-300"
+         style="background-color: var(--surface); border: 1px solid var(--border);">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: rgba(186,26,26,0.1); color: #ba1a1a;">
+                <span class="material-symbols-outlined text-2xl">delete_forever</span>
+            </div>
+            <div>
+                <h3 class="font-headline italic text-2xl" style="color: var(--text);">Confirmar eliminación</h3>
+                <p class="text-sm font-body" style="color: var(--text-muted);">Esta acción no se puede deshacer.</p>
+            </div>
+        </div>
+        <p class="font-body text-sm mb-2" style="color: var(--text-muted);">
+            Estás a punto de eliminar el lote
+            <strong class="font-mono text-xs px-1 py-0.5 rounded" style="background-color: var(--bg-subtle); color: var(--text);">{{ ejemplar.sku }}</strong>
+        </p>
+        <p class="font-body italic text-sm mb-8" style="color: var(--text-faint);">"{{ ejemplar.libro.titulo }}"</p>
+
+        <div class="flex justify-end gap-3">
+            <button onclick="closeDeleteModal()" type="button"
+                    class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+                    style="border: 1px solid var(--border); color: var(--text-muted);">
+                Cancelar
+            </button>
+            <button id="confirm-delete-btn" type="button"
+                    class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-all"
+                    style="background-color: #ba1a1a; color: white;">
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Preview portada al seleccionar archivo
+function previewPortada(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const wrap = document.getElementById('portada-preview-wrap');
+            wrap.innerHTML = '<img src="' + e.target.result + '" alt="Nueva portada" class="portada-preview shadow-md">';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Modal de borrado
+function openDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    const content = document.getElementById('delete-modal-content');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    const content = document.getElementById('delete-modal-content');
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+    document.getElementById('form-delete-header').submit();
+});
+</script>
+{% endblock %}
+{% endblock %}

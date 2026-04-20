@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="min-h-screen pt-32 pb-20 flex items-center justify-center relative overflow-hidden"
+      style="background-color: var(--bg);">
+
+    <!-- Decos de fondo -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl opacity-40"
+         style="background-color: var(--bg-subtle);"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-40"
+         style="background-color: var(--bg-subtle);"></div>
+
+    <section class="container mx-auto px-6 z-10">
+        <div class="max-w-4xl mx-auto grid md:grid-cols-2 rounded-xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(27,28,26,0.1)]"
+             style="background-color: var(--surface); border: 1px solid var(--border);">
+
+            <!-- Panel izquierdo decorativo -->
+            <div class="hidden md:flex flex-col justify-center p-12 relative"
+                 style="background-color: var(--bg-subtle);">
+                <div class="relative z-10">
+                    <span class="label-md uppercase tracking-widest font-bold mb-6 block"
+                          style="color: var(--primary); opacity: 0.7;">Únete al archivo</span>
+                    <h1 class="text-5xl font-headline italic leading-tight mb-8" style="color: var(--text);">
+                        Escribe tu propio <span class="block">prólogo con nosotros.</span>
+                    </h1>
+                    <p class="leading-relaxed text-lg max-w-xs" style="color: var(--text-muted);">
+                        Accede a ediciones limitadas, preventas exclusivas y nuestro boletín literario curado por expertos.
+                    </p>
+                </div>
+                <div class="absolute bottom-12 left-12 flex gap-4">
+                    <div class="w-12 h-[1px] mt-3" style="background-color: var(--text-faint);"></div>
+                    <p class="text-xs italic font-headline" style="color: var(--text-faint);">"Preferiría no hacerlo", dijo Bartleby. Pero tú sí querrás registrarte.</p>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="p-8 md:p-12 lg:p-16">
+                <div class="mb-10 text-center md:text-left">
+                    <h2 class="text-2xl font-headline font-bold mb-2" style="color: var(--text);">Crear Cuenta</h2>
+                    <p class="text-sm" style="color: var(--text-muted);">Ingresa tus datos para comenzar tu colección.</p>
+                </div>
+
+                <form method="POST" action="{% url 'registrar' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid md:grid-cols-2 gap-x-6 gap-y-2">
+                        <div>
+                            <label for="{{ form.first_name.id_for_label }}">Nombre</label>
+                            {{ form.first_name }}
+                            {{ form.first_name.errors }}
+                        </div>
+                        <div>
+                            <label for="{{ form.last_name.id_for_label }}">Apellido</label>
+                            {{ form.last_name }}
+                            {{ form.last_name.errors }}
+                        </div>
+                        <div>
+                            <label for="{{ form.username.id_for_label }}">Usuario</label>
+                            {{ form.username }}
+                            {{ form.username.errors }}
+                        </div>
+                        <div>
+                            <label for="{{ form.telefono.id_for_label }}">Telefono</label>
+                            {{ form.telefono }}
+                            {{ form.telefono.errors }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.email.id_for_label }}">Correo electronico</label>
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.direccion.id_for_label }}">Direccion</label>
+                            {{ form.direccion }}
+                            {{ form.direccion.errors }}
+                        </div>
+                        <div>
+                            <label for="{{ form.password1.id_for_label }}">Contrasena</label>
+                            {{ form.password1 }}
+                            {{ form.password1.errors }}
+                        </div>
+                        <div>
+                            <label for="{{ form.password2.id_for_label }}">Confirmar contrasena</label>
+                            {{ form.password2 }}
+                            {{ form.password2.errors }}
+                        </div>
+                        {% if form.non_field_errors %}
+                            <div class="md:col-span-2">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="rounded-lg px-4 py-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                        <label class="flex items-start gap-3 !mt-0 !mb-0 normal-case tracking-normal text-xs md:text-sm" style="color: var(--text-muted);">
+                            <input type="checkbox" name="acepta_privacidad" class="mt-1 h-4 w-4 rounded" required>
+                            <span>
+                                Acepto el
+                                <a href="{% url 'aviso_privacidad' %}" class="font-bold hover:underline" style="color: var(--primary);">
+                                    Aviso de Privacidad
+                                </a>
+                                y reconozco los
+                                <a href="{% url 'terminos_condiciones' %}" class="font-bold hover:underline" style="color: var(--primary);">
+                                    Términos y Condiciones
+                                </a>
+                                aplicables al sistema de apartados y ventas.
+                            </span>
+                        </label>
+                    </div>
+                    <div class="pt-6">
+                        <button type="submit" class="w-full bg-gradient-to-r from-[#3e5219] to-[#556b2f] text-white py-4 rounded-lg shadow-lg hover:opacity-90 transition-all duration-300 font-bold text-sm tracking-widest uppercase">
+                            Crear cuenta
+                        </button>
+                    </div>
+                    <div class="pt-4 text-center">
+                        <a href="{% url 'login' %}" class="text-sm hover:underline underline-offset-4 transition-colors"
+                           style="color: var(--text-muted);">
+                            ¿Ya tienes cuenta? Inicia sesión
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

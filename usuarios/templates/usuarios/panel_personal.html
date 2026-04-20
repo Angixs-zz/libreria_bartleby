@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load catalogo_tags %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .personal-shell {
+        --bs-body-bg: transparent;
+        --bs-body-color: var(--text);
+    }
+
+    .personal-shell .summary-card,
+    .personal-shell .table-shell,
+    .personal-shell .modal-content {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.92));
+        border: 1px solid rgba(197, 200, 184, 0.7);
+        box-shadow: 0 20px 55px rgba(28, 32, 19, 0.08);
+        color: var(--text);
+    }
+
+    .dark .personal-shell .summary-card,
+    .dark .personal-shell .table-shell,
+    .dark .personal-shell .modal-content {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
+        border-color: rgba(80, 85, 60, 0.6);
+        box-shadow: 0 20px 55px rgba(0, 0, 0, 0.24);
+    }
+
+    .personal-shell .olive-btn {
+        background-color: #4A5D23;
+        border-color: #4A5D23;
+        color: #fff;
+    }
+
+    .personal-shell .olive-btn:hover,
+    .personal-shell .olive-btn:focus {
+        background-color: #3e5219;
+        border-color: #3e5219;
+        color: #fff;
+    }
+
+    .personal-shell .role-badge {
+        background-color: rgba(74, 93, 35, 0.12);
+        color: #4A5D23;
+        border: 1px solid rgba(74, 93, 35, 0.18);
+        letter-spacing: 0.1em;
+    }
+
+    .dark .personal-shell .role-badge {
+        background-color: rgba(163, 196, 106, 0.12);
+        color: #d2eca2;
+        border-color: rgba(163, 196, 106, 0.18);
+    }
+
+    .personal-shell .table > :not(caption) > * > * {
+        border-color: rgba(197, 200, 184, 0.45);
+        vertical-align: middle;
+        color: var(--text);
+    }
+
+    .dark .personal-shell .table > :not(caption) > * > * {
+        border-color: rgba(80, 85, 60, 0.45);
+    }
+
+    .personal-shell .staff-row:hover {
+        background-color: rgba(74, 93, 35, 0.04);
+    }
+
+    .dark .personal-shell .staff-row:hover {
+        background-color: rgba(163, 196, 106, 0.06);
+    }
+
+    .personal-shell .modal-header,
+    .personal-shell .modal-footer {
+        border-color: rgba(197, 200, 184, 0.35);
+    }
+
+    .dark .personal-shell .modal-header,
+    .dark .personal-shell .modal-footer {
+        border-color: rgba(80, 85, 60, 0.4);
+    }
+
+    .personal-shell .table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="personal-shell py-5">
+    <div class="container py-4">
+        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
+            <div>
+                <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
+                    Direccion General · Personal
+                </p>
+                <h1 class="display-4 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                    Gestion de Personal
+                </h1>
+                <p class="mb-0" style="max-width: 760px; color: var(--text-muted);">
+                    Administra cuentas de cajeros y staff, controla accesos y mantén la operación bajo supervisión del Director General.
+                </p>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn olive-btn btn-lg" data-bs-toggle="modal" data-bs-target="#nuevoStaffModal">
+                    <i class="bi bi-person-plus-fill me-2"></i>Agregar Empleado
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="summary-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Equipo</div>
+                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ total_personal }}</div>
+                    <div class="small" style="color: var(--text-muted);">cuentas administrativas</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="summary-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Cajeros</div>
+                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ staff_activo }}</div>
+                    <div class="small" style="color: var(--text-muted);">staff activo</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="summary-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Direccion</div>
+                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ directores }}</div>
+                    <div class="small" style="color: var(--text-muted);">director{{ directores|pluralize:"es" }} activo{{ directores|pluralize:"s" }}</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="summary-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Bajas logicas</div>
+                    <div class="display-6 fw-semibold" style="color: #7a3b2e;">{{ cuentas_inactivas }}</div>
+                    <div class="small" style="color: var(--text-muted);">cuentas sin acceso</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-shell rounded-4 p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fst-italic mb-1" style="font-family: 'Newsreader', serif; color: #4A5D23;">Directorio interno</h2>
+                    <p class="mb-0 small" style="color: var(--text-muted);">Consulta el estado del personal y el último acceso a la bitácora.</p>
+                </div>
+
+                <form method="get" class="d-flex gap-2 w-100 w-lg-auto">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre o usuario">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <a href="{% url 'panel_personal' %}" class="btn btn-outline-secondary">Limpiar</a>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Ultimo acceso</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in personal %}
+                            <tr class="staff-row">
+                                <td>
+                                    <div class="fw-semibold">{{ empleado.get_full_name|default:empleado.username }}</div>
+                                    <div class="small" style="color: var(--text-muted);">{{ empleado.email|default:"Sin correo" }}</div>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ empleado.username }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill role-badge px-3 py-2">{{ empleado.rol_panel }}</span>
+                                </td>
+                                <td>
+                                    {% if empleado.last_login %}
+                                        {{ empleado.last_login|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">Sin ingreso registrado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if empleado.is_active %}
+                                        <span class="badge text-bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">Desactivado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if empleado.is_superuser %}
+                                        <span class="small fw-semibold" style="color: var(--text-muted);">Cuenta protegida</span>
+                                    {% elif empleado.is_active %}
+                                        <div class="table-actions">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                                Editar
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal-{{ empleado.id }}">
+                                                Resetear contraseña
+                                            </button>
+                                            <form method="post" action="{% url 'desactivar_personal' empleado.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Desactivar usuario
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% else %}
+                                        <div class="table-actions">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                                Editar
+                                            </button>
+                                            <form method="post" action="{% url 'reactivar_personal' empleado.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm olive-btn">
+                                                    Reactivar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5" style="color: var(--text-muted);">
+                                    No hay empleados que coincidan con la busqueda.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for empleado in personal %}
+    {% if not empleado.is_superuser %}
+        <div class="modal fade" id="editarPersonalModal-{{ empleado.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 overflow-hidden">
+                    <form method="post" action="{% url 'editar_personal' empleado.id %}">
+                        {% csrf_token %}
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                                    Editar empleado
+                                </h2>
+                                <p class="small mb-0" style="color: var(--text-muted);">
+                                    Ajusta los datos básicos de {{ empleado.get_full_name|default:empleado.username }}.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+
+                        <div class="modal-body px-4 px-md-5 py-4">
+                            {% with form=editar_forms|get_item:empleado.id %}
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
+                                        {{ form.first_name }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
+                                        {{ form.last_name }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
+                                        {{ form.username }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
+                                        {{ form.email }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Telefono</label>
+                                        {{ form.telefono }}
+                                    </div>
+                                </div>
+                            {% endwith %}
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn olive-btn px-4">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="resetPasswordModal-{{ empleado.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 overflow-hidden">
+                    <form method="post" action="{% url 'resetear_password_personal' empleado.id %}">
+                        {% csrf_token %}
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                                    Resetear contraseña
+                                </h2>
+                                <p class="small mb-0" style="color: var(--text-muted);">
+                                    Define una nueva contraseña para {{ empleado.username }}.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+
+                        <div class="modal-body px-4 px-md-5 py-4">
+                            {% with form=password_forms|get_item:empleado.id %}
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nueva contraseña</label>
+                                        {{ form.password1 }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
+                                        {{ form.password2 }}
+                                    </div>
+                                </div>
+                            {% endwith %}
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn olive-btn px-4">Actualizar contraseña</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<div class="modal fade" id="nuevoStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 overflow-hidden">
+            <div class="position-relative">
+                <div class="position-absolute top-0 end-0 m-4 opacity-25">
+                    <i class="bi bi-journal-bookmark-fill" style="font-size: 4rem; color: #4A5D23;"></i>
+                </div>
+            </div>
+            <form method="post" action="{% url 'crear_staff' %}">
+                {% csrf_token %}
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                            Nuevo empleado
+                        </h2>
+                        <p class="small mb-0" style="color: var(--text-muted);">
+                            Registra una nueva cuenta de cajero o staff con la misma estética sobria de Bartleby.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body px-4 px-md-5 py-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
+                            {{ staff_form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
+                            {{ staff_form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
+                            {{ staff_form.username }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
+                            {{ staff_form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Contrasena</label>
+                            {{ staff_form.password1 }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contrasena</label>
+                            {{ staff_form.password2 }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn olive-btn px-4">Guardar empleado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .detalle-proveedor-shell {
+        --bs-body-bg: transparent;
+        --bs-body-color: var(--text);
+    }
+
+    .detalle-proveedor-shell .panel-card,
+    .detalle-proveedor-shell .surface-card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 240, 0.92));
+        border: 1px solid rgba(197, 200, 184, 0.7);
+        box-shadow: 0 20px 60px rgba(23, 29, 15, 0.08);
+    }
+
+    .dark .detalle-proveedor-shell .panel-card,
+    .dark .detalle-proveedor-shell .surface-card {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
+        border-color: rgba(80, 85, 60, 0.6);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    }
+
+    .detalle-proveedor-shell .accordion-item,
+    .detalle-proveedor-shell .accordion-button {
+        background-color: transparent;
+        color: var(--text);
+        border-color: rgba(197, 200, 184, 0.45);
+    }
+
+    .dark .detalle-proveedor-shell .accordion-item,
+    .dark .detalle-proveedor-shell .accordion-button {
+        border-color: rgba(80, 85, 60, 0.45);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-proveedor-shell py-5">
+    <div class="container py-4">
+        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
+            <div>
+                <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
+                    Proveedor · Historial de compras
+                </p>
+                <h1 class="display-4 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: var(--primary);">
+                    {{ proveedor.nombre }}
+                </h1>
+                <p class="mb-1" style="color: var(--text-muted);">{{ proveedor.contacto|default:"Sin contacto principal" }}</p>
+                <p class="mb-0" style="color: var(--text-muted);">
+                    {{ proveedor.telefono|default:"Sin telefono" }} · {{ proveedor.email|default:"Sin email" }}
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Nuevo lote
+                </a>
+                <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="panel-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Lotes</div>
+                    <div class="display-6 fw-semibold" style="color: var(--primary);">{{ total_lotes }}</div>
+                    <div class="small" style="color: var(--text-muted);">adquisiciones registradas</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="panel-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Gasto acumulado</div>
+                    <div class="display-6 fw-semibold text-warning">${{ gasto_total }}</div>
+                    <div class="small" style="color: var(--text-muted);">invertido con este proveedor</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="panel-card rounded-4 p-4 h-100">
+                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Unidades</div>
+                    <div class="display-6 fw-semibold text-primary">{{ unidades_adquiridas }}</div>
+                    <div class="small" style="color: var(--text-muted);">libros ingresados al inventario</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface-card rounded-4 p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fst-italic mb-1" style="font-family: 'Newsreader', serif;">Historial por proveedor</h2>
+                    <p class="mb-0 small" style="color: var(--text-muted);">Despliega cada lote para revisar los libros adquiridos y su costo.</p>
+                </div>
+                <div class="small" style="color: var(--text-muted);">
+                    {{ proveedor.direccion|default:"Sin direccion registrada" }}
+                </div>
+            </div>
+
+            {% if adquisiciones %}
+                <div class="accordion" id="acordeon-adquisiciones">
+                    {% for adquisicion in adquisiciones %}
+                        <div class="accordion-item rounded-4 overflow-hidden mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#adquisicion-{{ adquisicion.id }}">
+                                    <div class="w-100 d-flex flex-column flex-lg-row justify-content-between gap-2 pe-3">
+                                        <div>
+                                            <div class="fw-semibold">Lote #{{ adquisicion.id }}</div>
+                                            <div class="small" style="color: var(--text-muted);">
+                                                {{ adquisicion.fecha|date:"d/m/Y" }}
+                                                {% if adquisicion.creado_por %}· Registrado por {{ adquisicion.creado_por.username }}{% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="text-lg-end">
+                                            <div class="fw-semibold" style="color: var(--primary);">${{ adquisicion.total }}</div>
+                                            <div class="small" style="color: var(--text-muted);">{{ adquisicion.detalles.count }} renglon{{ adquisicion.detalles.count|pluralize:"es" }}</div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="adquisicion-{{ adquisicion.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#acordeon-adquisiciones">
+                                <div class="accordion-body">
+                                    {% if adquisicion.observaciones %}
+                                        <div class="alert alert-secondary mb-4">{{ adquisicion.observaciones }}</div>
+                                    {% endif %}
+
+                                    <div class="table-responsive">
+                                        <table class="table align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Libro</th>
+                                                    <th>SKU</th>
+                                                    <th class="text-end">Cantidad</th>
+                                                    <th class="text-end">Costo unitario</th>
+                                                    <th class="text-end">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for detalle in adquisicion.detalles.all %}
+                                                    <tr>
+                                                        <td>
+                                                            <div class="fw-semibold">{{ detalle.ejemplar.libro.titulo }}</div>
+                                                            <div class="small" style="color: var(--text-muted);">{{ detalle.ejemplar.libro.autor }}</div>
+                                                        </td>
+                                                        <td>{{ detalle.ejemplar.sku }}</td>
+                                                        <td class="text-end">{{ detalle.cantidad }}</td>
+                                                        <td class="text-end">${{ detalle.costo_unitario }}</td>
+                                                        <td class="text-end fw-semibold">${{ detalle.subtotal }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5" style="color: var(--text-muted);">
+                    Todavia no hay compras registradas para este proveedor.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main style="background-color: var(--bg);">
+    <section class="relative overflow-hidden py-24 md:py-32" style="border-bottom: 1px solid var(--border);">
+        <div class="absolute inset-0 pointer-events-none opacity-60">
+            <div class="absolute -top-20 -left-16 w-72 h-72 rounded-full blur-3xl" style="background-color: var(--bg-subtle);"></div>
+            <div class="absolute bottom-0 right-0 w-[28rem] h-[28rem] rounded-full blur-[110px]" style="background-color: rgba(74,93,35,0.08);"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-8 relative z-10">
+            <div class="max-w-3xl">
+                    <p class="text-[11px] font-bold uppercase tracking-[0.28em] mb-5" style="color: var(--text-muted);">
+                        Bartleby, el librero
+                    </p>
+                    <h1 class="text-5xl md:text-7xl font-headline italic leading-[0.95] mb-8" style="color: var(--primary);">
+                        Un espacio para leer con propósito.
+                    </h1>
+                    <p class="text-lg md:text-xl leading-relaxed max-w-2xl" style="color: var(--text-muted);">
+                        Librería independiente en Xoxocotlán, Oaxaca, dedicada a acercar lecturas académicas, culturales
+                        y literarias que realmente aporten valor a quienes buscan entender mejor su mundo.
+                    </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-14">
+                <article class="space-y-10 max-w-3xl">
+                    <section>
+                        <h2 class="text-3xl md:text-4xl font-headline italic mb-5" style="color: var(--text);">
+                            Nosotros
+                        </h2>
+                        <div class="space-y-5 text-base md:text-lg leading-8" style="color: var(--text-muted);">
+                            <p>
+                                <strong style="color: var(--text);">Bartleby, el librero</strong> es una librería independiente ubicada
+                                en el corazón de Xoxocotlán, Oaxaca. Más que un punto de venta, es un espacio pensado para quienes buscan
+                                en los libros una forma de entender, cuestionar y enriquecer su visión del mundo.
+                            </p>
+                            <p>
+                                Nuestro proyecto nace con una intención clara: construir un lugar donde la lectura tenga un propósito.
+                                Creemos que los libros no solo informan, sino que también forman criterio, despiertan preguntas y
+                                fortalecen la relación con nuestro contexto cultural y social.
+                            </p>
+                            <p>
+                                Por ello, trabajamos bajo una idea central: acercar lecturas que realmente aporten valor, tanto a
+                                estudiantes como a lectores interesados en el conocimiento y la cultura.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl md:text-4xl font-headline italic mb-5" style="color: var(--text);">
+                            Curaduría con intención
+                        </h2>
+                        <div class="space-y-5 text-base md:text-lg leading-8" style="color: var(--text-muted);">
+                            <p>
+                                Nos especializamos en una selección cuidada de obras académicas, culturales y literarias, con especial
+                                atención a temas que dialogan con la identidad, la historia y la realidad local.
+                            </p>
+                            <p>
+                                Cada libro que forma parte de nuestra librería responde a un criterio: ser relevante, útil y
+                                significativo para quien lo lee. Nuestra atención es cercana, nuestras recomendaciones son conscientes
+                                y nuestro enfoque prioriza la calidad sobre la cantidad.
+                            </p>
+                            <p>
+                                Entendemos la librería no como un lugar de consumo rápido, sino como un espacio de descubrimiento.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl md:text-4xl font-headline italic mb-5" style="color: var(--text);">
+                            Comunidad lectora
+                        </h2>
+                        <div class="space-y-5 text-base md:text-lg leading-8" style="color: var(--text-muted);">
+                            <p>
+                                Además de la venta de libros, en <strong style="color: var(--text);">Bartleby, el librero</strong>
+                                buscamos construir comunidad. Promovemos espacios de encuentro como clubes de lectura y actividades
+                                donde el intercambio de ideas es fundamental.
+                            </p>
+                            <p>
+                                Aquí, los lectores no son solo clientes, sino parte activa de un entorno que se construye colectivamente.
+                            </p>
+                            <p>
+                                Te invitamos a conocer nuestro espacio, explorar nuevas lecturas y formar parte de una comunidad que
+                                entiende los libros no solo como objetos, sino como herramientas para pensar y transformar.
+                            </p>
+                        </div>
+                    </section>
+                </article>
+
+                <aside class="space-y-6">
+                    <div class="rounded-3xl p-8 shadow-[0_18px_50px_rgba(27,28,26,0.08)]"
+                         style="background-color: var(--surface); border: 1px solid var(--border);">
+                        <p class="text-[10px] uppercase tracking-[0.24em] font-bold mb-4" style="color: var(--text-muted);">
+                            Horario
+                        </p>
+                        <div class="space-y-3 text-sm leading-6" style="color: var(--text);">
+                            <p><strong>Lunes a viernes:</strong><br>12:30 p.m. a 8:00 p.m.</p>
+                            <p><strong>Sábados:</strong><br>12:30 p.m. a 6:00 p.m.</p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-3xl p-8 shadow-[0_18px_50px_rgba(27,28,26,0.08)]"
+                         style="background-color: var(--surface); border: 1px solid var(--border);">
+                        <p class="text-[10px] uppercase tracking-[0.24em] font-bold mb-4" style="color: var(--text-muted);">
+                            Lo que nos distingue
+                        </p>
+                        <ul class="space-y-4 text-sm leading-6" style="color: var(--text-muted);">
+                            <li>Selección académica, cultural y literaria con enfoque local.</li>
+                            <li>Recomendaciones conscientes, cercanas y contextualizadas.</li>
+                            <li>Espacios para el diálogo, el encuentro y la lectura compartida.</li>
+                            <li>Un espacio de descubrimiento donde la lectura se vive con tiempo y atención.</li>
+                        </ul>
+                    </div>
+
+                    <div class="rounded-3xl p-8 shadow-[0_18px_50px_rgba(27,28,26,0.08)]"
+                         style="background-color: var(--primary); color: white;">
+                        <p class="text-[10px] uppercase tracking-[0.24em] font-bold mb-4 text-white/70">
+                            Visítanos
+                        </p>
+                        <p class="text-lg font-headline italic mb-3">
+                            Hidalgo 305, colonia centro, Xoxocotlán
+                        </p>
+                        <p class="text-sm leading-6 text-white/80 mb-6">
+                            Nuestro espacio está pensado para quienes leen con curiosidad, rigor y deseo de conversación.
+                        </p>
+                        <a href="{% url 'lista_libros' %}"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.18em] bg-white text-[#3e5219] hover:opacity-90 transition-opacity">
+                            Explorar catálogo
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

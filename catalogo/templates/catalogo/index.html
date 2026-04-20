@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-20" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+    <div class="max-w-7xl mx-auto px-8">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl lg:text-7xl font-headline italic mb-6" style="color: var(--primary);">
+                Descubre tu próxima gran lectura
+            </h1>
+            <p class="text-xl leading-relaxed" style="color: var(--text-muted);">
+                Dale una segunda vida a los libros en el corazón de Oaxaca.
+                Curaduría literaria para almas inquietas.
+            </p>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="py-16" style="background-color: var(--bg);">
+    <div class="max-w-7xl mx-auto px-8">
+        <h2 class="text-3xl font-headline italic mb-10" style="color: var(--text);">Nuestro Catálogo</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+
+            {% for libro in libros %}
+            <div class="group flex flex-col" id="item-{{ libro.id }}">
+
+                <div class="aspect-[3/4] mb-6 overflow-hidden shadow-sm transition-transform duration-500 group-hover:-translate-y-2"
+                     style="background-color: var(--bg-subtle);">
+                    {% if libro.portada %}
+                        <img src="{{ libro.portada.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-6xl" style="color: var(--border);">menu_book</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-[10px] font-label tracking-widest uppercase px-2 py-0.5 rounded-full"
+                          style="color: var(--primary); background-color: rgba(163,196,106,0.2);">
+                        {{ libro.categoria.nombre }}
+                    </span>
+                    <span class="text-[10px] font-label italic" style="color: var(--text-faint);">
+                        Estado: {{ libro.get_estado_fisico_display }}
+                    </span>
+                </div>
+
+                <h3 class="text-xl font-headline mb-1" style="color: var(--text);">
+                    {{ libro.titulo }}
+                </h3>
+
+                <p class="text-sm font-body mb-4" style="color: var(--text-muted);">
+                    {{ libro.autor }}
+                </p>
+
+                <div class="mt-auto flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
+                    <span class="text-lg font-body font-bold" style="color: var(--primary);">
+                        ${{ libro.precio_venta }}
+                    </span>
+
+                    <form method="POST" action="{% url 'agregar_al_carrito' libro.id %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 shadow-sm text-white"
+                                style="background-color: var(--primary);">
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                            Añadir
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            {% empty %}
+                <div class="col-span-full text-center py-20">
+                    <p class="text-lg" style="color: var(--text-muted);">
+                        No hay libros disponibles en este momento.
+                    </p>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load catalogo_tags %}
+
+{% block extra_head %}
+<style>
+/* ── Galería / portada ─────────────────────────────── */
+.portada-wrap {
+    position: sticky;
+    top: 6rem;
+}
+.portada-img {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+}
+.portada-placeholder {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+}
+
+/* ── Badges ────────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ── Meta row ──────────────────────────────────────── */
+.meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem;
+}
+.meta-row:last-child { border-bottom: none; }
+.meta-key {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.meta-val {
+    color: var(--text);
+    text-align: right;
+    font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-6xl mx-auto">
+
+    <!-- ── Breadcrumb ──────────────────────────────────── -->
+    <nav class="flex items-center gap-2 text-xs font-body mb-10" style="color: var(--text-faint);">
+        <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 hover:opacity-80 transition-opacity" style="color: var(--text-muted);">
+            <span class="material-symbols-outlined text-sm">storefront</span>
+            Catálogo
+        </a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        {% if ejemplar.libro.categoria %}
+        <a href="{% url 'lista_libros' %}?genero={{ ejemplar.libro.categoria.id }}" class="hover:opacity-80 transition-opacity" style="color: var(--text-muted);">
+            {{ ejemplar.libro.categoria.nombre }}
+        </a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        {% endif %}
+        <span class="truncate max-w-xs" style="color: var(--text);">{{ ejemplar.libro.titulo }}</span>
+    </nav>
+
+    <!-- ── Layout Principal ───────────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16">
+
+        <!-- COLUMNA IZQUIERDA: Portada -->
+        <div class="portada-wrap flex flex-col items-center">
+            {% if ejemplar.libro.portada %}
+                <img src="{{ ejemplar.libro.portada.url }}"
+                     alt="{{ ejemplar.libro.titulo }}"
+                     class="portada-img w-full">
+            {% else %}
+                <div class="portada-placeholder w-full">
+                    <span class="material-symbols-outlined text-7xl" style="color: var(--border); font-variation-settings:'wght' 100;">menu_book</span>
+                    <span class="text-sm font-body" style="color: var(--text-faint);">Sin portada disponible</span>
+                </div>
+            {% endif %}
+
+            <!-- SKU chip debajo de la portada -->
+            <p class="mt-4 font-mono text-xs" style="color: var(--text-faint);">
+                SKU: {{ ejemplar.sku }}
+            </p>
+        </div>
+
+        <!-- COLUMNA DERECHA: Información + Acción -->
+        <div>
+
+            <!-- Categoría + Estado -->
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                {% if ejemplar.libro.categoria %}
+                <span class="badge" style="background-color: rgba(163,196,106,0.15); color: var(--primary);">
+                    {{ ejemplar.libro.categoria.nombre }}
+                </span>
+                {% endif %}
+                <span class="badge" style="background-color: rgba(62,82,25,0.08); color: var(--text-muted);">
+                    <span class="material-symbols-outlined text-xs">verified</span>
+                    {{ ejemplar.get_estado_fisico_display }}
+                </span>
+            </div>
+
+            <!-- Título y autor -->
+            <h1
+              data-blur-text
+              data-delay="120"
+              data-direction="bottom"
+              class="font-headline italic text-4xl md:text-5xl leading-tight mb-3"
+              style="color: var(--text);">
+                {{ ejemplar.libro.titulo }}
+            </h1>
+            <p class="reveal text-lg font-body mb-2" style="color: var(--text-muted);">
+                {{ ejemplar.libro.autor }}
+            </p>
+            {% if ejemplar.libro.edicion %}
+            <p class="text-sm font-body mb-6" style="color: var(--text-faint);">
+                {{ ejemplar.libro.edicion }}
+            </p>
+            {% endif %}
+
+            <!-- Precio y disponibilidad -->
+            <div class="reveal flex items-end gap-4 my-8 pb-8" style="border-bottom: 1px solid var(--border);">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color: var(--text-faint);">Precio de apartado</p>
+                    <span class="font-headline text-5xl font-bold" style="color: var(--primary);">
+                        ${{ ejemplar.precio_venta }}
+                    </span>
+                </div>
+
+                <div class="mb-1">
+                    {% if ejemplar.stock_disponible > 0 %}
+                    <span class="badge" style="background-color: rgba(163,196,106,0.15); color: var(--primary);">
+                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                        Disponible · {{ ejemplar.stock_disponible }} ud{% if ejemplar.stock_disponible != 1 %}s{% endif %}.
+                    </span>
+                    {% else %}
+                    <span class="badge" style="background-color: rgba(186,26,26,0.1); color:#ba1a1a;">
+                        <span class="material-symbols-outlined text-xs">block</span>
+                        Sin stock
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botón de acción principal -->
+            {% if ejemplar.stock_disponible > 0 %}
+            <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0 mb-3" id="form-agregar-{{ ejemplar.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'detalle_libro' ejemplar.id %}">
+
+                <!-- Selector de cantidad -->
+                <div class="flex items-center gap-3 mb-4">
+                    <label class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">Cantidad:</label>
+                    <div class="flex items-center rounded-lg overflow-hidden" style="border: 1px solid var(--border);">
+                        <button type="button"
+                                onclick="ajustarCantidad('cant-{{ ejemplar.id }}', -1)"
+                                class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
+                                style="background-color: var(--bg-subtle); color: var(--text);">−</button>
+                        <input type="number"
+                               name="cantidad"
+                               id="cant-{{ ejemplar.id }}"
+                               value="1"
+                               min="1"
+                               max="{{ ejemplar.stock_disponible }}"
+                               class="w-14 text-center font-bold text-base border-none outline-none"
+                               style="background-color: var(--surface); color: var(--text);">
+                        <button type="button"
+                                onclick="ajustarCantidad('cant-{{ ejemplar.id }}', 1, {{ ejemplar.stock_disponible }})"
+                                class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
+                                style="background-color: var(--bg-subtle); color: var(--text);">+</button>
+                    </div>
+                    <span class="text-xs" style="color: var(--text-faint);">
+                        Máx. {{ ejemplar.stock_disponible }}
+                    </span>
+                </div>
+
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold uppercase tracking-widest shadow-lg hover:opacity-90 hover:-translate-y-0.5 transition-all active:scale-95 btn-shine ripple-origin"
+                        style="background-color: var(--primary); color: white;">
+                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                    Añadir a mi bolsa
+                </button>
+            </form>
+            <script>
+            function ajustarCantidad(inputId, delta, max) {
+                const input = document.getElementById(inputId);
+                let val = parseInt(input.value) + delta;
+                val = Math.max(1, val);
+                if (max !== undefined) val = Math.min(max, val);
+                input.value = val;
+            }
+            </script>
+            {% else %}
+            <button disabled
+                    class="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold uppercase tracking-widest opacity-40 cursor-not-allowed"
+                    style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined">remove_shopping_cart</span>
+                Sin disponibilidad
+            </button>
+            {% endif %}
+
+            <a href="{% url 'lista_libros' %}"
+               class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all hover:opacity-80 mt-2"
+               style="border: 1px solid var(--border); color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Seguir explorando
+            </a>
+
+            <!-- Datos del libro -->
+            <div class="mt-10">
+                <p class="text-[10px] font-bold uppercase tracking-widest mb-4" style="color: var(--text-faint);">Ficha del ejemplar</p>
+                <div>
+                    {% if ejemplar.libro.isbn %}
+                    <div class="meta-row">
+                        <span class="meta-key">ISBN</span>
+                        <span class="meta-val font-mono text-sm">{{ ejemplar.libro.isbn }}</span>
+                    </div>
+                    {% endif %}
+                    {% if ejemplar.libro.categoria %}
+                    <div class="meta-row">
+                        <span class="meta-key">Género</span>
+                        <span class="meta-val">{{ ejemplar.libro.categoria.nombre }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="meta-row">
+                        <span class="meta-key">Estado físico</span>
+                        <span class="meta-val">{{ ejemplar.get_estado_fisico_display }}</span>
+                    </div>
+                    {% if ejemplar.descripcion_estado %}
+                    <div class="meta-row">
+                        <span class="meta-key">Notas</span>
+                        <span class="meta-val text-right max-w-56">{{ ejemplar.descripcion_estado }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="meta-row">
+                        <span class="meta-key">Unidades disponibles</span>
+                        <span class="meta-val">{{ ejemplar.stock_disponible }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sobre el apartado -->
+            <div class="mt-8 p-5 rounded-xl" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                <p class="text-xs font-bold uppercase tracking-widest mb-3" style="color: var(--text-muted);">¿Cómo funciona el apartado?</p>
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2 text-sm font-body" style="color: var(--text-muted);">
+                        <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style="color: var(--primary);">add_shopping_cart</span>
+                        Añade el libro a tu bolsa y confirma tu reserva.
+                    </li>
+                    <li class="flex items-start gap-2 text-sm font-body" style="color: var(--text-muted);">
+                        <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style="color: var(--primary);">schedule</span>
+                        Tienes <strong>72 horas</strong> para recogerlo en la librería.
+                    </li>
+                    <li class="flex items-start gap-2 text-sm font-body" style="color: var(--text-muted);">
+                        <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style="color: var(--primary);">storefront</span>
+                        El pago se realiza en tienda al momento de recoger.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Descripción ─────────────────────────────────── -->
+    {% if ejemplar.libro.descripcion %}
+    <section class="mt-16 pt-10" style="border-top: 1px solid var(--border);">
+        <h2 class="font-headline italic text-3xl mb-6" style="color: var(--text);">Sobre este libro</h2>
+        <div class="max-w-3xl">
+            <p class="font-body text-base leading-relaxed" style="color: var(--text-muted);">
+                {{ ejemplar.libro.descripcion }}
+            </p>
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+</main>
+{% endblock %}

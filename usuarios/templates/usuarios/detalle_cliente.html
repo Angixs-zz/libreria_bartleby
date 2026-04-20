@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+    <div class="max-w-7xl mx-auto">
+        <section class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 py-10 mb-8"
+                 style="border-bottom: 1px solid var(--border);">
+            <div class="min-w-0">
+                <p class="text-xs uppercase tracking-[0.3em] font-bold mb-2" style="color: var(--text-muted);">
+                    Staff Area · Cliente
+                </p>
+                <h1 class="font-headline italic text-5xl md:text-6xl leading-tight mb-3" style="color: var(--primary);">
+                    {{ cliente.get_full_name|default:cliente.username }}
+                </h1>
+                <p class="font-body max-w-3xl text-base" style="color: var(--text-muted);">
+                    Ficha integral del cliente con contacto, historial operativo y seguimiento interno.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'panel_clientes' %}"
+                   class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                   style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Volver al archivo
+                </a>
+                <a href="{% url 'gestor_reservas' %}"
+                   class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                   style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                    <span class="material-symbols-outlined text-sm">confirmation_number</span>
+                    Reservas
+                </a>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.5fr)_380px] gap-6 mb-8">
+            <article class="rounded-3xl overflow-hidden"
+                     style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 80px rgba(10, 14, 8, 0.04);">
+                <div class="p-6 sm:p-8" style="background: linear-gradient(140deg, rgba(62,82,25,0.08), transparent 58%);">
+                    <div class="flex flex-col lg:flex-row justify-between gap-6 mb-8">
+                        <div class="flex items-start gap-4 min-w-0">
+                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold uppercase flex-shrink-0"
+                                 style="background-color: var(--bg-subtle); color: var(--primary); border: 1px solid var(--border);">
+                                {{ cliente.username|first }}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <h2 class="font-headline italic text-3xl sm:text-4xl leading-none truncate" style="color: var(--text);">
+                                        {{ cliente.get_full_name|default:cliente.username }}
+                                    </h2>
+                                    {% if reservas_activas %}
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                              style="background-color: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.2);">
+                                            Reservando
+                                        </span>
+                                    {% elif compras %}
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                              style="background-color: rgba(62,82,25,0.12); color: var(--primary); border: 1px solid rgba(62,82,25,0.2);">
+                                            Comprador
+                                        </span>
+                                    {% else %}
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                              style="background-color: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border);">
+                                            Sin movimiento
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm font-medium mb-1" style="color: var(--text-muted);">@{{ cliente.username }}</p>
+                                <p class="text-sm break-all mb-1" style="color: var(--text-muted);">
+                                    {{ cliente.email|default:"Sin correo registrado" }}
+                                </p>
+                                <p class="text-sm" style="color: var(--text-faint);">
+                                    Alta {{ cliente.date_joined|date:"d M Y" }}
+                                    {% if ultima_actividad %}
+                                        · Última actividad {{ ultima_actividad|date:"d M Y · H:i" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 min-w-full lg:min-w-[330px]">
+                            <div class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Reservas</p>
+                                <p class="font-headline text-3xl" style="color: var(--text);">{{ reservas|length }}</p>
+                                <p class="text-xs" style="color: var(--text-faint);">{{ reservas_activas|length }} activas</p>
+                            </div>
+                            <div class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Compras</p>
+                                <p class="font-headline text-3xl" style="color: var(--text);">{{ compras|length }}</p>
+                                <p class="text-xs" style="color: var(--text-faint);">${{ ticket_promedio }} promedio</p>
+                            </div>
+                            <div class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Valor comprado</p>
+                                <p class="font-headline text-3xl" style="color: var(--text);">${{ gasto_total }}</p>
+                                <p class="text-xs" style="color: var(--text-faint);">histórico</p>
+                            </div>
+                            <div class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Valor reservado</p>
+                                <p class="font-headline text-3xl" style="color: var(--text);">${{ valor_reservado }}</p>
+                                <p class="text-xs" style="color: var(--text-faint);">pendiente</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="rounded-2xl p-5" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">Contacto</p>
+                            <div class="space-y-3 text-sm">
+                                <div>
+                                    <p class="font-semibold mb-1" style="color: var(--text);">Teléfono</p>
+                                    <p style="color: var(--text-muted);">{{ perfil_cliente.telefono|default:"Sin teléfono registrado" }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-semibold mb-1" style="color: var(--text);">Correo</p>
+                                    <p class="break-all" style="color: var(--text-muted);">{{ cliente.email|default:"Sin correo registrado" }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-semibold mb-1" style="color: var(--text);">Dirección</p>
+                                    <p class="leading-relaxed" style="color: var(--text-muted);">{{ perfil_cliente.direccion|default:"Sin dirección registrada" }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl p-5" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">Lectura operativa</p>
+                            <div class="space-y-3 text-sm">
+                                {% if reservas_activas %}
+                                    <p style="color: var(--text);">
+                                        Tiene {{ reservas_activas|length }} apartado{{ reservas_activas|pluralize }} activo{{ reservas_activas|pluralize:"s" }}. Conviene revisar vencimientos y seguimiento.
+                                    </p>
+                                {% else %}
+                                    <p style="color: var(--text);">
+                                        No tiene apartados activos en este momento.
+                                    </p>
+                                {% endif %}
+                                {% if compras %}
+                                    <p style="color: var(--text);">
+                                        Ya registra {{ compras|length }} compra{{ compras|pluralize }} con un gasto acumulado de ${{ gasto_total }}.
+                                    </p>
+                                {% else %}
+                                    <p style="color: var(--text);">
+                                        Aún no hay compras asociadas a este cliente.
+                                    </p>
+                                {% endif %}
+                                <p style="color: var(--text-muted);">
+                                    Notas internas registradas: {{ notas|length }}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <aside class="space-y-6">
+                <section class="rounded-3xl p-6"
+                         style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 80px rgba(10, 14, 8, 0.04);">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Seguimiento interno</p>
+                            <h2 class="font-headline italic text-3xl" style="color: var(--text);">Notas</h2>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: var(--primary);">note_stack</span>
+                    </div>
+
+                    <form method="post" class="mb-5 space-y-3">
+                        {% csrf_token %}
+                        <label class="text-[10px] uppercase tracking-[0.25em] font-bold block" style="color: var(--text-muted);">
+                            Nueva nota
+                        </label>
+                        {{ nota_form.contenido }}
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                                style="background-color: var(--primary); color: white;">
+                            <span class="material-symbols-outlined text-sm">save</span>
+                            Guardar nota
+                        </button>
+                    </form>
+
+                    <div class="space-y-3">
+                        {% for nota in notas|slice:":5" %}
+                            <article class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <div class="flex items-start justify-between gap-3 mb-2">
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color: var(--text);">
+                                            {{ nota.autor.get_full_name|default:nota.autor.username|default:"Sistema" }}
+                                        </p>
+                                        <p class="text-xs" style="color: var(--text-faint);">{{ nota.creado_en|date:"d M Y · H:i" }}</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-base" style="color: var(--primary);">bookmark</span>
+                                </div>
+                                <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-muted);">{{ nota.contenido }}</p>
+                            </article>
+                        {% empty %}
+                            <p class="text-sm" style="color: var(--text-faint);">Todavía no hay notas internas para este cliente.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </aside>
+        </section>
+
+        <section class="grid grid-cols-1 2xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-6">
+            <article class="rounded-3xl p-6 sm:p-7"
+                     style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 80px rgba(10, 14, 8, 0.04);">
+                <div class="flex items-center justify-between gap-3 mb-6">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Timeline</p>
+                        <h2 class="font-headline italic text-4xl" style="color: var(--text);">Actividad completa</h2>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: var(--primary);">timeline</span>
+                </div>
+
+                <div class="space-y-4">
+                    {% for evento in timeline %}
+                        <article class="rounded-2xl p-5" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3 mb-3">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        {% if evento.tipo == 'reserva' %}
+                                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                                  style="background-color: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.2);">
+                                                Reserva
+                                            </span>
+                                        {% elif evento.tipo == 'compra' %}
+                                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                                  style="background-color: rgba(37,99,235,0.12); color: #2563eb; border: 1px solid rgba(37,99,235,0.2);">
+                                                Compra
+                                            </span>
+                                        {% else %}
+                                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.25em]"
+                                                  style="background-color: rgba(62,82,25,0.12); color: var(--primary); border: 1px solid rgba(62,82,25,0.2);">
+                                                Nota
+                                            </span>
+                                        {% endif %}
+                                        <p class="text-xs" style="color: var(--text-faint);">{{ evento.fecha|date:"d M Y · H:i" }}</p>
+                                    </div>
+                                    <h3 class="font-headline italic text-2xl mb-1" style="color: var(--text);">{{ evento.titulo }}</h3>
+                                    <p class="text-sm font-semibold mb-2" style="color: var(--text-muted);">{{ evento.subtitulo }}</p>
+                                </div>
+
+                                {% if evento.monto %}
+                                    <p class="text-lg font-semibold whitespace-nowrap" style="color: var(--text);">${{ evento.monto }}</p>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm leading-relaxed mb-2" style="color: var(--text);">{{ evento.descripcion }}</p>
+                            <p class="text-xs uppercase tracking-[0.2em]" style="color: var(--text-faint);">{{ evento.meta }}</p>
+                        </article>
+                    {% empty %}
+                        <p class="text-sm" style="color: var(--text-faint);">No hay actividad para mostrar.</p>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <div class="space-y-6">
+                <article class="rounded-3xl p-6 sm:p-7"
+                         style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 80px rgba(10, 14, 8, 0.04);">
+                    <div class="flex items-center justify-between gap-3 mb-5">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Apartados</p>
+                            <h2 class="font-headline italic text-3xl" style="color: var(--text);">Reservas activas</h2>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #d97706;">bookmark_manager</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        {% for reserva in reservas_activas %}
+                            <article class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <div class="flex items-center justify-between gap-3 mb-2">
+                                    <a href="{% url 'detalle_ticket' reserva.id %}" class="text-sm font-bold hover:underline" style="color: var(--primary);">
+                                        {{ reserva.codigo_ticket }}
+                                    </a>
+                                    <span class="text-xs font-semibold" style="color: #d97706;">${{ reserva.total }}</span>
+                                </div>
+                                <p class="text-xs mb-2" style="color: var(--text-faint);">Vence {{ reserva.fecha_vencimiento|date:"d M Y · H:i" }}</p>
+                                <p class="text-sm leading-relaxed" style="color: var(--text);">
+                                    {% for libro in reserva.libros.all %}
+                                        {{ libro.titulo }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </article>
+                        {% empty %}
+                            <p class="text-sm" style="color: var(--text-faint);">No hay apartados activos.</p>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <article class="rounded-3xl p-6 sm:p-7"
+                         style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 80px rgba(10, 14, 8, 0.04);">
+                    <div class="flex items-center justify-between gap-3 mb-5">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Ventas</p>
+                            <h2 class="font-headline italic text-3xl" style="color: var(--text);">Historial de compras</h2>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #2563eb;">shopping_bag</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        {% for venta in compras|slice:":6" %}
+                            <article class="rounded-2xl p-4" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+                                <div class="flex items-center justify-between gap-3 mb-2">
+                                    <p class="text-sm font-bold" style="color: var(--text);">Ticket #{{ venta.id }}</p>
+                                    <span class="text-sm font-semibold" style="color: #2563eb;">${{ venta.total }}</span>
+                                </div>
+                                <p class="text-xs mb-2" style="color: var(--text-faint);">
+                                    {{ venta.fecha_venta|date:"d M Y · H:i" }}
+                                    {% if venta.cajero %}· {{ venta.cajero.username }}{% endif %}
+                                </p>
+                                <p class="text-sm leading-relaxed" style="color: var(--text);">
+                                    {% for detalle in venta.detalles.all %}
+                                        {{ detalle.ejemplar.libro.titulo }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </article>
+                        {% empty %}
+                            <p class="text-sm" style="color: var(--text-faint);">No hay compras registradas.</p>
+                        {% endfor %}
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
