@@ -311,33 +311,47 @@ class InventarioService:
             metodo_pago=metodo_pago
         )
         
+        from decimal import ROUND_HALF_UP
         # Crear detalles y descontar stock
         for ejemplar in ejemplares:
+            # Replicar lógica de cálculo de cantidad de la vista antigua
+            if ejemplar.precio_venta and ejemplar.precio_venta > 0:
+                if ejemplares.count() == 1:
+                    cantidad = int(
+                        (reserva.total / ejemplar.precio_venta)
+                        .quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+                    )
+                else:
+                    cantidad = 1
+                cantidad = max(1, min(cantidad, ejemplar.stock))
+            else:
+                cantidad = 1
+
             # Verificar que aún hay stock
-            if ejemplar.stock < 1:
+            if ejemplar.stock < cantidad:
                 raise ValueError(
-                    f"'{ejemplar.libro.titulo}' ahora está agotado"
+                    f"'{ejemplar.libro.titulo}' no tiene stock suficiente (requerido: {cantidad})"
                 )
             
             DetalleVenta.objects.create(
                 venta=venta,
                 ejemplar=ejemplar,
-                cantidad=1,
+                cantidad=cantidad,
                 precio_unitario=ejemplar.precio_venta
             )
             
             # Descontar stock
-            ejemplar.stock = F('stock') - 1
+            ejemplar.stock = F('stock') - cantidad
             ejemplar.save(update_fields=['stock'])
             
-            total_venta += ejemplar.precio_venta
+            total_venta += (ejemplar.precio_venta * cantidad)
         
         # Actualizar total de venta
         venta.total = total_venta
         venta.save()
         
-        # Marcar reserva como confirmada
-        reserva.estado = 'confirmada'
+        # Marcar reserva como completada
+        reserva.estado = 'completada'
         reserva.save()
         
         return venta
