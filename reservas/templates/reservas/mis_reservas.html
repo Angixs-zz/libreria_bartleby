@@ -82,15 +82,16 @@
 
     {% else %}
         <section class="flex flex-col items-center justify-center py-20 text-center">
-            <div class="relative mb-10">
-                <div class="w-24 h-32 rounded-lg flex items-center justify-center relative"
+            <div class="relative mb-10 group">
+                <div class="w-24 h-32 rounded-lg flex items-center justify-center relative shadow-inner overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-md"
                      style="border: 2px solid var(--border); background-color: var(--bg-subtle);">
-                    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-10 h-1 rounded" style="background-color: var(--border);"></div>
-                    <span class="material-symbols-outlined text-5xl" style="color: var(--primary); opacity: 0.3;">book_5</span>
+                    <div class="absolute inset-0 bg-gradient-to-br from-transparent to-[#3e5219]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-10 h-1 rounded transition-colors duration-500 group-hover:bg-[#3e5219]/30" style="background-color: var(--border);"></div>
+                    <span class="material-symbols-outlined text-5xl transition-transform duration-700 group-hover:scale-110" style="color: var(--primary); opacity: 0.3;">book_5</span>
                 </div>
-                <div class="absolute -bottom-4 -right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-sm"
+                <div class="absolute -bottom-4 -right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transform transition-all duration-500 group-hover:rotate-12 group-hover:scale-110"
                      style="background-color: var(--surface); border: 1px solid var(--border);">
-                    <span class="material-symbols-outlined" style="color: var(--primary); opacity: 0.4;">search_off</span>
+                    <span class="material-symbols-outlined transition-colors duration-500" style="color: var(--primary); opacity: 0.6;">search_off</span>
                 </div>
             </div>
 
