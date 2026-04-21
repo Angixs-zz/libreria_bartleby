@@ -51,6 +51,7 @@ def lista_libros(request):
     """
     query = request.GET.get('q', '').strip()
     categoria_id = request.GET.get('genero', '')
+    precio_min = request.GET.get('precio_min', '')
     precio_max = request.GET.get('precio_max', '')
     page = request.GET.get('page', 1)
 
@@ -73,7 +74,13 @@ def lista_libros(request):
     if categoria_id and categoria_id.isdigit():
         ejemplares = ejemplares.filter(libro__categoria_id=categoria_id)
 
-    # Filtro de precio
+    # Filtros de precio
+    if precio_min:
+        try:
+            ejemplares = ejemplares.filter(precio_venta__gte=float(precio_min))
+        except (ValueError, TypeError):
+            pass
+
     if precio_max:
         try:
             ejemplares = ejemplares.filter(precio_venta__lte=float(precio_max))
@@ -113,6 +120,7 @@ def lista_libros(request):
         'categorias': categorias,
         'query': query,
         'genero_seleccionado': int(categoria_id) if categoria_id.isdigit() else '',
+        'precio_min_seleccionado': precio_min,
         'precio_max_seleccionado': precio_max,
         'paginator': paginator,
         'ejemplares_reservados': ejemplares_reservados,

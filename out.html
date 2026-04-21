@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Catálogo Público | Librería Bartleby</title>
+
+<script>
+    // Aplicar el tema ANTES de que el navegador pinte la página (evita el flash)
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+
+    function toggleDarkMode() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.theme = isDark ? 'dark' : 'light';
+        // Actualizar el ícono del botón
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#3e5219",
+        background: "#faf9f5",
+        "on-surface": "#1b1c1a"
+      },
+      fontFamily: {
+        headline: ["Newsreader", "serif"],
+        body: ["Manrope", "sans-serif"]
+      }
+    }
+  }
+}
+</script>
+
+<style>
+/* ── Colores base ────────────────────────────────────── */
+:root {
+  --bg:          #faf9f5;
+  --bg-subtle:   #f4f4f0;
+  --surface:     #ffffff;
+  --border:      rgba(197, 200, 184, 0.4);
+  --text:        #1b1c1a;
+  --text-muted:  #75796b;
+  --text-faint:  #9ca3af;
+  --primary:     #3e5219;
+}
+
+html.dark {
+  --bg:          #141510;
+  --bg-subtle:   #1e1e18;
+  --surface:     #27271f;
+  --border:      rgba(80, 85, 60, 0.5);
+  --text:        #e8e8e0;
+  --text-muted:  #a5a99b;
+  --text-faint:  #6b7060;
+  --primary:     #a3c46a;
+}
+
+/* ── Transición suave global ──────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3 {
+  font-family: 'Newsreader', serif;
+}
+
+/* ── Inputs ───────────────────────────────────────────── */
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+}
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom-color: var(--primary);
+}
+input::placeholder { color: var(--text-faint); }
+
+/* ── Labels ───────────────────────────────────────────── */
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+    margin-bottom: 0.25rem;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ── Helptext ─────────────────────────────────────────── */
+.helptext {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-faint);
+    margin-top: 0.25rem;
+    font-style: italic;
+    line-height: 1.2;
+}
+
+/* ── Password hints ───────────────────────────────────── */
+form ul:not(.errorlist) {
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    list-style-type: disc;
+    opacity: 0.8;
+}
+form ul:not(.errorlist) li {
+    font-size: 0.65rem !important;
+    color: var(--text-faint) !important;
+    margin-bottom: 0.15rem;
+    line-height: 1.2;
+    font-style: italic;
+}
+
+/* ── Error list ───────────────────────────────────────── */
+ul.errorlist {
+    color: #ba1a1a;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    padding-left: 0;
+    list-style-type: none;
+    font-weight: bold;
+}
+
+/* ── Dark mode toggle button ──────────────────────────── */
+#dark-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s;
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+#dark-toggle:hover {
+    background: rgba(255,255,255,0.22);
+    transform: rotate(15deg) scale(1.08);
+}
+#dark-toggle .material-symbols-outlined {
+    font-size: 1.2rem;
+    color: white;
+    user-select: none;
+}
+
+.nav-link-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-link-soft:hover {
+    color: white;
+}
+
+.nav-chip-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown summary {
+    list-style: none;
+}
+
+.nav-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1rem;
+    border-radius: 14px;
+    background: rgba(210, 236, 162, 0.16);
+    border: 1px solid rgba(210, 236, 162, 0.22);
+    color: #f3f8df;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.nav-dropdown[open] .nav-dropdown-trigger,
+.nav-dropdown-trigger:hover {
+    background: rgba(210, 236, 162, 0.22);
+}
+
+.nav-dropdown-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.8rem);
+    min-width: 260px;
+    padding: 0.75rem;
+    border-radius: 20px;
+    background: rgba(32, 42, 11, 0.98);
+    border: 1px solid rgba(210, 236, 162, 0.18);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+}
+
+.nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.9rem 0.95rem;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-item:hover {
+    background: rgba(210, 236, 162, 0.12);
+    color: white;
+}
+
+.nav-dropdown-item strong {
+    display: block;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+}
+
+.nav-dropdown-item span:last-child {
+    display: block;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.62);
+    margin-top: 0.1rem;
+}
+
+/* ── BlurText animation ───────────────────────────────── */
+.blur-text-word {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+  white-space: pre;
+}
+
+/* ── Scroll-reveal base ───────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s cubic-bezier(.22,.68,0,1.2),
+              transform 0.65s cubic-bezier(.22,.68,0,1.2);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-left.visible { opacity: 1; transform: none; }
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* ── Stagger children ─────────────────────────────────── */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.22,.68,0,1.1);
+}
+.stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0ms; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:80ms; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:160ms; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:240ms; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:320ms; }
+.stagger.visible > *:nth-child(n+6) { opacity:1; transform:none; transition-delay:400ms; }
+
+/* ── Page enter transition ────────────────────────────── */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.page-enter {
+  animation: pageEnter 0.45s cubic-bezier(.22,.68,0,1.1) both;
+}
+
+/* ── Button shimmer on hover ──────────────────────────── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+}
+.btn-shine:hover::after { transform: translateX(100%); }
+
+/* ── Magnetic card lift ───────────────────────────────── */
+.card-lift {
+  transition: transform 0.3s cubic-bezier(.22,.68,0,1.2),
+              box-shadow 0.3s ease;
+}
+.card-lift:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+/* ── Nav link underline animate ──────────────────────── */
+.nav-animate {
+  position: relative;
+}
+.nav-animate::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: white;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+.nav-animate:hover::after { width: 100%; }
+
+/* ── Ripple button ────────────────────────────────────── */
+@keyframes ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+.ripple-origin {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  width: 60px; height: 60px;
+  margin-top: -30px; margin-left: -30px;
+  animation: ripple-anim 0.6s linear;
+  pointer-events: none;
+}
+
+/* ── Toast slide-in ───────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity:0; transform: translateY(-16px) scale(0.97); }
+  to   { opacity:1; transform: none; }
+}
+.toast-message {
+  animation: toastIn 0.35s cubic-bezier(.22,.68,0,1.2) both;
+}
+/* ── Header scroll shrink ─────────────────────────────── */
+#site-header {
+  transition: height 0.35s ease, background 0.35s ease,
+              box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+  height: 5.5rem;
+}
+#site-header.scrolled {
+  height: 4.25rem;
+  background: rgba(40, 58, 16, 0.96) !important;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.28);
+}
+
+/* ── Nav pill sliding indicator ───────────────────────── */
+#nav-pill {
+  position: absolute;
+  height: 100%;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.18);
+  pointer-events: none;
+  transition: left 0.35s cubic-bezier(.22,.68,0,1.15),
+              width 0.35s cubic-bezier(.22,.68,0,1.15);
+  top: 0;
+}
+.main-nav-link {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  transition: color 0.2s ease;
+}
+.main-nav-link:hover { color: white; }
+.main-nav-link.active { color: white; }
+
+/* ── Page exit animation ──────────────────────────────── */
+@keyframes pageExit {
+  to { opacity: 0; transform: translateY(-8px); filter: blur(2px); }
+}
+.page-exit {
+  animation: pageExit 0.28s ease forwards;
+  pointer-events: none;
+}
+
+/* ── Logo glow pulse ────────────────────────────────── */
+.logo-mark {
+  width: 2.1rem; height: 2.1rem;
+  border-radius: 8px;
+  background: rgba(210,236,162,0.18);
+  border: 1px solid rgba(210,236,162,0.32);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.25s, transform 0.25s;
+}
+.logo-mark:hover { background: rgba(210,236,162,0.28); transform: rotate(-6deg) scale(1.05); }
+
+/* ── User zone refinements ──────────────────────────── */
+.user-zone-divider {
+  width: 1px; height: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  margin: 0 0.5rem;
+}
+.header-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 2.2rem; height: 2.2rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, color 0.2s;
+}
+.header-icon-btn:hover {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  transform: scale(1.08);
+}
+</style>
+
+
+
+</head>
+
+<body class="min-h-screen flex flex-col" style="background-color: var(--bg); color: var(--text);">
+
+<!-- ═════════════ SITE HEADER ══════════════ -->
+<header id="site-header" class="fixed top-0 w-full z-50"
+        style="background: linear-gradient(135deg, #3e5219 0%, #2e3d12 100%);">
+
+  <!-- Bottom accent line -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:1px;
+               background:linear-gradient(90deg,transparent,rgba(210,236,162,0.4),transparent);"></div>
+
+  <nav class="flex items-center justify-between px-6 md:px-10 h-full max-w-screen-xl mx-auto w-full">
+
+    <!-- ── LEFT: Logo ────────────────────────────────────── -->
+    <a href="/catalogo/" class="flex items-center gap-3 flex-shrink-0 group" style="text-decoration:none;">
+      <div class="logo-mark">
+        <span class="material-symbols-outlined text-[#d2eca2]" style="font-size:1.15rem;font-variation-settings:'wght' 300;">local_library</span>
+      </div>
+      <div class="leading-none">
+        <span class="block font-headline italic text-white text-xl tracking-tight">Librería Bartleby</span>
+        <span class="block text-[0.6rem] font-label uppercase tracking-[0.2em]" style="color:rgba(210,236,162,0.6);">Oaxaca &middot; desde 2024</span>
+      </div>
+    </a>
+
+    <!-- ── CENTER: Main Nav ──────────────────────────────── -->
+    <div class="hidden md:flex items-center" id="main-nav-wrap"
+         style="position:relative; background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.25rem;">
+      <div id="nav-pill"></div>
+
+      <a href="/catalogo/conocenos/"
+         class="main-nav-link nav-page-link "
+         data-nav="conocenos">
+        <span class="material-symbols-outlined" style="font-size:0.95rem;">info</span>
+        Conocenos
+      </a>
+
+      <a href="/catalogo/"
+         class="main-nav-link nav-page-link active"
+         data-nav="lista_libros">
+        <span class="material-symbols-outlined" style="font-size:0.95rem;">storefront</span>
+        Catálogo
+      </a>
+    </div>
+
+    <!-- ── RIGHT: Actions ───────────────────────────────── -->
+    <div class="flex items-center gap-2">
+
+      <!-- Dark mode -->
+      <button id="dark-toggle" class="header-icon-btn" onclick="toggleDarkMode()" title="Cambiar tema" aria-label="Cambiar modo">
+          <span id="theme-icon" class="material-symbols-outlined" style="font-size:1.1rem;">
+              dark_mode
+          </span>
+      </button>
+
+      
+        <!-- Carrito + Reservas -->
+        <div class="flex items-center gap-1 rounded-xl p-1" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);">
+          
+
+          <a href="/catalogo/carrito/"
+             class="relative flex items-center gap-1.5 font-black uppercase tracking-widest hover:scale-105 transition-all"
+             style="background:#d2eca2;color:#2e3d12;padding:0.45rem 1rem;border-radius:8px;font-size:0.7rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">shopping_bag</span>
+            <span>Bolsa</span>
+            
+            
+            
+          </a>
+        </div>
+      
+
+      
+        <a href="/usuarios/login/"
+           class="btn-shine font-bold text-[#2e3d12] rounded-lg transition-all hover:scale-105 shadow-md"
+           style="background:#d2eca2;padding:0.5rem 1.3rem;font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;">
+          Ingresar
+        </a>
+      
+
+    </div>
+  </nav>
+</header>
+<!-- /SITE HEADER -->
+
+<main class="flex-grow relative" style="padding-top: 5.5rem;">
+    
+    
+    
+<main class="pt-20">
+
+    <!-- Hero -->
+    <section class="relative overflow-hidden py-20 lg:py-32" style="background-color: var(--bg);">
+        <div class="max-w-7xl mx-auto px-8 relative z-10">
+            <div class="max-w-2xl">
+                <h1
+                  data-blur-text
+                  data-delay="140"
+                  data-direction="top"
+                  class="text-5xl lg:text-7xl font-headline italic tracking-tight leading-tight mb-6"
+                  style="color: var(--primary);">
+                    Descubre tu próxima gran lectura
+                </h1>
+                <p class="reveal text-xl lg:text-2xl font-body leading-relaxed opacity-90" style="color: var(--text-muted);">
+                    Dale una segunda vida a los libros en el corazón de Oaxaca. Curación literaria para almas inquietas.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Buscador Inteligente -->
+    <section class="py-6" style="background-color: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="max-w-7xl mx-auto px-8">
+            <form method="GET" action="/catalogo/" class="flex flex-col md:flex-row gap-4 items-end">
+                
+                <!-- Búsqueda por texto -->
+                <div class="flex-grow w-full md:w-auto">
+                    <label for="q" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Buscar libro, autor o ISBN</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute text-gray-400" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-faint);">search</span>
+                        <input type="text" name="q" id="q" value="" placeholder="Ej. Borges, Aleph..." 
+                               class="w-full pr-4 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow"
+                               style="padding-left: 2.5rem; background-color: var(--surface); border: 1px solid var(--border); color: var(--text);">
+                    </div>
+                </div>
+
+                <!-- Filtro por Género (Categoría) -->
+                <div class="w-full md:w-48">
+                    <label for="genero" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Género</label>
+                    <select name="genero" id="genero" class="w-full px-4 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow cursor-pointer" style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text);">
+                        <option value="">Todos los géneros</option>
+                        
+                            <option value="1" >Juvenil</option>
+                        
+                    </select>
+                </div>
+
+                <!-- Filtros por Precio -->
+                <div class="w-full md:w-auto flex gap-2">
+                    <div class="w-1/2 md:w-32">
+                        <label for="precio_min" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Precio Min</label>
+                        <input type="number" name="precio_min" id="precio_min" min="0" step="1"
+                               value="" placeholder="0"
+                               class="w-full px-3 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow"
+                               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                    </div>
+                    <div class="w-1/2 md:w-32">
+                        <label for="precio_max" class="block text-sm font-label mb-2" style="color: var(--text-muted);">Precio Max</label>
+                        <input type="number" name="precio_max" id="precio_max" min="0" step="1"
+                               value="" placeholder="1000"
+                               class="w-full px-3 py-2 rounded-lg font-body focus:outline-none focus:ring-2 transition-shadow"
+                               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="w-full md:w-auto flex gap-2">
+                    <button type="submit" class="px-6 py-2 rounded-lg font-label font-bold transition-all hover:opacity-90 flex-grow" style="background-color: var(--primary); color: white;">
+                        Buscar
+                    </button>
+                    
+                </div>
+                
+            </form>
+        </div>
+    </section>
+
+    <!-- Grid de libros -->
+    <section class="py-16" style="background-color: var(--bg);">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+
+                
+                
+                <div class="group flex flex-col cursor-pointer reveal" id="item-4"
+                     style="transition-delay: 000ms;"
+                     onclick="window.location='/catalogo/libro/4/'">
+
+                    <!-- Portada — el efecto de elevación va SOLO aquí -->
+                    <div class="aspect-[3/4] mb-6 overflow-hidden relative"
+                         style="background-color: var(--bg-subtle);
+                                border: 1px solid var(--border);
+                                border-radius: 4px;
+                                transition: transform 0.45s cubic-bezier(.22,.68,0,1.15),
+                                            box-shadow 0.45s ease;
+                                will-change: transform, box-shadow;"
+                         onmouseenter="this.style.transform='translateY(-14px) scale(1.025)';
+                                       this.style.boxShadow='0 28px 60px rgba(0,0,0,0.22), 0 4px 14px rgba(0,0,0,0.12)';"
+                         onmouseleave="this.style.transform='';
+                                       this.style.boxShadow='';">
+                        
+                            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 "
+                                 src="/media/portadas/los-juegos-del-hambre-1-los-juegos-del-hambre_3DmC6Qp.jpg" alt="Los juegos del hambre">
+                        
+
+                        
+                        <!-- Hover: ver detalle -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(to top, rgba(27,28,26,0.6) 0%, transparent 60%);">
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1"
+                                  style="background-color: rgba(255,255,255,0.18); backdrop-filter: blur(6px); color: white; border: 1px solid rgba(255,255,255,0.25);">
+                                <span class="material-symbols-outlined text-xs">open_in_new</span>
+                                Ver detalles
+                            </span>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Info del libro -->
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-label tracking-widest uppercase px-2 py-0.5 rounded-full"
+                              style="color: var(--primary); background-color: rgba(163,196,106,0.2);">
+                            Juvenil
+                        </span>
+                        <span class="text-[10px] font-label italic" style="color: var(--text-faint);">
+                            Como nuevo
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-headline mb-1 line-clamp-2" style="color: var(--text);">Los juegos del hambre</h3>
+                    <p class="text-sm font-body mb-4" style="color: var(--text-muted);">Suzanne Collins</p>
+
+                    <!-- Precio + Acción -->
+                    <div class="mt-auto flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
+                        <span class="text-lg font-body font-bold" style="color: var(--primary);">$50.00</span>
+
+                        
+                        <form method="POST" action="/catalogo/agregar/4/" class="m-0"
+                              onclick="event.stopPropagation()">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="8NfCmkpjeAs7issGoibr6wmKnlyWdo6N07ezTKBFXJGN3dimnmAOZzGr4llnIKb9">
+                            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 text-white btn-shine ripple-origin"
+                                    style="background-color: var(--primary);">
+                                <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                                Añadir
+                            </button>
+                        </form>
+                        
+                    </div>
+
+                </div>
+                
+
+
+                
+                
+                <div class="group flex flex-col cursor-pointer reveal" id="item-3"
+                     style="transition-delay: 100ms;"
+                     onclick="window.location='/catalogo/libro/3/'">
+
+                    <!-- Portada — el efecto de elevación va SOLO aquí -->
+                    <div class="aspect-[3/4] mb-6 overflow-hidden relative"
+                         style="background-color: var(--bg-subtle);
+                                border: 1px solid var(--border);
+                                border-radius: 4px;
+                                transition: transform 0.45s cubic-bezier(.22,.68,0,1.15),
+                                            box-shadow 0.45s ease;
+                                will-change: transform, box-shadow;"
+                         onmouseenter="this.style.transform='translateY(-14px) scale(1.025)';
+                                       this.style.boxShadow='0 28px 60px rgba(0,0,0,0.22), 0 4px 14px rgba(0,0,0,0.12)';"
+                         onmouseleave="this.style.transform='';
+                                       this.style.boxShadow='';">
+                        
+                            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 "
+                                 src="/media/portadas/los-juegos-del-hambre-1-los-juegos-del-hambre_3DmC6Qp.jpg" alt="Los juegos del hambre">
+                        
+
+                        
+                        <!-- Hover: ver detalle -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(to top, rgba(27,28,26,0.6) 0%, transparent 60%);">
+                            <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-1"
+                                  style="background-color: rgba(255,255,255,0.18); backdrop-filter: blur(6px); color: white; border: 1px solid rgba(255,255,255,0.25);">
+                                <span class="material-symbols-outlined text-xs">open_in_new</span>
+                                Ver detalles
+                            </span>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Info del libro -->
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-label tracking-widest uppercase px-2 py-0.5 rounded-full"
+                              style="color: var(--primary); background-color: rgba(163,196,106,0.2);">
+                            Juvenil
+                        </span>
+                        <span class="text-[10px] font-label italic" style="color: var(--text-faint);">
+                            Aceptable
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-headline mb-1 line-clamp-2" style="color: var(--text);">Los juegos del hambre</h3>
+                    <p class="text-sm font-body mb-4" style="color: var(--text-muted);">Suzanne Collins</p>
+
+                    <!-- Precio + Acción -->
+                    <div class="mt-auto flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
+                        <span class="text-lg font-body font-bold" style="color: var(--primary);">$20.00</span>
+
+                        
+                        <form method="POST" action="/catalogo/agregar/3/" class="m-0"
+                              onclick="event.stopPropagation()">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="8NfCmkpjeAs7issGoibr6wmKnlyWdo6N07ezTKBFXJGN3dimnmAOZzGr4llnIKb9">
+                            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 text-white btn-shine ripple-origin"
+                                    style="background-color: var(--primary);">
+                                <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                                Añadir
+                            </button>
+                        </form>
+                        
+                    </div>
+
+                </div>
+                
+
+
+                
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Newsletter -->
+    <section class="bg-[#3e5219] dark:bg-[#1f2d0a] text-[#d0eba1] py-20">
+        <div class="max-w-7xl mx-auto px-8 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div class="max-w-xl">
+                <h2 class="text-4xl font-headline italic mb-4 text-white">Únete a nuestra bitácora</h2>
+                <p class="font-body opacity-90 leading-relaxed text-white">Recibe recomendaciones mensuales seleccionadas por nuestros curadores y anuncios de nuevos libros.</p>
+            </div>
+            <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
+                <input class="bg-white/10 border-b border-[#d0eba1]/30 text-white placeholder:text-[#d0eba1]/70 px-4 py-3 min-w-[300px] focus:outline-none focus:border-[#d0eba1] transition-all" placeholder="Tu correo electrónico" type="email"/>
+                <button class="bg-[#d0eba1] text-[#3e5219] font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-all">
+                    Suscribirse
+                </button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+// Countdown timers para libros reservados
+function actualizarCountdowns() {
+    document.querySelectorAll('.countdown-timer').forEach(el => {
+        const expiry = new Date(el.dataset.expiry);
+        const ahora = new Date();
+        const diff = expiry - ahora;
+
+        if (diff <= 0) {
+            el.textContent = 'Disponible pronto';
+            return;
+        }
+
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    });
+}
+
+if (document.querySelectorAll('.countdown-timer').length > 0) {
+    actualizarCountdowns();
+    setInterval(actualizarCountdowns, 1000);
+}
+</script>
+
+</main>
+
+<footer class="w-full" style="background-color: var(--bg-subtle); border-top: 1px solid var(--border);">
+  <div class="flex flex-col md:flex-row justify-between items-center gap-6 px-8 py-10 max-w-7xl mx-auto">
+
+    <div class="text-lg font-serif italic" style="color: var(--primary);">
+      Libreria Bartleby
+    </div>
+
+    <div class="flex flex-wrap items-center justify-center gap-6 text-sm" style="color: var(--text-muted);">
+      <a href="/aviso-privacidad/" class="hover:opacity-70 transition-opacity" style="color: var(--primary);">
+        Aviso de Privacidad
+      </a>
+      <a href="/terminos-condiciones/" class="hover:opacity-70 transition-opacity" style="color: var(--primary);">
+        Terminos y Condiciones
+      </a>
+      <span class="hidden md:inline-block" style="color: var(--border);">|</span>
+      <span>Proteccion de datos y uso responsable del sistema</span>
+    </div>
+
+    <p class="text-sm text-center md:text-right" style="color: var(--text-muted);">
+      2026 Libreria Bartleby. Todos los derechos reservados.
+    </p>
+
+  </div>
+</footer>
+
+<script>
+    // Sincronizar ícono al cargar la página
+    (function() {
+        const icon = document.getElementById('theme-icon');
+        if (!icon) return;
+        icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+    })();
+</script>
+
+
+
+<script>
+(function() {
+  /* ── BlurText ────────────────────────────────────── */
+  function blurText(el) {
+    const text      = el.textContent.trim();
+    const by        = el.dataset.blurBy || 'words';
+    const delay     = parseInt(el.dataset.delay || 150);
+    const direction = el.dataset.direction || 'top';
+    const step      = parseFloat(el.dataset.stepDuration || 0.35);
+    const segments  = by === 'words' ? text.split(' ') : text.split('');
+    el.textContent = '';
+    el.style.display = 'flex'; el.style.flexWrap = 'wrap'; el.style.alignItems = 'baseline';
+    segments.forEach((seg, i) => {
+      const span = document.createElement('span');
+      span.className = 'blur-text-word';
+      span.textContent = seg;
+      if (by === 'words' && i < segments.length - 1) span.textContent += ' ';
+      span.style.filter = 'blur(10px)'; span.style.opacity = '0';
+      span.style.transform = direction === 'top' ? 'translateY(-40px)' : 'translateY(40px)';
+      el.appendChild(span);
+    });
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        obs.unobserve(el);
+        el.querySelectorAll('.blur-text-word').forEach((span, i) => {
+          setTimeout(() => {
+            span.style.transition = `opacity ${step}s ease, filter ${step}s ease, transform ${step}s cubic-bezier(.22,.68,0,1.1)`;
+            span.style.filter = 'blur(0px)'; span.style.opacity = '1'; span.style.transform = 'translateY(0)';
+          }, i * delay);
+        });
+      });
+    }, { threshold: 0.15 });
+    obs.observe(el);
+  }
+
+  /* ── Scroll-reveal ───────────────────────────────── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal,.reveal-left,.reveal-scale,.stagger');
+    if (!els.length) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  /* ── Ripple ─────────────────────────────────────── */
+  function initRipple() {
+    document.querySelectorAll('.ripple-origin').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const r = document.createElement('span'); r.className = 'ripple-effect';
+        const rect = btn.getBoundingClientRect();
+        r.style.left = (e.clientX - rect.left) + 'px'; r.style.top = (e.clientY - rect.top) + 'px';
+        btn.appendChild(r); r.addEventListener('animationend', () => r.remove());
+      });
+    });
+  }
+
+  /* ── Page enter ─────────────────────────────────── */
+  function initPageEnter() {
+    const main = document.querySelector('main > *:first-child') || document.querySelector('main');
+    if (main) main.classList.add('page-enter');
+  }
+
+  /* ── Nav pill indicator ───────────────────────────── */
+  function initNavPill() {
+    const wrap = document.getElementById('main-nav-wrap');
+    const pill = document.getElementById('nav-pill');
+    if (!wrap || !pill) return;
+
+    function movePillTo(link) {
+      if (!link) { pill.style.width = '0'; pill.style.opacity = '0'; return; }
+      const wRect = wrap.getBoundingClientRect();
+      const lRect = link.getBoundingClientRect();
+      pill.style.opacity = '1';
+      pill.style.width   = lRect.width  + 'px';
+      pill.style.left    = (lRect.left - wRect.left) + 'px';
+    }
+
+    const active = wrap.querySelector('.main-nav-link.active');
+    // set initial position without transition
+    pill.style.transition = 'none';
+    movePillTo(active);
+    requestAnimationFrame(() => {
+      pill.style.transition = 'left 0.35s cubic-bezier(.22,.68,0,1.15), width 0.35s cubic-bezier(.22,.68,0,1.15), opacity 0.2s';
+    });
+
+    wrap.querySelectorAll('.main-nav-link').forEach(link => {
+      link.addEventListener('mouseenter', () => movePillTo(link));
+    });
+    wrap.addEventListener('mouseleave', () => movePillTo(active));
+  }
+
+  /* ── Header scroll shrink ──────────────────────────── */
+  function initHeaderShrink() {
+    const hdr = document.getElementById('site-header');
+    if (!hdr) return;
+    window.addEventListener('scroll', () => {
+      hdr.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+  }
+
+  /* ── Page-exit transition on nav links ──────────────── */
+  function initPageTransitions() {
+    document.querySelectorAll('a.nav-page-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = link.getAttribute('href');
+        if (!href || href === '#' || link.target === '_blank') return;
+        // same origin only
+        try { const u = new URL(href, location.origin); if (u.origin !== location.origin) return; } catch { return; }
+        // don't re-animate same page
+        if (href === location.pathname) return;
+        e.preventDefault();
+        const main = document.querySelector('main');
+        if (main) { main.classList.add('page-exit'); }
+        setTimeout(() => { location.href = href; }, 280);
+      });
+    });
+  }
+
+  /* ── Init all ────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-blur-text]').forEach(blurText);
+    initReveal();
+    initRipple();
+    initPageEnter();
+    initNavPill();
+    initHeaderShrink();
+    initPageTransitions();
+  });
+})();
+</script>
+
+</body>
+</html>
