@@ -85,11 +85,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
-                        <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-2">
+                        <select name="estado_fisico_select" class="w-full rounded-lg border-gray-200 p-2 text-sm font-body" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                             {% for estado in estados_fisicos %}
-                                <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                                <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
                             {% endfor %}
+                            <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
                         </select>
+                        <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg border-gray-200 p-2 text-sm font-body border-dashed border-[#3e5219]" placeholder="Escribe aquí el nuevo estado...">
+                        <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio venta ($)</label>
@@ -161,11 +164,14 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
-                            <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-3">
+                            <select name="estado_fisico_select" class="w-full rounded-lg border-gray-200 p-3 text-sm font-body" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                                 {% for estado in estados_fisicos %}
-                                    <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                                    <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
                                 {% endfor %}
+                                <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
                             </select>
+                            <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg border-gray-200 p-3 text-sm font-body border-dashed border-[#3e5219]" placeholder="Escribe aquí el nuevo estado...">
+                            <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>

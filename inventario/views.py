@@ -74,7 +74,10 @@ def agregar_libro(request):
                 descripcion = request.POST.get('descripcion', '').strip()
                 portada = request.FILES.get('portada')
                 nombre_categoria = request.POST.get('categoria_texto', '').strip()
-                estado_fisico_id = request.POST.get('estado_fisico')
+                estado_fisico_select = request.POST.get('estado_fisico_select', '').strip()
+                estado_fisico_texto = request.POST.get('estado_fisico_texto', '').strip()
+                estado_final = estado_fisico_texto if estado_fisico_select == '__nuevo__' else estado_fisico_select
+                if not estado_final: estado_final = 'Nuevo'
                 precio_venta_str = request.POST.get('precio_venta', '')
                 precio_compra_str = request.POST.get('precio_compra', '0')
                 stock_str = request.POST.get('stock', '1')
@@ -123,7 +126,9 @@ def agregar_libro(request):
                     portada=portada if portada else None
                 )
 
-                estado_fisico_obj = get_object_or_404(EstadoFisico, id=estado_fisico_id)
+                estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
+                if not estado_fisico_obj:
+                    estado_fisico_obj = EstadoFisico.objects.create(nombre=estado_final.capitalize())
 
                 # Crear ejemplar
                 Ejemplar.objects.create(
@@ -156,7 +161,10 @@ def agregar_libro(request):
             elif accion == 'nuevo_ejemplar':
                 libro_id = request.POST.get('libro_id')
                 libro_obj = get_object_or_404(Libro, id=libro_id)
-                estado_fisico_id = request.POST.get('estado_fisico')
+                estado_fisico_select = request.POST.get('estado_fisico_select', '').strip()
+                estado_fisico_texto = request.POST.get('estado_fisico_texto', '').strip()
+                estado_final = estado_fisico_texto if estado_fisico_select == '__nuevo__' else estado_fisico_select
+                if not estado_final: estado_final = 'Nuevo'
                 precio_venta_str = request.POST.get('precio_venta', '')
                 precio_compra_str = request.POST.get('precio_compra', '0')
                 stock_str = request.POST.get('stock', '1')
@@ -177,7 +185,9 @@ def agregar_libro(request):
                     messages.error(request, f'❌ Stock: {error}')
                     return redirect('agregar_libro')
 
-                estado_fisico_obj = get_object_or_404(EstadoFisico, id=estado_fisico_id)
+                estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
+                if not estado_fisico_obj:
+                    estado_fisico_obj = EstadoFisico.objects.create(nombre=estado_final.capitalize())
 
                 # Crear ejemplar
                 Ejemplar.objects.create(
@@ -354,15 +364,21 @@ def detalle_ejemplar(request, ejemplar_id):
         try:
             cambios = []
 
-            estado_fisico_id = request.POST.get('estado_fisico')
+            estado_fisico_select = request.POST.get('estado_fisico_select', '').strip()
+            estado_fisico_texto = request.POST.get('estado_fisico_texto', '').strip()
+            estado_final = estado_fisico_texto if estado_fisico_select == '__nuevo__' else estado_fisico_select
+
             descripcion_estado = request.POST.get('descripcion_estado', '').strip()
             precio_venta_str = request.POST.get('precio_venta', '')
             precio_compra_str = request.POST.get('precio_compra', '')
             stock_str = request.POST.get('stock', '')
 
-            if estado_fisico_id and str(ejemplar.estado_fisico_id) != estado_fisico_id:
+            if estado_final and estado_final.lower() != (ejemplar.estado_fisico.nombre.lower() if ejemplar.estado_fisico else ''):
                 cambios.append('estado fisico actualizado')
-                ejemplar.estado_fisico_id = estado_fisico_id
+                estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
+                if not estado_fisico_obj:
+                    estado_fisico_obj = EstadoFisico.objects.create(nombre=estado_final.capitalize())
+                ejemplar.estado_fisico = estado_fisico_obj
 
             if descripcion_estado != (ejemplar.descripcion_estado or ''):
                 cambios.append('descripcion de estado actualizada')
