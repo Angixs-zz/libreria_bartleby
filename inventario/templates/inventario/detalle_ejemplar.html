@@ -131,7 +131,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                     <span class="badge-estado"
                           style="background-color: rgba(163,196,106,0.15); color: var(--primary);">
                         <span class="material-symbols-outlined text-xs">verified</span>
-                        {{ ejemplar.get_estado_fisico_display }}
+                        {{ ejemplar.estado_fisico.nombre }}
                     </span>
                     {% endwith %}
 
@@ -302,9 +302,9 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                     <div class="field-group">
                         <label class="field-label" for="estado_fisico">Estado Físico</label>
                         <select id="estado_fisico" name="estado_fisico" class="field-input">
-                            {% for val, display in ejemplar.ESTADOS %}
-                            <option value="{{ val }}" {% if ejemplar.estado_fisico == val %}selected{% endif %}>
-                                {{ display }}
+                            {% for estado in estados_fisicos %}
+                            <option value="{{ estado.id }}" {% if ejemplar.estado_fisico_id == estado.id %}selected{% endif %}>
+                                {{ estado.nombre }}
                             </option>
                             {% endfor %}
                         </select>

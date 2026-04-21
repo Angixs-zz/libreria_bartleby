@@ -86,11 +86,9 @@
                     <div>
                         <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
                         <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-2">
-                            <option value="nuevo">Nuevo</option>
-                            <option value="como_nuevo">Como nuevo</option>
-                            <option value="bueno">Bueno</option>
-                            <option value="aceptable">Aceptable</option>
-                            <option value="con_detalles">Con detalles</option>
+                            {% for estado in estados_fisicos %}
+                                <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
@@ -164,11 +162,9 @@
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
                             <select name="estado_fisico" required class="w-full rounded-lg border-gray-300 p-3">
-                                <option value="nuevo">Nuevo</option>
-                                <option value="como_nuevo">Como nuevo</option>
-                                <option value="bueno">Bueno</option>
-                                <option value="aceptable">Aceptable</option>
-                                <option value="con_detalles">Con detalles</option>
+                                {% for estado in estados_fisicos %}
+                                    <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-4">

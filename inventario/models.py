@@ -71,20 +71,25 @@ class Libro(models.Model):
         )['total'] or 0
 
 
+class EstadoFisico(models.Model):
+    """Estado de conservación física de un libro."""
+    nombre = models.CharField(max_length=50, unique=True, help_text="Ej. Nuevo, Como nuevo, Aceptable")
+    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada de lo que implica este estado")
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Estado Físico"
+        verbose_name_plural = "Estados Físicos"
+
+
 class Ejemplar(models.Model):
     """
     Copia específica de un libro en inventario.
     
     Cada ejemplar tiene su propio SKU, estado físico, y precio.
     """
-    ESTADOS = (
-        ('nuevo', 'Nuevo'),
-        ('como_nuevo', 'Como nuevo'),
-        ('bueno', 'Bueno'),
-        ('aceptable', 'Aceptable'),
-        ('con_detalles', 'Con detalles'),
-    )
-    
     libro = models.ForeignKey(
         Libro,
         on_delete=models.CASCADE,
@@ -97,11 +102,14 @@ class Ejemplar(models.Model):
         db_index=True,
         help_text="Identificador único del ejemplar"
     )
-    estado_fisico = models.CharField(
-        max_length=20,
-        choices=ESTADOS,
+    estado_fisico = models.ForeignKey(
+        EstadoFisico,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name='ejemplares',
         help_text="Condición física del ejemplar"
     )
+
     descripcion_estado = models.TextField(
         blank=True,
         null=True,
@@ -126,7 +134,8 @@ class Ejemplar(models.Model):
     actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.sku} | {self.libro.titulo} ({self.get_estado_fisico_display()}) - ${self.precio_venta}"
+        estado_nombre = self.estado_fisico.nombre if self.estado_fisico else "Sin estado"
+        return f"{self.sku} | {self.libro.titulo} ({estado_nombre}) - ${self.precio_venta}"
     
     class Meta:
         ordering = ['-creado_en']

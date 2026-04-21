@@ -121,7 +121,7 @@
                 {% endif %}
                 <span class="badge" style="background-color: rgba(62,82,25,0.08); color: var(--text-muted);">
                     <span class="material-symbols-outlined text-xs">verified</span>
-                    {{ ejemplar.get_estado_fisico_display }}
+                    {{ ejemplar.estado_fisico.nombre }}
                 </span>
             </div>
 
@@ -249,7 +249,7 @@
                     {% endif %}
                     <div class="meta-row">
                         <span class="meta-key">Estado físico</span>
-                        <span class="meta-val">{{ ejemplar.get_estado_fisico_display }}</span>
+                        <span class="meta-val">{{ ejemplar.estado_fisico.nombre }}</span>
                     </div>
                     {% if ejemplar.descripcion_estado %}
                     <div class="meta-row">
