@@ -301,13 +301,16 @@ textarea.field-input { resize: vertical; min-height: 90px; }
 
                     <div class="field-group">
                         <label class="field-label" for="estado_fisico">Estado Físico</label>
-                        <select id="estado_fisico" name="estado_fisico" class="field-input">
+                        <select id="estado_fisico_select" name="estado_fisico_select" class="field-input" onchange="if(this.value==='__nuevo__'){document.getElementById('estado_fisico_texto').classList.remove('hidden');document.getElementById('estado_fisico_texto').focus();document.getElementById('estado_fisico_texto').required=true;}else{document.getElementById('estado_fisico_texto').classList.add('hidden');document.getElementById('estado_fisico_texto').required=false;document.getElementById('estado_fisico_texto').value='';}">
                             {% for estado in estados_fisicos %}
-                            <option value="{{ estado.id }}" {% if ejemplar.estado_fisico_id == estado.id %}selected{% endif %}>
+                            <option value="{{ estado.nombre }}" {% if ejemplar.estado_fisico.nombre == estado.nombre %}selected{% endif %}>
                                 {{ estado.nombre }}
                             </option>
                             {% endfor %}
+                            <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
                         </select>
+                        <input type="text" id="estado_fisico_texto" name="estado_fisico_texto" class="hidden mt-2 field-input border-dashed"
+                               placeholder="Escribe el nuevo estado..." style="border-color: var(--primary);">
                     </div>
 
                     <div class="field-group">
