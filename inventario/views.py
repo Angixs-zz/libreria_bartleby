@@ -26,7 +26,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from inventario.models import Libro, Ejemplar, Categoria
+from inventario.models import Libro, Ejemplar, Categoria, EstadoFisico
 from reservas.models import Reserva
 from ventas.models import Venta
 from services.inventario_service import InventarioService
@@ -74,7 +74,7 @@ def agregar_libro(request):
                 descripcion = request.POST.get('descripcion', '').strip()
                 portada = request.FILES.get('portada')
                 nombre_categoria = request.POST.get('categoria_texto', '').strip()
-                estado_fisico = request.POST.get('estado_fisico', 'nuevo')
+                estado_fisico_id = request.POST.get('estado_fisico')
                 precio_venta_str = request.POST.get('precio_venta', '')
                 precio_compra_str = request.POST.get('precio_compra', '0')
                 stock_str = request.POST.get('stock', '1')
@@ -123,11 +123,13 @@ def agregar_libro(request):
                     portada=portada if portada else None
                 )
 
+                estado_fisico_obj = get_object_or_404(EstadoFisico, id=estado_fisico_id)
+
                 # Crear ejemplar
                 Ejemplar.objects.create(
                     # El SKU se asigna automáticamente en el modelo.
                     libro=libro_obj,
-                    estado_fisico=estado_fisico,
+                    estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
                     stock=stock
@@ -154,7 +156,7 @@ def agregar_libro(request):
             elif accion == 'nuevo_ejemplar':
                 libro_id = request.POST.get('libro_id')
                 libro_obj = get_object_or_404(Libro, id=libro_id)
-                estado_fisico = request.POST.get('estado_fisico', 'nuevo')
+                estado_fisico_id = request.POST.get('estado_fisico')
                 precio_venta_str = request.POST.get('precio_venta', '')
                 precio_compra_str = request.POST.get('precio_compra', '0')
                 stock_str = request.POST.get('stock', '1')
@@ -175,10 +177,12 @@ def agregar_libro(request):
                     messages.error(request, f'❌ Stock: {error}')
                     return redirect('agregar_libro')
 
+                estado_fisico_obj = get_object_or_404(EstadoFisico, id=estado_fisico_id)
+
                 # Crear ejemplar
                 Ejemplar.objects.create(
                     libro=libro_obj,
-                    estado_fisico=estado_fisico,
+                    estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
                     stock=stock
@@ -242,10 +246,11 @@ def agregar_libro(request):
             return redirect('agregar_libro')
 
     categorias = Categoria.objects.all()
+    estados_fisicos = EstadoFisico.objects.all()
     return render(
         request,
         'inventario/agregar_libro.html',
-        {'categorias': categorias}
+        {'categorias': categorias, 'estados_fisicos': estados_fisicos}
     )
 
 
@@ -287,7 +292,7 @@ def buscar_libro_ajax(request):
             ejemplares.append({
                 'id': e.id,
                 'sku': e.sku,
-                'estado': e.get_estado_fisico_display(),
+                'estado': e.estado_fisico.nombre if e.estado_fisico else 'Sin estado',
                 'precio_venta': str(e.precio_venta),
                 'stock': e.stock,
             })
@@ -349,15 +354,15 @@ def detalle_ejemplar(request, ejemplar_id):
         try:
             cambios = []
 
-            estado_fisico = request.POST.get('estado_fisico', ejemplar.estado_fisico)
+            estado_fisico_id = request.POST.get('estado_fisico')
             descripcion_estado = request.POST.get('descripcion_estado', '').strip()
             precio_venta_str = request.POST.get('precio_venta', '')
             precio_compra_str = request.POST.get('precio_compra', '')
             stock_str = request.POST.get('stock', '')
 
-            if estado_fisico != ejemplar.estado_fisico:
+            if estado_fisico_id and str(ejemplar.estado_fisico_id) != estado_fisico_id:
                 cambios.append('estado fisico actualizado')
-                ejemplar.estado_fisico = estado_fisico
+                ejemplar.estado_fisico_id = estado_fisico_id
 
             if descripcion_estado != (ejemplar.descripcion_estado or ''):
                 cambios.append('descripcion de estado actualizada')
@@ -454,11 +459,13 @@ def detalle_ejemplar(request, ejemplar_id):
         reservas_qs = []
 
     categorias = Categoria.objects.all()
+    estados_fisicos = EstadoFisico.objects.all()
 
     return render(request, 'inventario/detalle_ejemplar.html', {
         'ejemplar': ejemplar,
         'reservas': reservas_qs,
         'categorias': categorias,
+        'estados_fisicos': estados_fisicos,
     })
 
 
@@ -554,7 +561,7 @@ def api_buscar_codigo(request):
     if not ejemplar:
         ejemplar = Ejemplar.objects.filter(
             libro__isbn=codigo,
-            estado_fisico='nuevo',
+            estado_fisico__nombre__iexact='nuevo',
             stock__gt=0
         ).select_related('libro').first()
 

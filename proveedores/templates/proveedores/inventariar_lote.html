@@ -148,7 +148,7 @@
                                     <div class="fw-semibold">{{ d.ejemplar.libro.titulo }}</div>
                                     <div class="small text-muted">{{ d.ejemplar.libro.autor }} · {{ d.ejemplar.sku }}</div>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ d.ejemplar.get_estado_fisico_display }}</span></td>
+                                <td><span class="badge bg-secondary">{{ d.ejemplar.estado_fisico.nombre }}</span></td>
                                 <td class="text-center">{{ d.cantidad }}</td>
                                 <td class="text-end">${{ d.costo_unitario }}</td>
                                 <td class="text-end fw-semibold">${{ d.subtotal }}</td>
