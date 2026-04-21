@@ -172,23 +172,15 @@ def marcar_entregada(request, reserva_id):
         return redirect('gestor_reservas')
 
     try:
-        reserva.estado = 'completada'
-        reserva.save()
+        # Confirmar reserva y generar la venta
+        InventarioService.confirmar_reserva_a_venta(
+            reserva_id=reserva.id,
+            metodo_pago='efectivo',  # Por defecto al entregar físicamente
+            usuario_cajero=request.user
+        )
 
-        # Descontar stock: calcular cuántas unidades de cada ejemplar se reservaron
-        # usando la proporción del total (funciona cuando precio_venta es único por lote)
-        from decimal import Decimal, ROUND_HALF_UP
-        for ejemplar in reserva.ejemplares.all():
-            if ejemplar.precio_venta and ejemplar.precio_venta > 0:
-                cantidad = int(
-                    (reserva.total / ejemplar.precio_venta)
-                    .quantize(Decimal('1'), rounding=ROUND_HALF_UP)
-                )
-                cantidad = max(1, min(cantidad, ejemplar.stock))
-            else:
-                cantidad = 1
-            ejemplar.stock = max(0, ejemplar.stock - cantidad)
-            ejemplar.save()
+        # Actualizar el objeto reserva local para auditoría si es necesario
+        reserva.refresh_from_db()
 
         registrar_auditoria(
             actor=request.user,
@@ -197,13 +189,13 @@ def marcar_entregada(request, reserva_id):
             entidad_tipo='reserva',
             entidad_id=reserva.id,
             entidad_nombre=reserva.codigo_ticket,
-            descripcion=f'Se marcó como entregada la reserva {reserva.codigo_ticket}.',
+            descripcion=f'Se marcó como entregada la reserva {reserva.codigo_ticket} y se generó la venta correspondiente.',
             metadata={'cliente': reserva.usuario.username},
         )
 
         messages.success(
             request,
-            f'✅ Reserva #{reserva.id} entregada. Stock descontado.'
+            f'✅ Reserva #{reserva.id} entregada. Venta registrada y stock descontado.'
         )
     except Exception as e:
         messages.error(request, f'❌ Error: {str(e)}')
