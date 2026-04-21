@@ -82,57 +82,98 @@
         background-color: rgba(74, 93, 35, 0.08);
         border: 1px solid rgba(74, 93, 35, 0.14);
         border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .perfil-shell .metric-chip:hover {
+        background-color: rgba(74, 93, 35, 0.12);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 93, 35, 0.08);
     }
 
     .dark .perfil-shell .metric-chip {
         background-color: rgba(163, 196, 106, 0.08);
         border-color: rgba(163, 196, 106, 0.14);
     }
+
+    .dark .perfil-shell .metric-chip:hover {
+        background-color: rgba(163, 196, 106, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="perfil-shell py-5">
-    <div class="container py-4">
+<div class="perfil-shell py-5 position-relative overflow-hidden">
+    <!-- Decorative background blobs -->
+    <div class="position-absolute top-0 end-0 w-100 h-100" style="max-width: 800px; background: radial-gradient(circle, rgba(119,141,69,0.1) 0%, transparent 70%); z-index: 0; transform: translate(30%, -20%); pointer-events: none;"></div>
+    <div class="position-absolute bottom-0 start-0 w-100 h-100" style="max-width: 600px; background: radial-gradient(circle, rgba(163,196,106,0.08) 0%, transparent 70%); z-index: 0; transform: translate(-20%, 30%); pointer-events: none;"></div>
+
+    <div class="container py-4 position-relative z-1">
         <div class="row g-4">
             <div class="col-12 col-xl-4">
-                <div class="profile-card rounded-4 p-4 p-lg-5 h-100">
+                <div class="profile-card rounded-4 p-4 p-lg-5 h-100 transition-all shadow-sm hover-shadow-md">
                     <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-                        <div class="avatar-circle">{{ avatar_text }}</div>
-                        <button type="button" class="btn olive-btn" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
-                            <i class="bi bi-pencil-square me-2"></i>Editar Perfil
+                        <div class="avatar-circle position-relative shadow-sm">
+                            <div class="position-absolute inset-0 rounded-circle border border-2 border-success opacity-25"></div>
+                            {{ avatar_text }}
+                        </div>
+                        <button type="button" class="btn olive-btn rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                            <i class="bi bi-pencil-square me-2"></i>Editar
                         </button>
                     </div>
 
                     <p class="mini-label mb-2">Mi perfil</p>
-                    <h1 class="display-6 fst-italic mb-2" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                    <h1 class="display-6 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: #4A5D23;">
                         {{ usuario_objetivo.get_full_name|default:usuario_objetivo.username }}
                     </h1>
 
+                    <div class="mb-4">
                     {% if perfil_tipo == 'cliente' %}
-                        <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(74,93,35,0.12); color: #4A5D23;">Cliente</span>
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: rgba(74,93,35,0.12); color: #4A5D23; letter-spacing: 0.5px;"><i class="bi bi-person-fill me-1"></i> Cliente</span>
                     {% elif perfil_tipo == 'staff' %}
-                        <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(74,93,35,0.12); color: #4A5D23;">Cajero / Staff</span>
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: rgba(74,93,35,0.12); color: #4A5D23; letter-spacing: 0.5px;"><i class="bi bi-person-badge-fill me-1"></i> Cajero / Staff</span>
                     {% else %}
-                        <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(74,93,35,0.12); color: #4A5D23;">Administrador</span>
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: rgba(74,93,35,0.12); color: #4A5D23; letter-spacing: 0.5px;"><i class="bi bi-shield-lock-fill me-1"></i> Administrador</span>
                     {% endif %}
+                    </div>
 
-                    <div class="mt-4 d-grid gap-3">
-                        <div>
-                            <div class="mini-label mb-1">Correo</div>
-                            <div>{{ usuario_objetivo.email|default:"Sin correo registrado" }}</div>
+                    <div class="mt-4 d-grid gap-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 rounded-circle" style="background-color: rgba(74,93,35,0.08); color: #4A5D23;">
+                                <i class="bi bi-envelope-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="mini-label mb-1">Correo Electrónico</div>
+                                <div class="fw-medium">{{ usuario_objetivo.email|default:"<span class='text-muted fst-italic'>Sin correo registrado</span>"|safe }}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="mini-label mb-1">Telefono</div>
-                            <div>{{ perfil.telefono|default:"Sin telefono registrado" }}</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 rounded-circle" style="background-color: rgba(74,93,35,0.08); color: #4A5D23;">
+                                <i class="bi bi-telephone-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="mini-label mb-1">Teléfono</div>
+                                <div class="fw-medium">{{ perfil.telefono|default:"<span class='text-muted fst-italic'>Sin teléfono registrado</span>"|safe }}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="mini-label mb-1">Fecha de registro</div>
-                            <div>{{ usuario_objetivo.date_joined|date:"d/m/Y H:i" }}</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 rounded-circle" style="background-color: rgba(74,93,35,0.08); color: #4A5D23;">
+                                <i class="bi bi-geo-alt-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="mini-label mb-1">Dirección</div>
+                                <div class="fw-medium">{{ perfil.direccion|default:"<span class='text-muted fst-italic'>Sin dirección registrada</span>"|safe }}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="mini-label mb-1">Direccion</div>
-                            <div>{{ perfil.direccion|default:"Sin direccion registrada" }}</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 rounded-circle" style="background-color: rgba(74,93,35,0.08); color: #4A5D23;">
+                                <i class="bi bi-calendar-check-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="mini-label mb-1">Miembro desde</div>
+                                <div class="fw-medium">{{ usuario_objetivo.date_joined|date:"d M, Y" }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,7 +212,11 @@
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <div class="alert alert-light mb-0">No tienes reservas activas en este momento.</div>
+                            <div class="p-5 text-center rounded-4" style="background-color: rgba(74,93,35,0.03); border: 1px dashed rgba(197, 200, 184, 0.6);">
+                                <i class="bi bi-calendar-x fs-1 mb-3" style="color: rgba(74,93,35,0.4);"></i>
+                                <h4 class="h5 fw-medium mb-2">No tienes reservas activas</h4>
+                                <p class="text-muted mb-0 small">Cualquier libro que apartes en la tienda aparecerá aquí para que le des seguimiento.</p>
+                            </div>
                         {% endif %}
                     </div>
 
@@ -196,7 +241,10 @@
                                         {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <div class="text-muted">Sin reservas anteriores.</div>
+                                    <div class="p-4 text-center rounded-4 h-100 d-flex flex-column justify-content-center" style="background-color: rgba(74,93,35,0.03); border: 1px dashed rgba(197, 200, 184, 0.6);">
+                                        <i class="bi bi-clock-history fs-2 mb-2" style="color: rgba(74,93,35,0.3);"></i>
+                                        <div class="text-muted small">Aún no hay historial de reservas.</div>
+                                    </div>
                                 {% endif %}
                             </div>
 
@@ -217,7 +265,10 @@
                                         {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <div class="text-muted">Sin compras registradas.</div>
+                                    <div class="p-4 text-center rounded-4 h-100 d-flex flex-column justify-content-center" style="background-color: rgba(74,93,35,0.03); border: 1px dashed rgba(197, 200, 184, 0.6);">
+                                        <i class="bi bi-bag-x fs-2 mb-2" style="color: rgba(74,93,35,0.3);"></i>
+                                        <div class="text-muted small">No hay compras registradas a tu cuenta.</div>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
