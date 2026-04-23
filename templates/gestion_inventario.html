@@ -1,375 +1,516 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+/* ── Quick-nav sidebar chips ─── */
+.qnav-chip {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.65rem 1rem; border-radius: 10px;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; text-decoration: none;
+  border: 1px solid var(--border); color: var(--text-muted);
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+.qnav-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateX(3px);
+}
+.qnav-chip.primary {
+  background: var(--primary); color: #fff;
+  border-color: var(--primary); box-shadow: 0 4px 14px rgba(62,82,25,.25);
+}
+.qnav-chip.primary:hover { opacity: .88; transform: translateX(3px); }
+
+/* ── Stat cards ─── */
+.stat-card {
+  position: relative; overflow: hidden;
+  border-radius: 14px; padding: 1.5rem;
+  background: var(--surface); border: 1px solid var(--border);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+.stat-ghost {
+  position: absolute; right: -1rem; bottom: -1rem;
+  font-size: 5.5rem; opacity: .04; user-select: none;
+  transition: transform 0.5s ease;
+}
+.stat-card:hover .stat-ghost { transform: scale(1.1); }
+
+/* ── Table rows ─── */
+.inv-row { border-top: 1px solid var(--border); transition: background 0.15s ease; }
+.inv-row:hover { background: var(--bg-subtle); }
+
+/* ── Status badge ─── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.badge-ok   { background: rgba(163,196,106,.18); color: var(--primary); }
+.badge-solo { background: rgba(251,191,36,.15); color: #b45309; }
+.badge-out  { background: rgba(186,26,26,.1); color: #ba1a1a; }
+
+/* ── Search input override ─── */
+#filtro-tabla {
+  background: var(--bg-subtle) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  padding: 0.55rem 1rem 0.55rem 2.6rem !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 0.82rem !important;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#filtro-tabla:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(163,196,106,.18) !important;
+}
+
+/* ── Sort button ─── */
+.sort-btn {
+  background: none; border: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted); transition: color 0.15s;
+}
+.sort-btn:hover { color: var(--primary); }
+.sort-btn.asc .sort-icon::after  { content: ' ↑'; }
+.sort-btn.desc .sort-icon::after { content: ' ↓'; }
+
+/* ── Action btn ─── */
+.act-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: 8px; border: none;
+  cursor: pointer; transition: background 0.15s, transform 0.15s, color 0.15s;
+  background: transparent;
+}
+.act-btn:hover { transform: scale(1.12); }
+.act-btn.edit { color: var(--primary); }
+.act-btn.edit:hover { background: rgba(163,196,106,.18); }
+.act-btn.del  { color: rgba(186,26,26,.7); }
+.act-btn.del:hover  { background: rgba(186,26,26,.1); color: #ba1a1a; }
+
+/* ── Section divider ─── */
+.section-label {
+  font-size: 0.62rem; font-weight: 900; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: 0 0 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Filter chip ─── */
+.filter-chip {
+  padding: 4px 12px; border-radius: 999px; font-size: 0.68rem; font-weight: 700;
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  background: var(--bg-subtle); color: var(--text-muted);
+}
+.filter-chip.active, .filter-chip:hover {
+  border-color: var(--primary); background: rgba(163,196,106,.15); color: var(--primary);
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
-<div class="max-w-7xl mx-auto">
+<div class="pt-8 pb-24 px-4 sm:px-8" style="min-height:calc(100vh - 5.5rem); background: var(--bg);">
+<div class="max-w-[1400px] mx-auto">
 
-    <!-- ── Page Header ───────────────────────────────────── -->
-    <section class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 py-10 mb-8"
-             style="border-bottom: 1px solid var(--border);">
+  <!-- ── PAGE HEADER ───────────────────────────────────── -->
+  <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+          style="border-bottom:1px solid var(--border); padding-bottom:1.5rem;">
+    <div>
+      <p class="text-[0.62rem] font-black uppercase tracking-[0.18em] mb-1" style="color:var(--text-faint);">
+        Staff · Área de Administración
+      </p>
+      <h1 data-blur-text data-delay="90" data-direction="top"
+          class="font-headline italic text-4xl md:text-5xl leading-tight"
+          style="color:var(--primary);">
+        Gestión de Inventario
+      </h1>
+      <p class="text-sm mt-1" style="color:var(--text-muted);">
+        {{ total_ejemplares }} lote{% if total_ejemplares != 1 %}s{% endif %} registrados
+        {% if agotados %}· <span style="color:#ba1a1a;">{{ agotados }} agotados</span>{% endif %}
+        {% if reservas_pendientes %}· <span style="color:#3b82f6;">{{ reservas_pendientes }} reservas pendientes</span>{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'agregar_libro' %}"
+       class="qnav-chip primary flex-shrink-0 btn-shine ripple-origin"
+       style="font-size:0.78rem; padding: 0.75rem 1.4rem;">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
+      Agregar Libro
+    </a>
+  </header>
+
+  <!-- ── MAIN LAYOUT: sidebar + content ─── -->
+  <div class="flex gap-6 items-start">
+
+    <!-- ════════════════ LEFT SIDEBAR ════════════════ -->
+    <aside class="hidden lg:flex flex-col gap-4 flex-shrink-0" style="width:220px;">
+
+      <!-- Stats mini-panel -->
+      <div class="rounded-2xl p-5 flex flex-col gap-4"
+           style="background:var(--surface); border:1px solid var(--border);">
+        <p class="section-label">Resumen</p>
+
         <div>
-            <p class="text-xs font-label uppercase tracking-widest mb-2" style="color: var(--text-muted);">
-                Catálogo Digital · Staff Area
-            </p>
-            <h1
-              data-blur-text
-              data-delay="110"
-              data-direction="top"
-              class="font-headline italic text-5xl md:text-6xl leading-tight mb-3"
-              style="color: var(--primary);">
-                Panel de Inventario
-            </h1>
-            <p class="reveal font-body max-w-lg text-base" style="color: var(--text-muted);">
-                Administra el catálogo, revisa el stock y registra nuevos ejemplares para Bartleby.
-            </p>
+          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Total Lotes</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:var(--primary);">{{ total_ejemplares }}</p>
         </div>
-        <div class="flex flex-wrap gap-3 items-center">
-            <a href="{% url 'directorio_proveedores' %}"
-               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
-                <span class="material-symbols-outlined text-base">local_shipping</span>
-                Proveedores
-            </a>
-            <a href="{% url 'dashboard_reportes' %}"
-               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
-                <span class="material-symbols-outlined text-base">monitoring</span>
-                Reportes
-            </a>
-            <a href="{% url 'panel_clientes' %}"
-               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
-                <span class="material-symbols-outlined text-base">groups</span>
-                Clientes
-            </a>
-            <a href="{% url 'gestor_reservas' %}"
-               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
-                <span class="material-symbols-outlined text-base">confirmation_number</span>
-                Reservas
-            </a>
-            <a href="{% url 'pos' %}"
-               class="inline-flex items-center gap-2 px-6 py-4 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--surface); border: 1px solid var(--border); color: var(--primary);">
-                <span class="material-symbols-outlined text-base">point_of_sale</span>
-                Punto de Venta
-            </a>
-            <a href="{% url 'agregar_libro' %}"
-               class="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-sm font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-               style="background-color: var(--primary); color: white;">
-                <span class="material-symbols-outlined text-base">add</span>
-                Agregar Libro
-            </a>
+        <div>
+          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Agotados</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:#ba1a1a;">{{ agotados }}</p>
         </div>
-    </section>
-
-    <!-- ── Stats Cards ─────────────────────────────────────── -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12 stagger">
-
-        <!-- Total Ejemplares -->
-        <div class="relative overflow-hidden rounded-sm p-8 group"
-             style="background-color: var(--surface); border: 1px solid var(--border);">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Volumen Actual</p>
-                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Total de Lotes</h2>
-                </div>
-                <div class="p-2 rounded-lg" style="background-color: rgba(163,196,106,0.15);">
-                    <span class="material-symbols-outlined text-2xl" style="color: var(--primary);">library_books</span>
-                </div>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline text-5xl font-bold" style="color: var(--primary);">{{ total_ejemplares }}</span>
-                <span class="text-xs font-body" style="color: var(--text-muted);">en inventario</span>
-            </div>
-            <!-- Ghost icon -->
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">auto_stories</span>
+        <div>
+          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Reservas</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</p>
         </div>
+      </div>
 
-        <!-- Ejemplares Agotados -->
-        <div class="relative overflow-hidden rounded-sm p-8 group"
-             style="background-color: var(--surface); border: 1px solid var(--border);">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Archivo Histórico</p>
-                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Lotes Agotados</h2>
-                </div>
-                <div class="p-2 rounded-lg" style="background-color: rgba(186,26,26,0.1);">
-                    <span class="material-symbols-outlined text-2xl" style="color:#ba1a1a;">inventory_2</span>
-                </div>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline text-5xl font-bold" style="color:#ba1a1a;">{{ agotados }}</span>
-                <span class="text-xs font-body" style="color: var(--text-muted);">obras sin existencia</span>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">block</span>
+      <!-- Quick nav -->
+      <div class="rounded-2xl p-4 flex flex-col gap-2"
+           style="background:var(--surface); border:1px solid var(--border);">
+        <p class="section-label">Módulos</p>
+        <a href="{% url 'agregar_libro' %}" class="qnav-chip primary">
+          <span class="material-symbols-outlined" style="font-size:1rem;">add_box</span> Agregar
+        </a>
+        <a href="{% url 'pos' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">point_of_sale</span> POS
+        </a>
+        <a href="{% url 'gestor_reservas' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">confirmation_number</span> Reservas
+        </a>
+        <a href="{% url 'directorio_proveedores' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">local_shipping</span> Proveedores
+        </a>
+        <a href="{% url 'dashboard_reportes' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">monitoring</span> Reportes
+        </a>
+        <a href="{% url 'panel_clientes' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">groups</span> Clientes
+        </a>
+        <a href="{% url 'lista_libros' %}" class="qnav-chip">
+          <span class="material-symbols-outlined" style="font-size:1rem;">storefront</span> Ver Tienda
+        </a>
+      </div>
+    </aside>
+
+    <!-- ════════════════ MAIN CONTENT ════════════════ -->
+    <div class="flex-1 min-w-0 flex flex-col gap-6">
+
+      <!-- ── STAT CARDS (visible en móvil/tablet) ── -->
+      <section class="grid grid-cols-3 gap-3 lg:hidden stagger">
+        <div class="stat-card">
+          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Lotes</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:var(--primary);">{{ total_ejemplares }}</p>
+          <span class="material-symbols-outlined stat-ghost">library_books</span>
+        </div>
+        <div class="stat-card">
+          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Agotados</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:#ba1a1a;">{{ agotados }}</p>
+          <span class="material-symbols-outlined stat-ghost">block</span>
+        </div>
+        <div class="stat-card">
+          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Reservas</p>
+          <p class="font-headline italic text-3xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</p>
+          <span class="material-symbols-outlined stat-ghost">bookmark</span>
+        </div>
+      </section>
+
+      <!-- ── TABLE PANEL ── -->
+      <section class="rounded-2xl overflow-hidden"
+               style="background:var(--surface); border:1px solid var(--border);">
+
+        <!-- Toolbar -->
+        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between px-5 py-4"
+             style="border-bottom:1px solid var(--border);">
+          <!-- Search -->
+          <div class="relative w-full sm:max-w-xs">
+            <span class="material-symbols-outlined absolute text-sm pointer-events-none"
+                  style="left:.75rem; top:50%; transform:translateY(-50%); color:var(--text-faint); font-size:1rem;">search</span>
+            <input id="filtro-tabla" type="text"
+                   placeholder="Buscar título, autor, ISBN…"
+                   oninput="filtrarTabla(this.value)">
+          </div>
+
+          <!-- Filters + mobile actions -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="filter-chip active" onclick="filtrarStock('todos', this)">Todos</button>
+            <button class="filter-chip" onclick="filtrarStock('disponible', this)">Disponibles</button>
+            <button class="filter-chip" onclick="filtrarStock('agotado', this)">Agotados</button>
+            <a href="{% url 'agregar_libro' %}" class="qnav-chip primary lg:hidden" style="padding:0.45rem 0.85rem;">
+              <span class="material-symbols-outlined" style="font-size:0.9rem;">add</span> Nuevo
+            </a>
+          </div>
         </div>
 
-        <!-- Reservas Pendientes -->
-        <div class="relative overflow-hidden rounded-sm p-8 group"
-             style="background-color: var(--surface); border: 1px solid var(--border);">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Logística</p>
-                    <h2 class="font-headline text-2xl italic" style="color: var(--text);">Reservas Activas</h2>
-                </div>
-                <div class="p-2 rounded-lg" style="background-color: rgba(59,130,246,0.1);">
-                    <span class="material-symbols-outlined text-2xl" style="color:#3b82f6;">confirmation_number</span>
-                </div>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline text-5xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</span>
-                <span class="text-xs font-body" style="color: var(--text-muted);">esperando retiro</span>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-[7rem] opacity-[0.04] group-hover:scale-110 transition-transform duration-700 select-none">bookmark</span>
-        </div>
-
-    </section>
-
-    <!-- ── Table Section ─────────────────────────────────── -->
-    <section class="rounded-sm overflow-hidden" style="background-color: var(--surface); border: 1px solid var(--border);">
-
-        <!-- Table toolbar -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 py-5"
-             style="border-bottom: 1px solid var(--border);">
-            <div class="relative w-full sm:w-80">
-                <span class="material-symbols-outlined absolute text-sm"
-                      style="left:0.75rem; top:50%; transform:translateY(-50%); color:var(--text-faint);">search</span>
-                <input type="text"
-                       id="filtro-tabla"
-                       placeholder="Filtrar por título, autor o ISBN..."
-                       oninput="filtrarTabla(this.value)"
-                       class="w-full rounded-lg text-sm font-body focus:ring-1 transition-shadow"
-                       style="padding: 0.6rem 1rem 0.6rem 2.5rem !important; background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text);">
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <a href="{% url 'agregar_libro' %}"
-                   class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all"
-                   style="background-color: var(--primary); color: white;">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    Nuevo
-                </a>
-                <a href="{% url 'lista_libros' %}"
-                   class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-all"
-                   style="border: 1px solid var(--border); color: var(--text-muted);">
-                    <span class="material-symbols-outlined text-sm">storefront</span>
-                    Ver Tienda
-                </a>
-            </div>
-        </div>
-
-        <!-- Responsive table wrapper -->
+        <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left" id="tabla-inventario" style="border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: var(--bg-subtle);">
-                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Portada</th>
-                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Detalles</th>
-                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold hidden md:table-cell" style="color: var(--text-muted);">ISBN / SKU</th>
-                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Stock</th>
-                        <th class="px-4 py-4 text-[10px] uppercase tracking-widest font-bold text-right hidden sm:table-cell" style="color: var(--text-muted);">Precio</th>
-                        <th class="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-center" style="color: var(--text-muted);">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ejemplar in ejemplares %}
-                    <tr class="fila-libro hover:opacity-80 transition-opacity"
-                        style="border-top: 1px solid var(--border);">
+          <table class="w-full text-left" id="tabla-inventario" style="border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--bg-subtle);">
+                <th class="px-4 py-3 w-16">
+                  <span class="sort-btn text-[0.6rem]" style="color:var(--text-faint);">Portada</span>
+                </th>
+                <th class="px-3 py-3">
+                  <button class="sort-btn" onclick="sortTable('titulo', this)">
+                    Título <span class="sort-icon"></span>
+                  </button>
+                </th>
+                <th class="px-3 py-3 hidden md:table-cell">
+                  <button class="sort-btn" onclick="sortTable('isbn', this)">
+                    ISBN / SKU <span class="sort-icon"></span>
+                  </button>
+                </th>
+                <th class="px-3 py-3">
+                  <button class="sort-btn" onclick="sortTable('stock', this)">
+                    Stock <span class="sort-icon"></span>
+                  </button>
+                </th>
+                <th class="px-3 py-3 hidden sm:table-cell">
+                  <button class="sort-btn" onclick="sortTable('precio', this)">
+                    Precio <span class="sort-icon"></span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 text-center" style="width:90px;">
+                  <span class="sort-btn" style="cursor:default;">Acción</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tbody-inventario">
+              {% for ejemplar in ejemplares %}
+              <tr class="inv-row fila-libro"
+                  data-titulo="{{ ejemplar.libro.titulo|lower }}"
+                  data-autor="{{ ejemplar.libro.autor|lower }}"
+                  data-isbn="{{ ejemplar.libro.isbn|default:''|lower }}"
+                  data-sku="{{ ejemplar.sku|lower }}"
+                  data-stock="{{ ejemplar.stock }}"
+                  data-precio="{{ ejemplar.precio_venta }}">
 
-                        <!-- Portada -->
-                        <td class="px-6 py-5">
-                            <div class="w-12 h-[4.5rem] rounded-sm overflow-hidden flex items-center justify-center flex-shrink-0"
-                                 style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
-                                {% if ejemplar.libro.portada %}
-                                    <img src="{{ ejemplar.libro.portada.url }}" alt="{{ ejemplar.libro.titulo }}" class="w-full h-full object-cover">
-                                {% else %}
-                                    <span class="material-symbols-outlined text-2xl" style="color: var(--border);">menu_book</span>
-                                {% endif %}
-                            </div>
-                        </td>
+                <!-- Portada -->
+                <td class="px-4 py-3">
+                  <div class="w-10 h-14 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+                       style="background:var(--bg-subtle); border:1px solid var(--border);">
+                    {% if ejemplar.libro.portada %}
+                      <img src="{{ ejemplar.libro.portada.url }}" alt="{{ ejemplar.libro.titulo }}"
+                           class="w-full h-full object-cover">
+                    {% else %}
+                      <span class="material-symbols-outlined" style="color:var(--border); font-size:1.2rem;">menu_book</span>
+                    {% endif %}
+                  </div>
+                </td>
 
-                        <!-- Detalles -->
-                        <td class="px-4 py-5 max-w-xs">
-                            <p class="font-headline italic text-lg leading-snug mb-0.5 dato-libro" style="color: var(--text);">{{ ejemplar.libro.titulo }}</p>
-                            <p class="text-sm font-body mb-1 dato-libro" style="color: var(--text-muted);">{{ ejemplar.libro.autor }}</p>
-                            {% if ejemplar.libro.categoria %}
-                            <span class="inline-block text-[10px] font-bold font-label uppercase tracking-widest px-2 py-0.5 rounded-full"
-                                  style="background-color: rgba(163,196,106,0.18); color: var(--primary);">
-                                {{ ejemplar.libro.categoria.nombre }}
-                            </span>
-                            {% endif %}
-                            <!-- Precio visible en móvil -->
-                            <p class="sm:hidden mt-1 text-sm font-bold" style="color: var(--primary);">${{ ejemplar.precio_venta }}</p>
-                        </td>
+                <!-- Detalles -->
+                <td class="px-3 py-3 max-w-[200px]">
+                  <p class="font-headline italic text-base leading-snug dato-libro truncate"
+                     style="color:var(--text);" title="{{ ejemplar.libro.titulo }}">{{ ejemplar.libro.titulo }}</p>
+                  <p class="text-xs dato-libro" style="color:var(--text-muted);">{{ ejemplar.libro.autor }}</p>
+                  {% if ejemplar.libro.categoria %}
+                  <span class="inline-block mt-1 text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
+                        style="background:rgba(163,196,106,.15); color:var(--primary);">
+                    {{ ejemplar.libro.categoria.nombre }}
+                  </span>
+                  {% endif %}
+                  <!-- Precio en móvil -->
+                  <p class="sm:hidden text-sm font-bold mt-1" style="color:var(--primary);">${{ ejemplar.precio_venta }}</p>
+                </td>
 
-                        <!-- ISBN / SKU (hidden on mobile) -->
-                        <td class="px-4 py-5 hidden md:table-cell">
-                            {% if ejemplar.libro.isbn %}
-                            <p class="font-mono text-xs mb-1 dato-libro" style="color: var(--text-muted);">{{ ejemplar.libro.isbn }}</p>
-                            {% endif %}
-                            <p class="font-mono text-xs" style="color: var(--text-faint);">{{ ejemplar.sku }}</p>
-                        </td>
+                <!-- ISBN / SKU -->
+                <td class="px-3 py-3 hidden md:table-cell">
+                  {% if ejemplar.libro.isbn %}
+                  <p class="font-mono text-xs dato-libro" style="color:var(--text-muted);">{{ ejemplar.libro.isbn }}</p>
+                  {% endif %}
+                  <p class="font-mono text-[0.68rem] mt-0.5" style="color:var(--text-faint);">{{ ejemplar.sku }}</p>
+                </td>
 
-                        <!-- Stock badge -->
-                        <td class="px-4 py-5">
-                            {% if ejemplar.stock == 0 %}
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
-                                      style="background-color:rgba(186,26,26,0.1); color:#ba1a1a;">
-                                    <span class="material-symbols-outlined text-xs">block</span> Agotado
-                                </span>
-                            {% elif ejemplar.stock == 1 %}
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
-                                      style="background-color:rgba(163,196,106,0.18); color: var(--primary);">
-                                    <span class="material-symbols-outlined text-xs">star</span> Único Ejemplar
-                                </span>
-                            {% else %}
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase whitespace-nowrap"
-                                      style="background-color:rgba(163,196,106,0.18); color: var(--primary);">
-                                    <span class="material-symbols-outlined text-xs">check_circle</span> {{ ejemplar.stock }} uds.
-                                </span>
-                            {% endif %}
-                        </td>
+                <!-- Stock -->
+                <td class="px-3 py-3">
+                  {% if ejemplar.stock == 0 %}
+                    <span class="badge badge-out">
+                      <span class="material-symbols-outlined" style="font-size:.75rem;">block</span>Agotado
+                    </span>
+                  {% elif ejemplar.stock == 1 %}
+                    <span class="badge badge-solo">
+                      <span class="material-symbols-outlined" style="font-size:.75rem;">star</span>Único
+                    </span>
+                  {% else %}
+                    <span class="badge badge-ok">
+                      <span class="material-symbols-outlined" style="font-size:.75rem;">check_circle</span>{{ ejemplar.stock }} uds.
+                    </span>
+                  {% endif %}
+                </td>
 
-                        <!-- Precio (hidden on mobile, shown in detail col) -->
-                        <td class="px-4 py-5 text-right hidden sm:table-cell">
-                            <span class="font-headline text-xl font-bold" style="color: var(--text);">${{ ejemplar.precio_venta }}</span>
-                        </td>
+                <!-- Precio -->
+                <td class="px-3 py-3 hidden sm:table-cell">
+                  <span class="font-headline text-lg font-bold" style="color:var(--text);">${{ ejemplar.precio_venta }}</span>
+                </td>
 
-                        <!-- Acciones -->
-                        <td class="px-6 py-5">
-                            <div class="flex items-center justify-center gap-1">
-                                <a href="{% url 'detalle_ejemplar' ejemplar.id %}"
-                                   class="p-2 rounded-full transition-all hover:scale-110 hover:bg-[rgba(163,196,106,0.15)]"
-                                   style="color: var(--primary);"
-                                   title="Ver / Editar ejemplar">
-                                    <span class="material-symbols-outlined text-xl">open_in_new</span>
-                                </a>
-                                <form method="POST" action="{% url 'eliminar_ejemplar' ejemplar.id %}" id="form-delete-{{ ejemplar.id }}" class="m-0">
-                                    {% csrf_token %}
-                                    <button type="button" onclick="openDeleteModal('{{ ejemplar.id }}', '{{ ejemplar.sku }}', '{{ ejemplar.libro.titulo|escapejs }}')" class="p-2 rounded-full transition-all hover:scale-110 text-red-500/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Eliminar lote">
-                                        <span class="material-symbols-outlined text-xl">delete</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="py-24 text-center">
-                            <span class="material-symbols-outlined text-6xl block mb-4" style="color: var(--border); font-variation-settings:'wght' 100;">inventory_2</span>
-                            <h3 class="font-headline italic text-2xl mb-2" style="color: var(--text-muted);">El archivo está vacío</h3>
-                            <p class="text-sm font-body mb-8" style="color: var(--text-faint);">Aún no hay ejemplares en el inventario.</p>
-                            <a href="{% url 'agregar_libro' %}"
-                               class="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all"
-                               style="background-color: var(--primary); color: white;">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                                Registrar el primero
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                <!-- Acciones -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-1">
+                    <a href="{% url 'detalle_ejemplar' ejemplar.id %}"
+                       class="act-btn edit" title="Ver / Editar ejemplar">
+                      <span class="material-symbols-outlined" style="font-size:1.1rem;">edit</span>
+                    </a>
+                    <form method="POST" action="{% url 'eliminar_ejemplar' ejemplar.id %}"
+                          id="form-delete-{{ ejemplar.id }}" class="m-0">
+                      {% csrf_token %}
+                      <button type="button" class="act-btn del"
+                              onclick="openDeleteModal('{{ ejemplar.id }}', '{{ ejemplar.sku }}', '{{ ejemplar.libro.titulo|escapejs }}')"
+                              title="Eliminar lote">
+                        <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="py-20 text-center">
+                  <span class="material-symbols-outlined block mb-3 text-5xl"
+                        style="color:var(--border); font-variation-settings:'wght' 100;">inventory_2</span>
+                  <h3 class="font-headline italic text-2xl mb-2" style="color:var(--text-muted);">El archivo está vacío</h3>
+                  <p class="text-sm mb-6" style="color:var(--text-faint);">Aún no hay ejemplares en el inventario.</p>
+                  <a href="{% url 'agregar_libro' %}"
+                     class="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-md transition-all hover:opacity-90"
+                     style="background:var(--primary); color:#fff;">
+                    <span class="material-symbols-outlined text-sm">add</span> Registrar primero
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
 
         <!-- Table footer -->
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-5"
-             style="border-top: 1px solid var(--border);">
-            <p class="text-sm font-body" style="color: var(--text-muted);">
-                <strong style="color: var(--text);">{{ total_ejemplares }}</strong> lote{% if total_ejemplares != 1 %}s{% endif %} en el inventario
-                {% if agotados %}&nbsp;·&nbsp; <span style="color:#ba1a1a;"><strong>{{ agotados }}</strong> sin existencia</span>{% endif %}
-            </p>
-            <a href="{% url 'agregar_libro' %}"
-               class="inline-flex items-center gap-1 text-sm font-bold hover:underline transition-all"
-               style="color: var(--primary);">
-                <span class="material-symbols-outlined text-base">add_circle</span>
-                Registrar nuevo ejemplar
-            </a>
+        <div class="flex justify-between items-center px-5 py-3"
+             style="border-top:1px solid var(--border);">
+          <p class="text-xs" style="color:var(--text-muted);">
+            <strong id="count-visible" style="color:var(--text);">{{ total_ejemplares }}</strong>
+            lote{% if total_ejemplares != 1 %}s{% endif %} mostrados
+          </p>
+          <a href="{% url 'agregar_libro' %}"
+             class="inline-flex items-center gap-1 text-xs font-bold hover:underline"
+             style="color:var(--primary);">
+            <span class="material-symbols-outlined text-sm">add_circle</span> Registrar nuevo
+          </a>
         </div>
-    </section>
+      </section>
 
+    </div><!-- /main content -->
+  </div><!-- /layout -->
 </div>
-</main>
+</div>
 
-<!-- Modal de Borrado Fino -->
-<div id="delete-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-    <div id="delete-modal-content" class="w-full max-w-md p-8 rounded-xl shadow-2xl transform scale-95 transition-transform duration-300" 
-         style="background-color: var(--surface); border: 1px solid var(--border);">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: rgba(186,26,26,0.1); color: #ba1a1a;">
-                <span class="material-symbols-outlined text-2xl">delete_forever</span>
-            </div>
-            <div>
-                <h3 class="font-headline italic text-2xl" style="color: var(--text);">Confirmar purga</h3>
-            </div>
-        </div>
-        
-        <p class="font-body text-sm mb-2" style="color: var(--text-muted);">
-            Estás a punto de borrar definitivamente del archivo digital el lote <strong id="modal-sku" class="font-mono text-xs px-1 py-0.5 rounded" style="background-color: var(--bg-subtle); color: var(--text);"></strong>.
-        </p>
-        <p class="font-body italic text-sm mb-8" id="modal-title" style="color: var(--text-faint);"></p>
-        
-        <div class="flex justify-end gap-3">
-            <button onclick="closeDeleteModal()" type="button" class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-gray-800" style="border: 1px solid var(--border); color: var(--text-muted);">
-                Cancelar
-            </button>
-            <button id="confirm-delete-btn" type="button" class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-all" style="background-color: #ba1a1a; color: white;">
-                Eliminar Registro
-            </button>
-        </div>
+<!-- ── DELETE MODAL ── -->
+<div id="delete-modal"
+     class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+  <div id="delete-modal-content"
+       class="w-full max-w-md p-8 rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300"
+       style="background:var(--surface); border:1px solid var(--border);">
+    <div class="flex items-center gap-4 mb-5">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+           style="background:rgba(186,26,26,.1); color:#ba1a1a;">
+        <span class="material-symbols-outlined">delete_forever</span>
+      </div>
+      <h3 class="font-headline italic text-2xl" style="color:var(--text);">Confirmar eliminación</h3>
     </div>
+    <p class="text-sm mb-2" style="color:var(--text-muted);">
+      Vas a eliminar el lote
+      <strong id="modal-sku" class="font-mono text-xs px-1.5 py-0.5 rounded"
+              style="background:var(--bg-subtle); color:var(--text);"></strong>
+    </p>
+    <p class="text-sm italic mb-8" id="modal-title" style="color:var(--text-faint);"></p>
+    <div class="flex justify-end gap-3">
+      <button onclick="closeDeleteModal()" type="button"
+              class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+              style="border:1px solid var(--border); color:var(--text-muted);">
+        Cancelar
+      </button>
+      <button id="confirm-delete-btn" type="button"
+              class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-all"
+              style="background:#ba1a1a; color:#fff;">
+        Eliminar
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
+/* ── Search filter ── */
 function filtrarTabla(q) {
-    const filas = document.querySelectorAll('.fila-libro');
-    const term = q.toLowerCase().trim();
-    filas.forEach(fila => {
-        const textos = Array.from(fila.querySelectorAll('.dato-libro'))
-                            .map(el => el.textContent.toLowerCase()).join(' ');
-        fila.style.display = (!term || textos.includes(term)) ? '' : 'none';
-    });
+  const term = q.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.fila-libro').forEach(row => {
+    const match = !term || (row.dataset.titulo + ' ' + row.dataset.autor + ' ' + row.dataset.isbn + ' ' + row.dataset.sku).includes(term);
+    const stockOk = currentFilter === 'todos' ||
+                    (currentFilter === 'agotado' && row.dataset.stock === '0') ||
+                    (currentFilter === 'disponible' && row.dataset.stock !== '0');
+    const show = match && stockOk;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('count-visible').textContent = visible;
 }
 
+/* ── Stock filter chips ── */
+let currentFilter = 'todos';
+function filtrarStock(tipo, btn) {
+  currentFilter = tipo;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  filtrarTabla(document.getElementById('filtro-tabla').value);
+}
+
+/* ── Table sort ── */
+let sortState = {};
+function sortTable(key, btn) {
+  const tbody = document.getElementById('tbody-inventario');
+  const rows = Array.from(tbody.querySelectorAll('.fila-libro'));
+  const dir = sortState[key] === 'asc' ? 'desc' : 'asc';
+  sortState = {}; sortState[key] = dir;
+
+  document.querySelectorAll('.sort-btn').forEach(b => { b.classList.remove('asc','desc'); });
+  btn.classList.add(dir);
+
+  rows.sort((a, b) => {
+    let va = a.dataset[key] || ''; let vb = b.dataset[key] || '';
+    if (key === 'stock' || key === 'precio') { va = parseFloat(va)||0; vb = parseFloat(vb)||0; }
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+/* ── Delete modal ── */
 let currentDeleteFormId = null;
-
 function openDeleteModal(id, sku, titulo) {
-    currentDeleteFormId = 'form-delete-' + id;
-    document.getElementById('modal-sku').innerText = sku;
-    document.getElementById('modal-title').innerText = '"' + titulo + '"';
-    
-    const modal = document.getElementById('delete-modal');
-    const content = document.getElementById('delete-modal-content');
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Animar entrada
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        content.classList.remove('scale-95');
-    }, 10);
+  currentDeleteFormId = 'form-delete-' + id;
+  document.getElementById('modal-sku').innerText = sku;
+  document.getElementById('modal-title').innerText = '"' + titulo + '"';
+  const modal = document.getElementById('delete-modal');
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  setTimeout(() => {
+    modal.classList.remove('opacity-0');
+    document.getElementById('delete-modal-content').classList.remove('scale-95');
+  }, 10);
 }
-
 function closeDeleteModal() {
-    const modal = document.getElementById('delete-modal');
-    const content = document.getElementById('delete-modal-content');
-    
-    // Animar salida
-    modal.classList.add('opacity-0');
-    content.classList.add('scale-95');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        currentDeleteFormId = null;
-    }, 300);
+  const modal = document.getElementById('delete-modal');
+  modal.classList.add('opacity-0');
+  document.getElementById('delete-modal-content').classList.add('scale-95');
+  setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); currentDeleteFormId = null; }, 300);
 }
-
-document.getElementById('confirm-delete-btn').addEventListener('click', function() {
-    if (currentDeleteFormId) {
-        document.getElementById(currentDeleteFormId).submit();
-    }
+document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+  if (currentDeleteFormId) document.getElementById(currentDeleteFormId).submit();
+});
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
 });
 </script>
 {% endblock %}
