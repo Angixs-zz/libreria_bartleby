@@ -122,12 +122,21 @@
 
         <!-- Apartados en curso -->
         <section class="mb-12">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="font-headline italic text-3xl text-[#1b1c1a] dark:text-white">Apartados en Curso</h2>
-                <span
-                    class="text-xs font-label uppercase tracking-widest px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
-                    {{ total_pendientes }} activo{{ total_pendientes|pluralize }}
-                </span>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <h2 class="font-headline italic text-3xl text-[#1b1c1a] dark:text-white">Apartados en Curso</h2>
+                    <span class="text-xs font-label uppercase tracking-widest px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
+                        {{ total_pendientes }} activo{{ total_pendientes|pluralize }}
+                    </span>
+                </div>
+                <!-- Buscador de códigos QR / Texto -->
+                <div class="relative w-full sm:w-80 shadow-sm rounded-lg">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" style="font-size: 1.25rem;">qr_code_scanner</span>
+                    <input type="text" id="buscador-apartados" placeholder="Escanear o teclear código..." 
+                           class="w-full pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1b1c1a] text-[#1b1c1a] dark:text-white focus:ring-2 focus:ring-[#3e5219] dark:focus:ring-[#d2eca2] outline-none transition-all font-mono text-sm"
+                           style="padding-left: 3rem;"
+                           autocomplete="off">
+                </div>
             </div>
 
             {% if pendientes %}
@@ -136,7 +145,7 @@
                 {% with h=reserva.horas_restantes %}
 
                 <div
-                    class="rounded-xl overflow-hidden transition-all hover:shadow-md bg-white dark:bg-[#1b1c1a] border border-gray-200 dark:border-gray-800 {% if h > 24 %}reserva-verde{% elif h > 6 %}reserva-amber{% else %}reserva-roja{% endif %}">
+                    class="reserva-card-item rounded-xl overflow-hidden transition-all hover:shadow-md bg-white dark:bg-[#1b1c1a] border border-gray-200 dark:border-gray-800 {% if h > 24 %}reserva-verde{% elif h > 6 %}reserva-amber{% else %}reserva-roja{% endif %}">
                     <div class="p-4 md:p-5 flex flex-col md:flex-row items-center gap-4 md:gap-6">
 
                         <!-- Usuario y código -->
@@ -147,7 +156,7 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="font-bold text-[#1b1c1a] dark:text-white truncate">{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</p>
-                                <p class="text-xs font-mono text-gray-400">{{ reserva.codigo_ticket }}</p>
+                                <p class="reserva-codigo-texto text-xs font-mono text-gray-400">{{ reserva.codigo_ticket }}</p>
                             </div>
                         </div>
 
@@ -318,5 +327,32 @@
     }
     actualizarCountdowns();
     setInterval(actualizarCountdowns, 1000);
+
+    // Buscador de códigos
+    document.addEventListener('DOMContentLoaded', () => {
+        const buscador = document.getElementById('buscador-apartados');
+        const reservas = document.querySelectorAll('.reserva-card-item');
+
+        if (buscador) {
+            buscador.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase().trim();
+                
+                reservas.forEach(card => {
+                    const codeElement = card.querySelector('.reserva-codigo-texto');
+                    if (codeElement) {
+                        const code = codeElement.textContent.toLowerCase();
+                        if (code.includes(term)) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+            
+            // Auto focus para pistolas láser de códigos QR
+            buscador.focus();
+        }
+    });
 </script>
 {% endblock %}
