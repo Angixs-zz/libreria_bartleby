@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<main class="max-w-6xl mx-auto px-8 py-12 pt-32 min-h-screen" style="background-color: var(--bg); color: var(--text);">
+<div class="pt-28 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-[1400px] mx-auto flex gap-6 items-start">
+  {% include 'partials/admin_sidebar.html' with request=request user=user only %}
+  <main class="flex-1 min-w-0" style="color: var(--text);">
 
 
 
@@ -201,6 +204,8 @@
     </div>
 
 </main>
+</div>
+</div>
 
 <script>
 let debounceTimer = null;

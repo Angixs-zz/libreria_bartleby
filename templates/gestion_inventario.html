@@ -132,9 +132,7 @@
         Gestión de Inventario
       </h1>
       <p class="text-sm mt-1" style="color:var(--text-muted);">
-        {{ total_ejemplares }} lote{% if total_ejemplares != 1 %}s{% endif %} registrados
-        {% if agotados %}· <span style="color:#ba1a1a;">{{ agotados }} agotados</span>{% endif %}
-        {% if reservas_pendientes %}· <span style="color:#3b82f6;">{{ reservas_pendientes }} reservas pendientes</span>{% endif %}
+        Administra el catálogo, revisa el stock y registra nuevos ejemplares.
       </p>
     </div>
     <a href="{% url 'agregar_libro' %}"
@@ -149,73 +147,29 @@
   <div class="flex gap-6 items-start">
 
     <!-- ════════════════ LEFT SIDEBAR ════════════════ -->
-    <aside class="hidden lg:flex flex-col gap-4 flex-shrink-0" style="width:220px;">
-
-      <!-- Stats mini-panel -->
-      <div class="rounded-2xl p-5 flex flex-col gap-4"
-           style="background:var(--surface); border:1px solid var(--border);">
-        <p class="section-label">Resumen</p>
-
-        <div>
-          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Total Lotes</p>
-          <p class="font-headline italic text-3xl font-bold" style="color:var(--primary);">{{ total_ejemplares }}</p>
-        </div>
-        <div>
-          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Agotados</p>
-          <p class="font-headline italic text-3xl font-bold" style="color:#ba1a1a;">{{ agotados }}</p>
-        </div>
-        <div>
-          <p class="text-[0.6rem] font-black uppercase tracking-widest mb-0.5" style="color:var(--text-faint);">Reservas</p>
-          <p class="font-headline italic text-3xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</p>
-        </div>
-      </div>
-
-      <!-- Quick nav -->
-      <div class="rounded-2xl p-4 flex flex-col gap-2"
-           style="background:var(--surface); border:1px solid var(--border);">
-        <p class="section-label">Módulos</p>
-        <a href="{% url 'agregar_libro' %}" class="qnav-chip primary">
-          <span class="material-symbols-outlined" style="font-size:1rem;">add_box</span> Agregar
-        </a>
-        <a href="{% url 'pos' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">point_of_sale</span> POS
-        </a>
-        <a href="{% url 'gestor_reservas' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">confirmation_number</span> Reservas
-        </a>
-        <a href="{% url 'directorio_proveedores' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">local_shipping</span> Proveedores
-        </a>
-        <a href="{% url 'dashboard_reportes' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">monitoring</span> Reportes
-        </a>
-        <a href="{% url 'panel_clientes' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">groups</span> Clientes
-        </a>
-        <a href="{% url 'lista_libros' %}" class="qnav-chip">
-          <span class="material-symbols-outlined" style="font-size:1rem;">storefront</span> Ver Tienda
-        </a>
-      </div>
-    </aside>
+    {% include 'partials/admin_sidebar.html' with request=request user=user only %}
 
     <!-- ════════════════ MAIN CONTENT ════════════════ -->
     <div class="flex-1 min-w-0 flex flex-col gap-6">
 
-      <!-- ── STAT CARDS (visible en móvil/tablet) ── -->
-      <section class="grid grid-cols-3 gap-3 lg:hidden stagger">
+      <!-- ── STAT CARDS ── -->
+      <section class="grid grid-cols-3 gap-3 stagger">
         <div class="stat-card">
-          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Lotes</p>
+          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Total Lotes</p>
           <p class="font-headline italic text-3xl font-bold" style="color:var(--primary);">{{ total_ejemplares }}</p>
+          <p class="text-xs mt-1" style="color:var(--text-faint);">en inventario</p>
           <span class="material-symbols-outlined stat-ghost">library_books</span>
         </div>
         <div class="stat-card">
-          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Agotados</p>
+          <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Sin Existencia</p>
           <p class="font-headline italic text-3xl font-bold" style="color:#ba1a1a;">{{ agotados }}</p>
+          <p class="text-xs mt-1" style="color:var(--text-faint);">lotes agotados</p>
           <span class="material-symbols-outlined stat-ghost">block</span>
         </div>
         <div class="stat-card">
           <p class="text-[0.58rem] font-black uppercase tracking-widest mb-1" style="color:var(--text-faint);">Reservas</p>
           <p class="font-headline italic text-3xl font-bold" style="color:#3b82f6;">{{ reservas_pendientes }}</p>
+          <p class="text-xs mt-1" style="color:var(--text-faint);">pendientes de retiro</p>
           <span class="material-symbols-outlined stat-ghost">bookmark</span>
         </div>
       </section>

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from inventario.models import Categoria, Libro, Ejemplar
+from inventario.models import EstadoFisico, Categoria, Libro, Ejemplar
 from usuarios.models import EventoAuditoria
 from .models import Proveedor, Adquisicion, DetalleAdquisicion
 
@@ -35,7 +35,7 @@ class ProveedoresModuleTests(TestCase):
         )
         self.ejemplar = Ejemplar.objects.create(
             libro=libro,
-            estado_fisico='bueno',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='bueno')[0],
             precio_compra=Decimal('90.00'),
             precio_venta=Decimal('180.00'),
             stock=2,
@@ -66,6 +66,7 @@ class ProveedoresModuleTests(TestCase):
             {
                 'proveedor': self.proveedor.id,
                 'fecha': '2026-04-08',
+                'tipo': 'identificado',
                 'observaciones': 'Compra de lote semanal',
                 'ejemplar_id': [str(self.ejemplar.id)],
                 'cantidad': ['3'],

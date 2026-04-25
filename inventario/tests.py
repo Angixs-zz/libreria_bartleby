@@ -13,7 +13,7 @@ from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
 
-from inventario.models import Libro, Ejemplar, Categoria
+from inventario.models import EstadoFisico, Libro, Ejemplar, Categoria
 from reservas.models import Reserva
 from ventas.models import Venta, DetalleVenta
 from services.inventario_service import InventarioService
@@ -107,7 +107,7 @@ class LibroEjemplarTestCase(TestCase):
         """Crear ejemplar debe generar SKU automático."""
         ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_venta=Decimal('15.99')
         )
         self.assertTrue(ejemplar.sku.startswith('BRT-'))
@@ -117,7 +117,7 @@ class LibroEjemplarTestCase(TestCase):
         """Precio referencia debe ser el del primer ejemplar."""
         ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_venta=Decimal('15.99')
         )
         self.assertEqual(self.libro.precio_referencia, Decimal('15.99'))
@@ -127,7 +127,7 @@ class LibroEjemplarTestCase(TestCase):
         for i in range(3):
             Ejemplar.objects.create(
                 libro=self.libro,
-                estado_fisico='nuevo',
+                estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
                 precio_venta=Decimal('15.99')
             )
         self.assertEqual(self.libro.total_ejemplares, 3)
@@ -149,7 +149,7 @@ class ReservaTestCase(TransactionTestCase):
         )
         self.ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_venta=Decimal('15.99'),
             stock=2
         )
@@ -198,7 +198,7 @@ class ReservaTestCase(TransactionTestCase):
         """Reservar múltiples ejemplares funciona."""
         ej2 = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='bueno',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='bueno')[0],
             precio_venta=Decimal('14.99'),
             stock=1
         )
@@ -216,7 +216,7 @@ class ReservaTestCase(TransactionTestCase):
         for i in range(InventarioService.MAX_EJEMPLARES_POR_RESERVA + 1):
             ej = Ejemplar.objects.create(
                 libro=self.libro,
-                estado_fisico='nuevo',
+                estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
                 precio_venta=Decimal('15.99'),
                 sku=f'BRT-TEST{i:04d}'
             )
@@ -243,7 +243,7 @@ class VentaTestCase(TransactionTestCase):
         )
         self.ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_venta=Decimal('15.99'),
             stock=5
         )
@@ -307,7 +307,7 @@ class CancelacionReservaTestCase(TransactionTestCase):
         )
         self.ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_venta=Decimal('15.99')
         )
         self.usuario = User.objects.create_user(

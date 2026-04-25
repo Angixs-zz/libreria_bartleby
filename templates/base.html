@@ -77,6 +77,16 @@ html.dark {
   transition-timing-function: ease;
 }
 
+/* ── Ocultar scrollbars globalmente (estética limpia) ──── */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+
 body {
   font-family: 'Manrope', sans-serif;
   background-color: var(--bg);
