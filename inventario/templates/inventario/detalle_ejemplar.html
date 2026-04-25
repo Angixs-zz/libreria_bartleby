@@ -88,8 +88,11 @@ textarea.field-input { resize: vertical; min-height: 90px; }
 {% endblock %}
 
 {% block content %}
-<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
-<div class="max-w-5xl mx-auto">
+<div class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-[1400px] mx-auto flex gap-6 items-start">
+  {% include 'partials/admin_sidebar.html' with request=request user=user only %}
+  <div class="flex-1 min-w-0">
+<div class="max-w-5xl">
 
     <!-- ── Breadcrumb ──────────────────────────────────── -->
     <nav class="flex items-center gap-2 text-xs font-body mb-8" style="color: var(--text-faint);">
@@ -405,7 +408,9 @@ textarea.field-input { resize: vertical; min-height: 90px; }
     {% endif %}
 
 </div>
-</main>
+</div>
+</div>
+</div>
 
 <!-- Modal de Borrado -->
 <div id="delete-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
@@ -440,6 +445,7 @@ textarea.field-input { resize: vertical; min-height: 90px; }
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -482,5 +488,4 @@ document.getElementById('confirm-delete-btn').addEventListener('click', function
     document.getElementById('form-delete-header').submit();
 });
 </script>
-{% endblock %}
 {% endblock %}

@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
-    <div class="max-w-7xl mx-auto">
+<div class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-[1400px] mx-auto flex gap-6 items-start">
+  {% include 'partials/admin_sidebar.html' with request=request user=user only %}
+  <main class="flex-1 min-w-0">
+    <div class="max-w-7xl">
         <section class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 py-10 mb-8"
                  style="border-bottom: 1px solid var(--border);">
             <div class="min-w-0">
@@ -318,5 +321,7 @@
             </div>
         </section>
     </div>
-</main>
+  </main>
+</div>
+</div>
 {% endblock %}

@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from inventario.models import Categoria, Libro, Ejemplar
+from inventario.models import EstadoFisico, Categoria, Libro, Ejemplar
 from proveedores.models import Proveedor, Adquisicion
 from reservas.models import Reserva
 from ventas.models import Venta, DetalleVenta
@@ -31,14 +31,14 @@ class DashboardReportesTests(TestCase):
 
         self.ejemplar_top = Ejemplar.objects.create(
             libro=self.libro_top,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_compra=Decimal('100.00'),
             precio_venta=Decimal('180.00'),
             stock=5,
         )
         self.ejemplar_stock_bajo = Ejemplar.objects.create(
             libro=self.libro_stock_bajo,
-            estado_fisico='bueno',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='bueno')[0],
             precio_compra=Decimal('80.00'),
             precio_venta=Decimal('120.00'),
             stock=2,

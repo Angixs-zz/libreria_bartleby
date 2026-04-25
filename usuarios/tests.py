@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from inventario.models import Categoria, Libro, Ejemplar
+from inventario.models import EstadoFisico, Categoria, Libro, Ejemplar
 from reservas.models import Reserva
 from usuarios.models import NotaClienteInterna, EventoAuditoria
 from ventas.models import Venta, DetalleVenta
@@ -44,7 +44,7 @@ class PanelClientesTests(TestCase):
         )
         ejemplar = Ejemplar.objects.create(
             libro=libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_compra=Decimal('100.00'),
             precio_venta=Decimal('250.00'),
             stock=3,
@@ -353,7 +353,7 @@ class MiPerfilActividadTests(TestCase):
         )
         self.ejemplar = Ejemplar.objects.create(
             libro=self.libro,
-            estado_fisico='nuevo',
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='nuevo')[0],
             precio_compra=Decimal('80.00'),
             precio_venta=Decimal('160.00'),
             stock=2,

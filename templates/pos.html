@@ -1,13 +1,33 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+{% block extra_head %}
+<style>
+  /* Ocultar scrollbars nativos para estética más limpia */
+  .hide-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Bloquear el scroll general de la ventana para el POS */
+  body {
+    overflow: hidden !important;
+  }
+</style>
+{% endblock %}
 
-<div class="flex flex-col lg:flex-row" style="min-height: calc(100vh - 5rem); background-color: var(--bg);">
+{% block content %}
+<div class="pt-6 pb-6 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5.5rem);">
+<div class="max-w-[1600px] mx-auto flex gap-6 items-stretch" style="height: calc(100vh - 8.5rem);">
+  {% include 'partials/admin_sidebar.html' with request=request user=user only %}
+  <main class="flex-1 min-w-0 rounded-xl overflow-hidden shadow-sm flex flex-col lg:flex-row relative" style="border: 1px solid var(--border); background-color: var(--bg);">
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
 
     <!-- ══ PANEL IZQUIERDO: Escáner + Ticket ══════════════ -->
-    <section class="flex-1 lg:mr-[380px] overflow-y-auto">
-        <div class="max-w-2xl mx-auto px-6 py-12">
+    <section class="flex-1 lg:mr-[380px] overflow-y-auto hide-scroll">
+        <div class="max-w-2xl mx-auto px-6 py-8">
 
             <!-- Título de la página -->
             <div class="mb-10">
@@ -63,11 +83,11 @@
     </section>
 
     <!-- ══ PANEL DERECHO: Resumen fijo ════════════════════ -->
-    <aside class="lg:fixed lg:right-0 lg:top-20 lg:w-[380px] lg:h-[calc(100vh-5rem)] flex flex-col"
-           style="background-color: var(--surface); border-left: 1px solid var(--border);">
+    <aside class="lg:absolute lg:right-0 lg:top-0 lg:w-[380px] flex flex-col"
+           style="background-color: var(--surface); border-left: 1px solid var(--border); height: 100%;">
 
         <!-- Contenido con scroll si hace falta -->
-        <div class="flex-1 overflow-y-auto px-8 py-10 flex flex-col gap-8">
+        <div class="flex-1 overflow-y-auto hide-scroll px-8 py-8 flex flex-col gap-6">
 
             <!-- Header resumen -->
             <div>
@@ -96,16 +116,16 @@
             <!-- Métodos de pago -->
             <div>
                 <p class="text-xs font-label uppercase tracking-widest mb-3" style="color: var(--text-muted);">Método de pago</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <button class="flex flex-col items-center gap-2 py-5 rounded-xl transition-all hover:opacity-80"
-                            style="border: 1px solid var(--border); color: var(--text-muted); background-color: var(--bg-subtle);">
+                <div class="grid grid-cols-2 gap-3" id="payment-methods">
+                    <button onclick="seleccionarMetodoPago('efectivo', this)" class="metodo-btn flex flex-col items-center gap-2 py-5 rounded-xl transition-all"
+                            style="border: 2px solid var(--primary); color: var(--primary); background-color: rgba(163,196,106,0.08);">
                         <span class="material-symbols-outlined text-2xl">payments</span>
                         <span class="text-xs font-bold font-label uppercase">Efectivo</span>
                     </button>
-                    <button class="flex flex-col items-center gap-2 py-5 rounded-xl transition-all"
-                            style="border: 2px solid var(--primary); color: var(--primary); background-color: rgba(163,196,106,0.08);">
-                        <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">credit_card</span>
-                        <span class="text-xs font-bold font-label uppercase">Tarjeta</span>
+                    <button onclick="seleccionarMetodoPago('transferencia', this)" class="metodo-btn flex flex-col items-center gap-2 py-5 rounded-xl transition-all hover:opacity-80"
+                            style="border: 1px solid var(--border); color: var(--text-muted); background-color: var(--bg-subtle);">
+                        <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">account_balance</span>
+                        <span class="text-xs font-bold font-label uppercase">Transferencia</span>
                     </button>
                 </div>
             </div>
@@ -121,13 +141,15 @@
             </button>
 
             <button onclick="pedirCancelar()"
-                    class="w-full py-3 rounded-xl flex items-center justify-center gap-2 font-body text-sm transition-all hover:text-red-500"
-                    style="color: var(--text-faint);">
+                    class="w-full py-3 rounded-xl flex items-center justify-center gap-2 font-body text-bold text-sm transition-all"
+                    style="color: #ba1a1a; font-weight: bold; background-color: rgba(186,26,26,0.1);">
                 <span class="material-symbols-outlined text-lg">cancel</span>
-                Cancelar venta
+                CANCELAR VENTA
             </button>
         </div>
     </aside>
+  </main>
+</div>
 </div>
 
 <!-- ══ Modal: Cancelar venta ══════════════════════════ -->
@@ -175,7 +197,21 @@
 
 <script>
     let carrito = [];
+    let metodoPagoSeleccionado = 'efectivo';
     const inputEscaner = document.getElementById('input-escaner');
+
+    function seleccionarMetodoPago(metodo, btnEl) {
+        metodoPagoSeleccionado = metodo;
+        document.querySelectorAll('.metodo-btn').forEach(btn => {
+            btn.style.border = '1px solid var(--border)';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.backgroundColor = 'var(--bg-subtle)';
+        });
+        btnEl.style.border = '2px solid var(--primary)';
+        btnEl.style.color = 'var(--primary)';
+        btnEl.style.backgroundColor = 'rgba(163,196,106,0.08)';
+        inputEscaner.focus();
+    }
 
     // Mantener foco en el escáner
     document.addEventListener('click', (e) => {
@@ -306,7 +342,7 @@
         fetch('/inventario/api/pos/cobrar/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrf_token').value },
-            body: JSON.stringify({ carrito })
+            body: JSON.stringify({ carrito: carrito, metodo_pago: metodoPagoSeleccionado })
         })
         .then(r => r.json())
         .then(d => {

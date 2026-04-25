@@ -1,0 +1,115 @@
+{% comment %}
+══════════════════════════════════════════════════════
+SIDEBAR DE ADMINISTRACIÓN — include en páginas admin
+Uso: include 'partials/admin_sidebar.html'
+══════════════════════════════════════════════════════
+{% endcomment %}
+<style>
+  /* Estilos propios del sidebar admin (safe to include multiple times) */
+  .adm-sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .adm-sidebar-panel {
+    border-radius: 16px;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .adm-section-label {
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.2rem;
+  }
+  .adm-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    transition: all 0.18s ease;
+    background: transparent;
+  }
+  .adm-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(163,196,106,0.08);
+    transform: translateX(2px);
+  }
+  .adm-chip.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 3px 10px rgba(62,82,25,0.22);
+  }
+  html.dark .adm-chip.active {
+    box-shadow: 0 3px 10px rgba(163,196,106,0.18);
+  }
+  .adm-chip .material-symbols-outlined { font-size: 1rem; flex-shrink: 0; }
+  /* Responsive: ocultar en < lg */
+  @media (max-width: 1023px) { .adm-sidebar { display: none; } }
+</style>
+
+<aside class="adm-sidebar">
+  <div class="adm-sidebar-panel">
+    <p class="adm-section-label">Módulos Admin</p>
+
+    <a href="{% url 'gestion_inventario' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestion_inventario' %}active{% endif %}">
+      <span class="material-symbols-outlined">inventory_2</span> Inventario
+    </a>
+    <a href="{% url 'agregar_libro' %}" class="adm-chip {% if request.resolver_match.url_name == 'agregar_libro' %}active{% endif %}">
+      <span class="material-symbols-outlined">add_box</span> Agregar Libro
+    </a>
+    <a href="{% url 'pos' %}" class="adm-chip {% if request.resolver_match.url_name == 'pos' %}active{% endif %}">
+      <span class="material-symbols-outlined">point_of_sale</span> POS
+    </a>
+    <a href="{% url 'gestor_reservas' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestor_reservas' %}active{% endif %}">
+      <span class="material-symbols-outlined">confirmation_number</span> Reservas
+    </a>
+    <a href="{% url 'directorio_proveedores' %}" class="adm-chip {% if request.resolver_match.url_name == 'directorio_proveedores' %}active{% endif %}">
+      <span class="material-symbols-outlined">local_shipping</span> Proveedores
+    </a>
+    <a href="{% url 'dashboard_reportes' %}" class="adm-chip {% if request.resolver_match.url_name == 'dashboard_reportes' %}active{% endif %}">
+      <span class="material-symbols-outlined">monitoring</span> Reportes
+    </a>
+    <a href="{% url 'centro_alertas' %}" class="adm-chip {% if request.resolver_match.url_name == 'centro_alertas' %}active{% endif %}">
+      <span class="material-symbols-outlined">notification_important</span> Alertas
+    </a>
+    <a href="{% url 'panel_clientes' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_clientes' %}active{% endif %}">
+      <span class="material-symbols-outlined">groups</span> Clientes
+    </a>
+    {% if user.is_superuser %}
+    <a href="{% url 'panel_personal' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_personal' %}active{% endif %}">
+      <span class="material-symbols-outlined">badge</span> Personal
+    </a>
+    <a href="{% url 'panel_auditoria' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_auditoria' %}active{% endif %}">
+      <span class="material-symbols-outlined">history</span> Auditoría
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="adm-sidebar-panel">
+    <p class="adm-section-label">Tienda</p>
+    <a href="{% url 'lista_libros' %}" class="adm-chip">
+      <span class="material-symbols-outlined">storefront</span> Ver catálogo
+    </a>
+  </div>
+</aside>

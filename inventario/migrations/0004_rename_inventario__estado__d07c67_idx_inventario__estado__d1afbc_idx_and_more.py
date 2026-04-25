@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RemoveIndex(
+            model_name='ejemplar',
+            name='inventario__estado__d07c67_idx',
+        ),
         migrations.RemoveField(
             model_name='ejemplar',
             name='estado_fisico',
