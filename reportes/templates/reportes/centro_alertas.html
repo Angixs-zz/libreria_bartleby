@@ -118,14 +118,14 @@
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
                             <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Inventario</p>
-                            <h2 class="section-title h3 mb-0">Stock crítico</h2>
+                            <h2 class="section-title h3 mb-0">Stock agotado</h2>
                         </div>
                         <span class="kpi-icon" style="background-color: rgba(13, 110, 253, 0.12); color: #0d6efd;">
                             <i class="bi bi-bookshelf"></i>
                         </span>
                     </div>
                     <div class="display-6 fw-semibold mb-2" style="color: #0d6efd;">{{ stock_critico|length }}</div>
-                    <p class="mb-0 small" style="color: var(--text-muted);">Títulos con menos de {{ umbral_stock_critico }} unidades registradas.</p>
+                    <p class="mb-0 small" style="color: var(--text-muted);">Títulos que se han quedado sin unidades disponibles en el inventario.</p>
                 </div>
             </div>
 
@@ -189,7 +189,7 @@
                 <div class="alert-panel rounded-4 p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2 class="section-title h2 mb-2">Stock crítico</h2>
+                            <h2 class="section-title h2 mb-2">Stock agotado</h2>
                             <p class="small mb-0" style="color: var(--text-muted);">Títulos por debajo del umbral de inventario.</p>
                         </div>
                         <span class="badge rounded-pill text-bg-primary">{{ stock_critico|length }}</span>
@@ -212,7 +212,7 @@
                                 </div>
                             </div>
                         {% empty %}
-                            <div class="alert alert-success mb-0">No hay libros en stock crítico.</div>
+                            <div class="alert alert-success mb-0">No tienes ningún libro agotado actualmente.</div>
                         {% endfor %}
                     </div>
                 </div>

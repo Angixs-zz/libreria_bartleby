@@ -335,7 +335,7 @@ def mi_perfil_actividad(request):
         inventario_resumen = Libro.objects.aggregate(
             titulos=Count('id'),
             unidades=Coalesce(Sum('ejemplares__stock'), 0),
-            criticos=Count('id', filter=Q(ejemplares__stock__lt=3), distinct=True),
+            criticos=Count('id', filter=Q(ejemplares__stock__lt=1), distinct=True),
         )
 
         context.update({
