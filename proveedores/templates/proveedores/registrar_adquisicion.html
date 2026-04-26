@@ -4,13 +4,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <style>
 .adquisiciones-shell { --bs-body-bg: transparent; --bs-body-color: var(--text); }
-.adquisiciones-shell .surface-card {
+.adquisiciones-shell .surface-card,
+.adquisiciones-shell .modal-content {
     background: linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,244,240,0.92));
     border: 1px solid rgba(197,200,184,0.7);
     box-shadow: 0 20px 60px rgba(23,29,15,0.08);
     border-radius: 1rem;
+    color: var(--text);
 }
-.dark .adquisiciones-shell .surface-card {
+.dark .adquisiciones-shell .surface-card,
+.dark .adquisiciones-shell .modal-content {
     background: linear-gradient(180deg,rgba(39,39,31,0.95),rgba(30,30,24,0.94));
     border-color: rgba(80,85,60,0.6);
 }
@@ -38,6 +41,42 @@
 }
 .tipo-pill .pill-label .material-symbols-outlined { font-size:2rem; }
 #detalle-lote-section { transition: opacity .3s, max-height .4s; }
+.adquisiciones-shell .section-title { font-family:'Newsreader',serif; font-style:italic; color:var(--primary); }
+.adquisiciones-shell .olive-btn { background:var(--primary); border-color:var(--primary); color:#fff; }
+.adquisiciones-shell .olive-btn:hover,
+.adquisiciones-shell .olive-btn:focus { background:#3e5219; border-color:#3e5219; color:#fff; }
+.adquisiciones-shell .quick-book-panel {
+    background: rgba(163,196,106,0.08);
+    border: 1px dashed rgba(163,196,106,0.42);
+}
+.adquisiciones-shell .cover-preview {
+    display: none;
+    align-items: center;
+    gap: .9rem;
+    padding: .85rem;
+    border-radius: .75rem;
+    background: rgba(74,93,35,.07);
+    border: 1px solid rgba(74,93,35,.14);
+}
+.adquisiciones-shell .cover-preview img {
+    width: 4.75rem;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: .55rem;
+    box-shadow: 0 10px 22px rgba(23,29,15,.16);
+}
+.adquisiciones-shell .form-control,
+.adquisiciones-shell .form-select,
+.adquisiciones-shell .input-group-text {
+    background-color: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+}
+.adquisiciones-shell .form-control:focus,
+.adquisiciones-shell .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .2rem rgba(74,93,35,.14);
+}
 </style>
 {% endblock %}
 
@@ -114,12 +153,12 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
                 <div>
                     <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;">Detalle del lote</h2>
-                    <p class="mb-0 small" style="color:var(--text-muted);">Cada renglón sube el stock del ejemplar seleccionado.</p>
+                    <p class="mb-0 small" style="color:var(--text-muted);">Cada renglón registra lo comprado al proveedor y sube el stock del ejemplar seleccionado.</p>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-primary" id="btn-abrir-modal-libro">
                         <span class="material-symbols-outlined align-middle" style="font-size:1rem;">auto_fix_high</span>
-                        Libro nuevo
+                        Libro suelto nuevo
                     </button>
                     <button type="button" class="btn btn-outline-secondary" id="agregar-renglon">
                         <span class="material-symbols-outlined align-middle" style="font-size:1rem;">add</span>
@@ -183,7 +222,7 @@
             <p class="mb-0 small" style="color:var(--text-muted);" id="hint-lote">
                 Para <strong>lote cerrado</strong> solo se guarda la cabecera. Luego inventarías libro por libro.
             </p>
-            <button type="submit" class="btn btn-success btn-lg">
+            <button type="submit" class="btn olive-btn btn-lg">
                 <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
                 <span id="btn-submit-label">Guardar adquisición</span>
             </button>
@@ -198,22 +237,23 @@
 
 <!-- ═══ MODAL: Crear libro + ejemplar rápido ════════════════════════ -->
 <div class="modal fade" id="modal-libro-rapido" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background:var(--surface);color:var(--text);border:1px solid var(--border);">
-            <div class="modal-header" style="border-color:var(--border);">
-                <h5 class="modal-title fw-bold" style="font-family:'Newsreader',serif;">
-                    <span class="material-symbols-outlined align-middle me-2" style="color:var(--primary);">auto_stories</span>
-                    Registrar libro nuevo
-                </h5>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <p class="text-uppercase fw-bold small mb-1" style="letter-spacing:.16em;color:var(--text-muted);">Libro suelto · Nueva obra</p>
+                    <h5 class="modal-title section-title fs-2">Registrar libro nuevo</h5>
+                    <p class="small mb-0" style="color:var(--text-muted);">Se creará el libro y quedará seleccionado en el detalle de esta adquisición.</p>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
 
                 <!-- Búsqueda por ISBN -->
-                <div class="mb-4 p-3 rounded-3" style="background:rgba(163,196,106,0.08);border:1px dashed rgba(163,196,106,0.4);">
+                <div class="quick-book-panel mb-4 p-4 rounded-3">
                     <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">
                         <span class="material-symbols-outlined align-middle" style="font-size:.9rem;">barcode_scanner</span>
-                        Buscar por ISBN (opcional — autocompletado)
+                        Búsqueda rápida por ISBN
                     </label>
                     <div class="input-group">
                         <input type="text" id="input-isbn-buscar" class="form-control" placeholder="9780743273565">
@@ -222,56 +262,94 @@
                     <div id="isbn-feedback" class="mt-2 small" style="color:var(--text-muted);"></div>
                 </div>
 
-                <form id="form-libro-rapido">
+                <form id="form-libro-rapido" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Título <span class="text-danger">*</span></label>
-                            {{ libro_form.titulo }}
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="surface-card p-4 h-100">
+                                <h3 class="fw-bold small text-uppercase mb-3 pb-2" style="letter-spacing:.1em;color:var(--text-muted);border-bottom:1px solid var(--border);">Datos de la obra</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Título <span class="text-danger">*</span></label>
+                                        {{ libro_form.titulo }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">ISBN</label>
+                                        {{ libro_form.isbn }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Autor <span class="text-danger">*</span></label>
+                                        {{ libro_form.autor }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Editorial</label>
+                                        {{ libro_form.editorial }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Año de publicación</label>
+                                        {{ libro_form.anio_publicacion }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Categoría / Género</label>
+                                        {{ libro_form.categoria_texto }}
+                                        <datalist id="categorias_rapidas_list">
+                                            {% for cat in categorias %}
+                                                <option value="{{ cat.nombre }}">
+                                            {% endfor %}
+                                        </datalist>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Sinopsis / Descripción</label>
+                                        {{ libro_form.descripcion }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">ISBN</label>
-                            {{ libro_form.isbn }}
-                        </div>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Autor <span class="text-danger">*</span></label>
-                            {{ libro_form.autor }}
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Editorial</label>
-                            {{ libro_form.editorial }}
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Categoría</label>
-                            {{ libro_form.categoria }}
-                        </div>
-                    </div>
-                    <hr style="border-color:var(--border);">
-                    <p class="fw-bold small text-uppercase mb-3" style="letter-spacing:.08em;color:var(--text-muted);">Estado del ejemplar</p>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Condición <span class="text-danger">*</span></label>
-                            {{ ejemplar_form.estado_fisico }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Precio de venta <span class="text-danger">*</span></label>
-                            {{ ejemplar_form.precio_venta }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Notas del estado</label>
-                            {{ ejemplar_form.descripcion_estado }}
+                        <div class="col-lg-5">
+                            <div class="surface-card p-4 h-100">
+                                <h3 class="fw-bold small text-uppercase mb-3 pb-2" style="letter-spacing:.1em;color:var(--text-muted);border-bottom:1px solid var(--border);">Primer ejemplar</h3>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Condición <span class="text-danger">*</span></label>
+                                        {{ ejemplar_form.estado_fisico }}
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Precio de venta <span class="text-danger">*</span></label>
+                                        {{ ejemplar_form.precio_venta }}
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Portada</label>
+                                        {{ libro_form.portada }}
+                                    </div>
+                                    <div class="col-12">
+                                        <div id="portada-preview-wrap-rapida" class="cover-preview">
+                                            <img id="portada-preview-img-rapida" src="" alt="Portada detectada por ISBN">
+                                            <div>
+                                                <div class="fw-semibold">Portada detectada</div>
+                                                <div class="small" style="color:var(--text-muted);">Se guardará automáticamente si no subes otra imagen.</div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="portada_url_externa" id="portada-url-hidden-rapida">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Notas del estado</label>
+                                        {{ ejemplar_form.descripcion_estado }}
+                                    </div>
+                                </div>
+                                <div class="alert alert-light border mt-3 mb-0 small" style="color:var(--text-muted);background:rgba(255,255,255,.38);border-color:var(--border)!important;">
+                                    El costo y la cantidad se capturan en el renglón de adquisición para que queden ligados al proveedor seleccionado.
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="modal-errores" class="mt-3 alert alert-danger d-none"></div>
                 </form>
             </div>
-            <div class="modal-footer" style="border-color:var(--border);">
+            <div class="modal-footer border-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btn-guardar-libro-rapido">
+                <button type="button" class="btn olive-btn" id="btn-guardar-libro-rapido">
                     <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
-                    Crear y agregar a la tabla
+                    Crear y seleccionar
                 </button>
             </div>
         </div>
@@ -345,23 +423,77 @@ const CSRF  = document.querySelector('[name=csrfmiddlewaretoken]').value;
 document.getElementById('btn-abrir-modal-libro').addEventListener('click', () => modal.show());
 
 // Búsqueda ISBN
+function setLibroRapidoValue(name, value) {
+    const el = document.querySelector(`#form-libro-rapido [name=${name}]`);
+    if (el && value !== undefined && value !== null) el.value = value;
+}
+
+function limpiarPortadaDetectada() {
+    const wrap = document.getElementById('portada-preview-wrap-rapida');
+    const img = document.getElementById('portada-preview-img-rapida');
+    const hidden = document.getElementById('portada-url-hidden-rapida');
+    if (wrap) wrap.style.display = 'none';
+    if (img) img.src = '';
+    if (hidden) hidden.value = '';
+}
+
+function mostrarPortadaDetectada(url) {
+    const wrap = document.getElementById('portada-preview-wrap-rapida');
+    const img = document.getElementById('portada-preview-img-rapida');
+    const hidden = document.getElementById('portada-url-hidden-rapida');
+    if (!url || !wrap || !img || !hidden) {
+        limpiarPortadaDetectada();
+        return;
+    }
+    img.src = url;
+    hidden.value = url;
+    wrap.style.display = 'flex';
+}
+
+function etiquetaFuenteISBN(fuente) {
+    if (fuente === 'local') return 'Encontrado en tu inventario';
+    if (fuente === 'google_books') return 'Encontrado en Google Books';
+    if (fuente === 'openlibrary_isbn' || fuente === 'openlibrary_search') return 'Encontrado en Open Library';
+    return 'Información encontrada';
+}
+
 document.getElementById('btn-buscar-isbn').addEventListener('click', async () => {
     const isbn = document.getElementById('input-isbn-buscar').value.trim();
     if (!isbn) return;
     const fb = document.getElementById('isbn-feedback');
-    fb.textContent = 'Buscando…';
-    const res  = await fetch(`{% url 'buscar_libro_isbn' %}?isbn=${encodeURIComponent(isbn)}`);
-    const data = await res.json();
-    if (data.ok) {
-        document.querySelector('#form-libro-rapido [name=titulo]').value  = data.titulo;
-        document.querySelector('#form-libro-rapido [name=autor]').value   = data.autor;
-        document.querySelector('#form-libro-rapido [name=isbn]').value    = isbn;
-        document.querySelector('#form-libro-rapido [name=editorial]').value = data.editorial || '';
-        if (data.categoria_id) document.querySelector('#form-libro-rapido [name=categoria]').value = data.categoria_id;
-        const fuente = data.fuente === 'local' ? '✅ Encontrado en tu catálogo' : '🌐 Encontrado en Open Library';
-        fb.innerHTML = `<span style="color:var(--primary);">${fuente}: <em>${data.titulo}</em></span>`;
-    } else {
-        fb.innerHTML = `<span style="color:#ba1a1a;">No encontrado. Llena los datos manualmente.</span>`;
+    const cleanIsbn = isbn.replace(/[- ]/g, '');
+    fb.textContent = 'Buscando información del libro...';
+
+    try {
+        const res  = await fetch(`{% url 'buscar_isbn_enriquecido' %}?isbn=${encodeURIComponent(cleanIsbn)}`);
+        if (!res.ok) {
+            limpiarPortadaDetectada();
+            setLibroRapidoValue('isbn', cleanIsbn);
+            fb.innerHTML = `<span style="color:#ba1a1a;">No se encontró información. Puedes llenar los datos manualmente.</span>`;
+            return;
+        }
+
+        const data = await res.json();
+        setLibroRapidoValue('titulo', data.titulo || '');
+        setLibroRapidoValue('autor', data.autor || '');
+        setLibroRapidoValue('isbn', cleanIsbn);
+        setLibroRapidoValue('editorial', data.editorial || '');
+        setLibroRapidoValue('anio_publicacion', data.anio || '');
+        setLibroRapidoValue('categoria_texto', data.categoria || '');
+        setLibroRapidoValue('descripcion', data.descripcion || '');
+        mostrarPortadaDetectada(data.portada_url || '');
+
+        fb.innerHTML = `<span style="color:var(--primary);">${etiquetaFuenteISBN(data.fuente)}: <em>${data.titulo || cleanIsbn}</em>. Revisa y completa lo que falte.</span>`;
+    } catch (e) {
+        limpiarPortadaDetectada();
+        fb.innerHTML = `<span style="color:#ba1a1a;">No se pudo consultar la API. Puedes llenar los datos manualmente.</span>`;
+    }
+});
+
+document.getElementById('input-isbn-buscar').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('btn-buscar-isbn').click();
     }
 });
 
@@ -386,7 +518,19 @@ document.getElementById('btn-guardar-libro-rapido').addEventListener('click', as
         const rows = document.querySelectorAll('#tabla-detalles tbody tr');
         if (rows.length === 1) {
             rows[0].querySelector('[name=ejemplar_id]').value = data.ejemplar_id;
+            rows[0].querySelector('[name=cantidad]').value = rows[0].querySelector('[name=cantidad]').value || '1';
+        } else {
+            const ultima = rows[rows.length - 1];
+            if (!ultima.querySelector('[name=ejemplar_id]').value) {
+                ultima.querySelector('[name=ejemplar_id]').value = data.ejemplar_id;
+                ultima.querySelector('[name=cantidad]').value = ultima.querySelector('[name=cantidad]').value || '1';
+            }
         }
+        recalcularTotales();
+        form.reset();
+        limpiarPortadaDetectada();
+        document.getElementById('isbn-feedback').textContent = '';
+        document.getElementById('input-isbn-buscar').value = '';
         modal.hide();
     } else {
         const msgs = Object.values(data.errores).flat().join(' · ');

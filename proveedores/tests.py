@@ -94,6 +94,46 @@ class ProveedoresModuleTests(TestCase):
             ).exists()
         )
 
+    def test_registrar_adquisicion_preselecciona_proveedor_desde_querystring(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse('registrar_adquisicion'),
+            {'proveedor': self.proveedor.id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].initial['proveedor'], str(self.proveedor.id))
+
+    def test_crear_ejemplar_rapido_crea_libro_con_categoria_nueva(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse('crear_ejemplar_rapido'),
+            {
+                'titulo': 'La ciudad y sus muros inciertos',
+                'autor': 'Haruki Murakami',
+                'isbn': '9786073910123',
+                'editorial': 'Tusquets',
+                'anio_publicacion': '2024',
+                'categoria_texto': 'Narrativa japonesa',
+                'descripcion': 'Novela contemporanea.',
+                'estado_fisico': EstadoFisico.objects.get(nombre='bueno').id,
+                'precio_venta': '260.00',
+                'descripcion_estado': 'Ejemplar en buen estado.',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['ok'])
+
+        libro = Libro.objects.get(isbn='9786073910123')
+        self.assertEqual(libro.categoria.nombre, 'Narrativa japonesa')
+        self.assertEqual(libro.anio_publicacion, 2024)
+        self.assertEqual(libro.ejemplares.count(), 1)
+        self.assertEqual(libro.ejemplares.first().stock, 0)
+
     def test_historial_proveedor_muestra_totales(self):
         adquisicion = Adquisicion.objects.create(
             proveedor=self.proveedor,

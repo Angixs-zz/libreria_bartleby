@@ -1,5 +1,75 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    .entry-two-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.25rem;
+        align-items: start;
+    }
+
+    .entry-main-panel,
+    .entry-side-card {
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+    }
+
+    .entry-main-panel {
+        background-color: var(--surface);
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .entry-side-card {
+        background-color: var(--bg-subtle);
+        padding: 1.25rem;
+    }
+
+    .entry-field-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.1rem 1.5rem;
+    }
+
+    .entry-field-wide {
+        grid-column: 1 / -1;
+    }
+
+    .entry-side-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .entry-cover-preview {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background-color: var(--surface);
+        padding: 1rem;
+    }
+
+    @media (min-width: 900px) {
+        .entry-two-column {
+            grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
+        }
+
+        .entry-field-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .entry-side-panel {
+            position: sticky;
+            top: 6rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="pt-28 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
 <div class="max-w-[1400px] mx-auto flex gap-6 items-start">
@@ -122,42 +192,44 @@
     </div>
 
     <div id="resultado-nuevo" class="hidden">
-        <div class="p-4 rounded-xl mb-6" style="background-color: rgba(163,196,106,0.12); border: 1px solid rgba(163,196,106,0.4);">
-            <p class="text-xs font-bold uppercase tracking-widest" style="color: var(--primary);">Obra nueva — no existe en el sistema</p>
-        </div>
-        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <form method="POST" enctype="multipart/form-data" class="entry-two-column">
             {% csrf_token %}
             <input type="hidden" name="accion" value="crear_todo">
-            <div class="md:col-span-7 space-y-6 p-8 rounded-xl shadow-sm" style="background-color: var(--surface); border: 1px solid var(--border);">
-                <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Datos de la Obra</h3>
-                <div>
-                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Título</label>
-                    <input type="text" name="titulo" id="nuevo-titulo" required class="w-full border-0 py-3 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+
+            <div class="entry-main-panel">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 pb-3" style="border-bottom: 1px solid var(--border);">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest" style="color: var(--primary);">Obra nueva</p>
+                        <h3 class="font-headline italic text-2xl leading-tight" style="color: var(--text);">Datos de la obra</h3>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-faint);">No existe en el sistema</span>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Autor</label>
-                    <input type="text" name="autor" id="nuevo-autor" required class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
-                </div>
-                <div class="grid grid-cols-2 gap-6">
+
+                <div class="entry-field-grid">
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Título</label>
+                        <input type="text" name="titulo" id="nuevo-titulo" required class="w-full border-0 py-2.5 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Autor</label>
+                        <input type="text" name="autor" id="nuevo-autor" required class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                    </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">ISBN</label>
-                        <input type="text" name="isbn" id="nuevo-isbn" class="w-full border-0 py-3 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="978-x-xxx...">
+                        <input type="text" name="isbn" id="nuevo-isbn" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="978-x-xxx...">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Editorial</label>
-                        <input type="text" name="editorial" id="nuevo-editorial" class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                        <input type="text" name="editorial" id="nuevo-editorial" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
                     </div>
-                </div>
-                <div class="grid grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Año de publicación</label>
-                        <input type="number" name="anio_publicacion" id="nuevo-anio" min="1000" max="2099" class="w-full border-0 py-3 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="Ej. 2023">
+                        <input type="number" name="anio_publicacion" id="nuevo-anio" min="1000" max="2099" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="Ej. 2023">
                     </div>
                     <div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
                         <input type="text" name="categoria_texto" id="nuevo-categoria" list="categorias_list"
-                               class="w-full border-0 py-3 focus:ring-0 bg-transparent"
+                               class="w-full border-0 py-2.5 focus:ring-0 bg-transparent"
                                style="border-bottom: 1px solid var(--border); color: var(--text);"
                                placeholder="Escribe o crea una nueva">
                         <datalist id="categorias_list">
@@ -166,24 +238,19 @@
                             {% endfor %}
                         </datalist>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Sinopsis / Descripción</label>
-                    <textarea name="descripcion" id="nuevo-descripcion" rows="4"
-                              class="w-full rounded-lg p-3 text-sm font-body resize-none"
-                              style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
-                              placeholder="Se autocompleta al buscar por ISBN…"></textarea>
+                    <div class="entry-field-wide">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Sinopsis / Descripción</label>
+                        <textarea name="descripcion" id="nuevo-descripcion" rows="3"
+                                  class="w-full rounded-lg p-3 text-sm font-body resize-none"
+                                  style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
+                                  placeholder="Se autocompleta al buscar por ISBN…"></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="md:col-span-5 space-y-4">
-                <!-- Portada preview from ISBN -->
-                <div id="portada-preview-wrap" class="hidden rounded-xl p-5 gap-3 flex-col items-center" style="border: 1px solid var(--border); background-color: var(--surface);">
-                    <img id="portada-preview-img" src="" alt="Portada" class="w-full max-w-[150px] rounded-lg shadow-lg mx-auto" style="aspect-ratio:3/4;object-fit:cover;">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-center" style="color:var(--text-faint);">Portada detectada por ISBN</span>
-                    <input type="hidden" name="portada_url_externa" id="portada-url-hidden">
-                </div>
-                <div class="p-6 rounded-xl" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
-                    <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Estado y Costos del Primer Lote</h3>
+
+            <aside class="entry-side-panel">
+                <div class="entry-side-card">
+                    <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Estado y costos</h3>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
@@ -194,9 +261,8 @@
                                 <option value="__nuevo__" class="font-bold" style="color: var(--primary);">+ Crear nueva condición...</option>
                             </select>
                             <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
-                            <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo ($)</label>
                                 <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
@@ -210,16 +276,24 @@
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad inicial</label>
                             <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada</label>
-                            <input type="file" name="portada" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#3e5219] file:text-white">
-                        </div>
                     </div>
                 </div>
+
+                <div id="portada-preview-wrap" class="hidden entry-cover-preview">
+                    <img id="portada-preview-img" src="" alt="Portada" class="w-full max-w-[128px] rounded-lg shadow-lg mx-auto" style="aspect-ratio:3/4;object-fit:cover;">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-center" style="color:var(--text-faint);">Portada detectada por ISBN</span>
+                    <input type="hidden" name="portada_url_externa" id="portada-url-hidden">
+                </div>
+
+                <div class="entry-side-card" style="background-color: var(--surface);">
+                    <label class="block text-xs font-bold mb-2 uppercase" style="color: var(--primary);">Portada</label>
+                    <input type="file" name="portada" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#3e5219] file:text-white">
+                </div>
+
                 <button type="submit" class="w-full bg-[#3e5219] text-white py-4 rounded-lg font-bold uppercase tracking-widest hover:opacity-90 shadow-md">
                     Guardar nueva obra
                 </button>
-            </div>
+            </aside>
         </form>
     </div>
 

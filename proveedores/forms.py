@@ -37,15 +37,43 @@ class AdquisicionForm(forms.ModelForm):
 
 class LibroRapidoForm(forms.ModelForm):
     """Crea o recupera un Libro por ISBN o título+autor desde el modal inline."""
+    categoria_texto = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'list': 'categorias_rapidas_list',
+            'placeholder': 'Escribe o crea una categoría',
+        })
+    )
+
     class Meta:
         model = Libro
-        fields = ['isbn', 'titulo', 'autor', 'editorial', 'categoria']
+        fields = [
+            'isbn',
+            'titulo',
+            'autor',
+            'editorial',
+            'anio_publicacion',
+            'descripcion',
+            'portada',
+        ]
         widgets = {
             'isbn':     forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ISBN-10 o ISBN-13 (opcional)'}),
             'titulo':   forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título'}),
             'autor':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Autor'}),
             'editorial':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Editorial (opcional)'}),
-            'categoria': forms.Select(attrs={'class': 'form-select'}),
+            'anio_publicacion': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1000',
+                'max': '2099',
+                'placeholder': 'Ej. 2023',
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Sinopsis o notas generales del libro',
+            }),
+            'portada': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
 
