@@ -36,6 +36,7 @@ class Libro(models.Model):
         help_text="ISBN-10 o ISBN-13"
     )
     editorial = models.CharField(max_length=100, blank=True, null=True)
+    anio_publicacion = models.PositiveSmallIntegerField(blank=True, null=True, help_text="Año de publicación original")
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     descripcion = models.TextField(blank=True, null=True)
     portada = models.ImageField(upload_to='portadas/', blank=True, null=True)

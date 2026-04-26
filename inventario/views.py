@@ -71,6 +71,7 @@ def agregar_libro(request):
                 autor = request.POST.get('autor', '').strip()
                 isbn = request.POST.get('isbn', '').strip()
                 editorial = request.POST.get('editorial', '').strip()
+                anio_raw = request.POST.get('anio_publicacion', '').strip()
                 descripcion = request.POST.get('descripcion', '').strip()
                 portada = request.FILES.get('portada')
                 nombre_categoria = request.POST.get('categoria_texto', '').strip()
@@ -115,16 +116,45 @@ def agregar_libro(request):
                         nombre=nombre_categoria.capitalize()
                     )
 
+                # Parsear año
+                anio_publicacion = None
+                if anio_raw and anio_raw.isdigit():
+                    anio_publicacion = int(anio_raw)
+
                 # Crear libro
                 libro_obj = Libro.objects.create(
                     titulo=titulo,
                     autor=autor,
                     isbn=isbn if isbn else None,
                     editorial=editorial if editorial else None,
+                    anio_publicacion=anio_publicacion,
                     categoria=categoria_obj,
                     descripcion=descripcion if descripcion else None,
                     portada=portada if portada else None
                 )
+
+                # Si no se subió portada manual pero viene URL externa (desde ISBN), descargarla
+                if not portada:
+                    portada_url_ext = request.POST.get('portada_url_externa', '').strip()
+                    if portada_url_ext:
+                        import urllib.request
+                        import urllib.error
+                        import os
+                        from django.core.files.base import ContentFile
+                        try:
+                            req = urllib.request.Request(
+                                portada_url_ext,
+                                headers={'User-Agent': 'LibreriaBartleby/1.0'}
+                            )
+                            with urllib.request.urlopen(req, timeout=8) as resp:
+                                img_data = resp.read()
+                            ext = portada_url_ext.split('.')[-1].split('?')[0].lower()
+                            if ext not in ('jpg', 'jpeg', 'png', 'webp'):
+                                ext = 'jpg'
+                            filename = f'isbn_{isbn or titulo[:20].replace(" ","_")}.{ext}'
+                            libro_obj.portada.save(filename, ContentFile(img_data), save=True)
+                        except Exception:
+                            pass  # Si falla la descarga, continúa sin portada
 
                 estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
                 if not estado_fisico_obj:
@@ -319,6 +349,171 @@ def buscar_libro_ajax(request):
 
 
 @staff_member_required
+@require_http_methods(["GET"])
+def buscar_isbn_enriquecido(request):
+    """
+    Busca informaci\u00f3n completa de un libro por ISBN consultando APIs externas.
+    
+    Nivel 1: Base de datos local
+    Nivel 2: OpenLibrary /isbn/<isbn>.json  (metadatos + descripci\u00f3n)
+    Nivel 3: OpenLibrary /search.json       (fallback)
+    
+    Devuelve: titulo, autor, editorial, anio, descripcion, categoria, portada_url
+    """
+    import urllib.request
+    import urllib.error
+
+    isbn_raw = request.GET.get('isbn', '').strip()
+    if not isbn_raw:
+        return JsonResponse({'error': 'ISBN requerido'}, status=400)
+
+    isbn = isbn_raw.replace('-', '').replace(' ', '')
+
+    # ── Nivel 1: inventario local (solo si tiene ejemplares activos) ─────────
+    libro_local = Libro.objects.filter(isbn=isbn).first()
+    if libro_local and libro_local.ejemplares.exists():
+        return JsonResponse({
+            'fuente': 'local',
+            'titulo': libro_local.titulo,
+            'autor': libro_local.autor,
+            'editorial': libro_local.editorial or '',
+            'anio': libro_local.anio_publicacion or '',
+            'descripcion': libro_local.descripcion or '',
+            'categoria': libro_local.categoria.nombre if libro_local.categoria else '',
+            'portada_url': libro_local.portada.url if libro_local.portada else '',
+        })
+
+    def _fetch_json(url, timeout=6):
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'LibreriaBartleby/1.0'})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read().decode('utf-8'))
+        except Exception:
+            return None
+
+    resultado = {
+        'fuente': None,
+        'titulo': '',
+        'autor': '',
+        'editorial': '',
+        'anio': '',
+        'descripcion': '',
+        'categoria': '',
+        'portada_url': '',
+    }
+
+    # ── Nivel 2: OpenLibrary /isbn/<isbn>.json ────────────────────────────
+    data_isbn = _fetch_json(f'https://openlibrary.org/isbn/{isbn}.json')
+    if data_isbn and data_isbn.get('title'):
+        resultado['fuente'] = 'openlibrary_isbn'
+        resultado['titulo'] = data_isbn.get('title', '')
+
+        # A\u00f1o de publicaci\u00f3n
+        publish_date = data_isbn.get('publish_date', '')
+        if publish_date:
+            import re
+            m = re.search(r'\d{4}', publish_date)
+            resultado['anio'] = m.group() if m else ''
+
+        # Editorial
+        publishers = data_isbn.get('publishers', [])
+        if publishers:
+            resultado['editorial'] = publishers[0]
+
+        # Portada  
+        covers = data_isbn.get('covers', [])
+        if covers:
+            resultado['portada_url'] = f'https://covers.openlibrary.org/b/id/{covers[0]}-L.jpg'
+
+        # Autor desde obra principal
+        works = data_isbn.get('works', [])
+        obra_data = None
+        if works:
+            obra_key = works[0].get('key', '')
+            obra_data = _fetch_json(f'https://openlibrary.org{obra_key}.json')
+            if obra_data:
+                # Descripci\u00f3n
+                desc = obra_data.get('description', '')
+                if isinstance(desc, dict):
+                    desc = desc.get('value', '')
+                resultado['descripcion'] = desc[:1200] if desc else ''
+
+                # Categor\u00eda / g\u00e9nero desde subjects
+                subjects = obra_data.get('subjects', [])
+                if subjects:
+                    resultado['categoria'] = subjects[0]
+
+        # Autores
+        authors = data_isbn.get('authors', [])
+        if authors:
+            autor_key = authors[0].get('key', '')
+            autor_data = _fetch_json(f'https://openlibrary.org{autor_key}.json')
+            if autor_data:
+                resultado['autor'] = (
+                    autor_data.get('name') or
+                    autor_data.get('personal_name') or ''
+                )
+
+        if resultado['titulo']:
+            return JsonResponse(resultado)
+
+    # ── Nivel 3: OpenLibrary /search.json ────────────────────────────────
+    data_search = _fetch_json(
+        f'https://openlibrary.org/search.json?isbn={isbn}'
+        f'&fields=title,author_name,publisher,first_publish_year,subject,cover_i&limit=1'
+    )
+    if data_search and data_search.get('docs'):
+        doc = data_search['docs'][0]
+        resultado['fuente'] = 'openlibrary_search'
+        resultado['titulo'] = doc.get('title', '')
+        autores = doc.get('author_name', [])
+        resultado['autor'] = autores[0] if autores else ''
+        editores = doc.get('publisher', [])
+        resultado['editorial'] = editores[0] if editores else ''
+        resultado['anio'] = str(doc.get('first_publish_year', '') or '')
+        subjects = doc.get('subject', [])
+        resultado['categoria'] = subjects[0] if subjects else ''
+        cover_id = doc.get('cover_i')
+        if cover_id:
+            resultado['portada_url'] = f'https://covers.openlibrary.org/b/id/{cover_id}-L.jpg'
+
+        if resultado['titulo']:
+            return JsonResponse(resultado)
+
+    # ── Nivel 4: Google Books ─────────────────────────────────────────────
+    data_gbooks = _fetch_json(
+        f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&maxResults=1'
+    )
+    if data_gbooks and data_gbooks.get('items'):
+        info = data_gbooks['items'][0].get('volumeInfo', {})
+        resultado['fuente'] = 'google_books'
+        resultado['titulo'] = info.get('title', '') or resultado['titulo']
+        authors = info.get('authors', [])
+        resultado['autor'] = ', '.join(authors) if authors else resultado['autor']
+        resultado['editorial'] = info.get('publisher', '') or resultado['editorial']
+        pub_date = info.get('publishedDate', '')
+        if pub_date:
+            import re as _re
+            m = _re.search(r'\d{4}', pub_date)
+            resultado['anio'] = m.group() if m else resultado['anio']
+        cats = info.get('categories', [])
+        resultado['categoria'] = cats[0] if cats else resultado['categoria']
+        desc = info.get('description', '') or ''
+        resultado['descripcion'] = desc[:1200] if desc else resultado['descripcion']
+        img_links = info.get('imageLinks', {})
+        cover = img_links.get('thumbnail') or img_links.get('smallThumbnail') or ''
+        if cover:
+            # Asegurar https y pedir tamaño grande
+            cover = cover.replace('http://', 'https://').replace('zoom=1', 'zoom=3')
+            resultado['portada_url'] = cover
+
+        if resultado['titulo']:
+            return JsonResponse(resultado)
+
+    return JsonResponse({'error': 'No se encontró información para este ISBN'}, status=404)
+
+
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def gestion_inventario(request):
     """
@@ -501,7 +696,11 @@ def eliminar_ejemplar(request, ejemplar_id):
     entidad_id = ejemplar.id
 
     try:
+        libro = ejemplar.libro
         ejemplar.delete()
+        # Si el Libro ya no tiene ningún ejemplar, eliminarlo también
+        if not libro.ejemplares.exists():
+            libro.delete()
     except ProtectedError:
         messages.error(
             request,

@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('agregar/', views.agregar_libro, name='agregar_libro'),
     path('buscar-libro/', views.buscar_libro_ajax, name='buscar_libro_ajax'),
+    path('buscar-isbn/', views.buscar_isbn_enriquecido, name='buscar_isbn_enriquecido'),
     path('gestion/', views.gestion_inventario, name='gestion_inventario'),
     path('ejemplar/<int:ejemplar_id>/', views.detalle_ejemplar, name='detalle_ejemplar'),
     path('eliminar/<int:ejemplar_id>/', views.eliminar_ejemplar, name='eliminar_ejemplar'),
