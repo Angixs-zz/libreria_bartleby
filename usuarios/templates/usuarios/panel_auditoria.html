@@ -87,11 +87,11 @@
 
         <div class="audit-panel rounded-4 p-4 mb-4">
             <form method="get" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-5">
+                <div class="col-12 col-lg-4">
                     <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Buscar</label>
                     <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Usuario, entidad o descripción">
                 </div>
-                <div class="col-12 col-md-6 col-lg-3">
+                <div class="col-12 col-md-6 col-lg-2">
                     <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Acción</label>
                     <select name="accion" class="form-select">
                         {% for key, label in acciones_auditoria.items %}
@@ -107,6 +107,14 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-12 col-md-6 col-lg-2">
+                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Cantidad</label>
+                    <select name="limite" class="form-select">
+                        {% for limite in limites_auditoria %}
+                            <option value="{{ limite }}" {% if limite_activo == limite %}selected{% endif %}>{{ limite }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <div class="col-12 col-lg-2 d-flex gap-2">
                     <button type="submit" class="btn text-white flex-fill" style="background-color: var(--primary);">Filtrar</button>
                     <a href="{% url 'panel_auditoria' %}" class="btn btn-outline-secondary">Limpiar</a>
@@ -118,7 +126,9 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="section-title h2 mb-2">Eventos recientes</h2>
-                    <p class="small mb-0" style="color: var(--text-muted);">Se muestran los últimos 120 registros según el filtro activo.</p>
+                    <p class="small mb-0" style="color: var(--text-muted);">
+                        Se muestran hasta {{ limite_activo }} registros según el filtro activo. La bitácora conserva eventos por {{ retencion_auditoria_dias }} días.
+                    </p>
                 </div>
             </div>
 

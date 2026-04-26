@@ -1,12 +1,15 @@
 from decimal import Decimal
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from inventario.models import EstadoFisico, Categoria, Libro, Ejemplar
 from reservas.models import Reserva
+from usuarios.auditoria import registrar_auditoria
 from usuarios.models import NotaClienteInterna, EventoAuditoria
 from ventas.models import Venta, DetalleVenta
 
@@ -624,3 +627,57 @@ class PanelAuditoriaTests(TestCase):
         eventos = list(response.context['eventos'])
         self.assertEqual(len(eventos), 1)
         self.assertEqual(eventos[0].accion, 'cancelar')
+
+    def test_panel_auditoria_respeta_limite_seleccionado(self):
+        for indice in range(30):
+            EventoAuditoria.objects.create(
+                actor=self.director,
+                accion='editar',
+                modulo='inventario',
+                entidad_tipo='libro',
+                entidad_id=indice + 1,
+                entidad_nombre=f'Libro {indice + 1}',
+                descripcion='Cambio de inventario.',
+            )
+        self.client.force_login(self.director)
+
+        response = self.client.get(reverse('panel_auditoria'), {'limite': '25'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['eventos']), 25)
+        self.assertEqual(response.context['limite_activo'], 25)
+
+    def test_panel_auditoria_ignora_limite_no_permitido(self):
+        self.client.force_login(self.director)
+
+        response = self.client.get(reverse('panel_auditoria'), {'limite': '9999'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['limite_activo'], 120)
+
+    def test_registrar_auditoria_depura_eventos_antiguos(self):
+        antiguo = EventoAuditoria.objects.create(
+            actor=self.director,
+            accion='crear',
+            modulo='usuarios',
+            entidad_tipo='usuario_staff',
+            entidad_id=self.staff.id,
+            entidad_nombre='registro_antiguo',
+            descripcion='Registro antiguo.',
+        )
+        EventoAuditoria.objects.filter(pk=antiguo.pk).update(
+            creado_en=timezone.now() - timedelta(days=181)
+        )
+
+        registrar_auditoria(
+            actor=self.director,
+            accion='editar',
+            modulo='usuarios',
+            entidad_tipo='usuario_staff',
+            entidad_id=self.staff.id,
+            entidad_nombre=self.staff.username,
+            descripcion='Registro reciente.',
+        )
+
+        self.assertFalse(EventoAuditoria.objects.filter(pk=antiguo.pk).exists())
+        self.assertTrue(EventoAuditoria.objects.filter(descripcion='Registro reciente.').exists())

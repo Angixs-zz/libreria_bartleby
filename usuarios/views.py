@@ -38,7 +38,7 @@ from .forms import (
     ClienteNotaInternaForm,
 )
 from .models import PerfilUsuario, NotaClienteInterna, EventoAuditoria
-from .auditoria import registrar_auditoria
+from .auditoria import AUDITORIA_RETENCION_DIAS, registrar_auditoria
 from .email_service import enviar_codigo_verificacion_email, enviar_codigo_login_email
 
 
@@ -76,6 +76,22 @@ MODULOS_AUDITORIA = {
     'ventas': 'Ventas',
     'proveedores': 'Proveedores',
 }
+
+LIMITES_AUDITORIA = [25, 50, 120, 250]
+LIMITE_AUDITORIA_DEFAULT = 120
+
+
+def obtener_limite_auditoria(valor):
+    try:
+        limite = int(valor)
+    except (TypeError, ValueError):
+        return LIMITE_AUDITORIA_DEFAULT
+
+    if limite in LIMITES_AUDITORIA:
+        return limite
+
+    return LIMITE_AUDITORIA_DEFAULT
+
 
 def registrar(request):
     if request.method == 'POST':
@@ -413,6 +429,7 @@ def panel_auditoria(request):
     query = request.GET.get('q', '').strip()
     accion = request.GET.get('accion', 'todas').strip()
     modulo = request.GET.get('modulo', 'todos').strip()
+    limite = obtener_limite_auditoria(request.GET.get('limite'))
 
     eventos = EventoAuditoria.objects.select_related('actor')
 
@@ -430,13 +447,16 @@ def panel_auditoria(request):
     if modulo != 'todos':
         eventos = eventos.filter(modulo=modulo)
 
-    eventos = eventos.order_by('-creado_en')[:120]
+    eventos = eventos.order_by('-creado_en')[:limite]
 
     context = {
         'eventos': eventos,
         'query': query,
         'accion_activa': accion,
         'modulo_activo': modulo,
+        'limite_activo': limite,
+        'limites_auditoria': LIMITES_AUDITORIA,
+        'retencion_auditoria_dias': AUDITORIA_RETENCION_DIAS,
         'acciones_auditoria': ACCIONES_AUDITORIA,
         'modulos_auditoria': MODULOS_AUDITORIA,
         'total_eventos': EventoAuditoria.objects.count(),

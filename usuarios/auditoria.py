@@ -1,4 +1,21 @@
+from datetime import timedelta
+
+from django.conf import settings
+from django.utils import timezone
+
 from .models import EventoAuditoria
+
+
+AUDITORIA_RETENCION_DIAS = getattr(settings, 'AUDITORIA_RETENCION_DIAS', 180)
+
+
+def depurar_auditoria_antigua():
+    if not AUDITORIA_RETENCION_DIAS:
+        return 0
+
+    limite = timezone.now() - timedelta(days=AUDITORIA_RETENCION_DIAS)
+    eliminados, _ = EventoAuditoria.objects.filter(creado_en__lt=limite).delete()
+    return eliminados
 
 
 def registrar_auditoria(
@@ -12,7 +29,7 @@ def registrar_auditoria(
     descripcion='',
     metadata=None,
 ):
-    return EventoAuditoria.objects.create(
+    evento = EventoAuditoria.objects.create(
         actor=actor,
         accion=accion,
         modulo=modulo,
@@ -22,3 +39,5 @@ def registrar_auditoria(
         descripcion=descripcion,
         metadata=metadata or {},
     )
+    depurar_auditoria_antigua()
+    return evento
