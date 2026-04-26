@@ -17,6 +17,30 @@ from .forms import ProveedorForm, AdquisicionForm, LibroRapidoForm, EjemplarRapi
 from .models import Proveedor, Adquisicion, DetalleAdquisicion
 
 
+def _guardar_portada_externa(libro, portada_url, nombre_base):
+    if not portada_url or libro.portada:
+        return
+
+    import urllib.request
+    from django.core.files.base import ContentFile
+
+    try:
+        req = urllib.request.Request(
+            portada_url,
+            headers={'User-Agent': 'LibreriaBartleby/1.0'}
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            img_data = resp.read()
+
+        ext = portada_url.split('.')[-1].split('?')[0].lower()
+        if ext not in ('jpg', 'jpeg', 'png', 'webp'):
+            ext = 'jpg'
+        nombre_limpio = ''.join(c if c.isalnum() else '_' for c in nombre_base[:30]).strip('_') or 'portada'
+        libro.portada.save(f'isbn_{nombre_limpio}.{ext}', ContentFile(img_data), save=True)
+    except Exception:
+        pass
+
+
 def _build_filas_desde_post(request):
     ejemplares = request.POST.getlist('ejemplar_id')
     cantidades = request.POST.getlist('cantidad')
@@ -241,7 +265,11 @@ def registrar_adquisicion(request):
                 messages.success(request, f'Lote #{adquisicion.id} registrado y stock actualizado.')
                 return redirect('detalle_proveedor', proveedor_id=adquisicion.proveedor_id)
     else:
-        form = AdquisicionForm()
+        initial = {}
+        proveedor_id = request.GET.get('proveedor')
+        if proveedor_id and Proveedor.objects.filter(pk=proveedor_id).exists():
+            initial['proveedor'] = proveedor_id
+        form = AdquisicionForm(initial=initial)
 
     context = {
         'form': form,
@@ -306,7 +334,7 @@ def buscar_libro_isbn(request):
             'titulo': libro_local.titulo,
             'autor': libro_local.autor,
             'editorial': libro_local.editorial or '',
-            'categoria_id': libro_local.categoria_id,
+            'categoria': libro_local.categoria.nombre if libro_local.categoria else '',
             'libro_id': libro_local.id,
         })
 
@@ -320,7 +348,7 @@ def buscar_libro_isbn(request):
                 'titulo': datos.get('titulo', ''),
                 'autor': datos.get('autor', ''),
                 'editorial': datos.get('editorial', ''),
-                'categoria_id': None,
+                'categoria': datos.get('categoria', ''),
             })
     except Exception:
         pass
@@ -337,7 +365,7 @@ def crear_ejemplar_rapido(request):
     pantalla de adquisición. Devuelve el ID y etiqueta del nuevo Ejemplar
     para que el JS lo inyecte en el <select> de la fila.
     """
-    libro_form = LibroRapidoForm(request.POST)
+    libro_form = LibroRapidoForm(request.POST, request.FILES)
     ejemplar_form = EjemplarRapidoForm(request.POST)
 
     errores = {}
@@ -352,6 +380,13 @@ def crear_ejemplar_rapido(request):
     isbn = libro_form.cleaned_data.get('isbn') or None
     titulo = libro_form.cleaned_data['titulo']
     autor = libro_form.cleaned_data['autor']
+    categoria_nombre = libro_form.cleaned_data.get('categoria_texto', '').strip()
+    portada = libro_form.cleaned_data.get('portada')
+    portada_url_externa = request.POST.get('portada_url_externa', '').strip()
+
+    categoria = None
+    if categoria_nombre:
+        categoria, _ = Categoria.objects.get_or_create(nombre=categoria_nombre.capitalize())
 
     with transaction.atomic():
         # Reutilizar libro si ya existe con ese ISBN
@@ -362,7 +397,10 @@ def crear_ejemplar_rapido(request):
                     'titulo': titulo,
                     'autor': autor,
                     'editorial': libro_form.cleaned_data.get('editorial') or '',
-                    'categoria': libro_form.cleaned_data.get('categoria'),
+                    'anio_publicacion': libro_form.cleaned_data.get('anio_publicacion'),
+                    'categoria': categoria,
+                    'descripcion': libro_form.cleaned_data.get('descripcion') or '',
+                    'portada': portada,
                 }
             )
         else:
@@ -370,8 +408,21 @@ def crear_ejemplar_rapido(request):
                 titulo=titulo,
                 autor=autor,
                 editorial=libro_form.cleaned_data.get('editorial') or '',
-                categoria=libro_form.cleaned_data.get('categoria'),
+                anio_publicacion=libro_form.cleaned_data.get('anio_publicacion'),
+                categoria=categoria,
+                descripcion=libro_form.cleaned_data.get('descripcion') or '',
+                portada=portada,
             )
+
+        if isbn and categoria and not libro.categoria_id:
+            libro.categoria = categoria
+            libro.save(update_fields=['categoria', 'actualizado_en'])
+
+        if portada and not libro.portada:
+            libro.portada = portada
+            libro.save(update_fields=['portada', 'actualizado_en'])
+        elif not portada:
+            _guardar_portada_externa(libro, portada_url_externa, isbn or titulo)
 
         ejemplar = Ejemplar.objects.create(
             libro=libro,

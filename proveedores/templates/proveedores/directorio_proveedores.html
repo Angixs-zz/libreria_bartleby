@@ -12,9 +12,12 @@
 
     .proveedores-shell .panel-card,
     .proveedores-shell .surface-card {
+        position: relative;
+        overflow: hidden;
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 240, 0.92));
         border: 1px solid rgba(197, 200, 184, 0.7);
         box-shadow: 0 20px 60px rgba(23, 29, 15, 0.08);
+        color: var(--text);
     }
 
     .dark .proveedores-shell .panel-card,
@@ -24,19 +27,157 @@
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
     }
 
+    .proveedores-shell .section-title {
+        font-family: 'Newsreader', serif;
+        font-style: italic;
+        color: var(--primary);
+    }
+
+    .proveedores-shell .olive-btn {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(62, 82, 25, 0.18);
+    }
+
+    .proveedores-shell .olive-btn:hover,
+    .proveedores-shell .olive-btn:focus {
+        background-color: #3e5219;
+        border-color: #3e5219;
+        color: #fff;
+    }
+
+    .proveedores-shell .ghost-stat {
+        position: absolute;
+        right: -0.75rem;
+        bottom: -1rem;
+        font-size: 4.9rem;
+        line-height: 1;
+        color: var(--primary);
+        opacity: 0.06;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .proveedores-shell .metric-value {
+        color: var(--primary);
+    }
+
     .proveedores-shell .table > :not(caption) > * > * {
         border-color: rgba(197, 200, 184, 0.45);
         vertical-align: middle;
+        color: var(--text);
     }
 
     .dark .proveedores-shell .table > :not(caption) > * > * {
         border-color: rgba(80, 85, 60, 0.45);
     }
 
-    .proveedores-shell .modal-content {
+    .proveedores-shell thead th {
+        color: var(--text-muted);
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .proveedores-shell .provider-row {
+        transition: background-color 0.16s ease, transform 0.16s ease;
+    }
+
+    .proveedores-shell .provider-row:hover {
+        background-color: rgba(74, 93, 35, 0.045);
+    }
+
+    .dark .proveedores-shell .provider-row:hover {
+        background-color: rgba(163, 196, 106, 0.065);
+    }
+
+    .proveedores-shell .provider-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(74, 93, 35, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(74, 93, 35, 0.14);
+        flex: 0 0 auto;
+    }
+
+    .dark .proveedores-shell .provider-avatar {
+        background: rgba(163, 196, 106, 0.12);
+        color: #d2eca2;
+        border-color: rgba(163, 196, 106, 0.16);
+    }
+
+    .proveedores-shell .soft-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .proveedores-shell .soft-badge.success {
+        background: rgba(25, 135, 84, 0.12);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+
+    .proveedores-shell .soft-badge.muted {
+        background: rgba(108, 117, 125, 0.12);
+        color: var(--text-muted);
+        border: 1px solid rgba(108, 117, 125, 0.18);
+    }
+
+    .proveedores-shell .icon-action {
+        width: 2.15rem;
+        height: 2.15rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.55rem;
+    }
+
+    .proveedores-shell .form-control,
+    .proveedores-shell .form-select {
         background-color: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+    }
+
+    .proveedores-shell .form-control:focus,
+    .proveedores-shell .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(74, 93, 35, 0.14);
+    }
+
+    .proveedores-shell .modal-content {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 244, 240, 0.95));
         color: var(--text);
         border: 1px solid var(--border);
+        box-shadow: 0 24px 70px rgba(23, 29, 15, 0.18);
+    }
+
+    .dark .proveedores-shell .modal-content {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.98), rgba(30, 30, 24, 0.96));
+    }
+
+    .proveedores-shell .modal-header,
+    .proveedores-shell .modal-footer {
+        border-color: rgba(197, 200, 184, 0.35);
+    }
+
+    .dark .proveedores-shell .modal-header,
+    .dark .proveedores-shell .modal-footer {
+        border-color: rgba(80, 85, 60, 0.4);
     }
 </style>
 {% endblock %}
@@ -53,7 +194,7 @@
                 <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
                     Staff Area · Compras
                 </p>
-                <h1 class="display-4 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: var(--primary);">
+                <h1 class="section-title display-4 mb-3">
                     Directorio de Proveedores
                 </h1>
                 <p class="mb-0" style="max-width: 720px; color: var(--text-muted);">
@@ -62,7 +203,7 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'registrar_adquisicion' %}" class="btn btn-success btn-lg">
+                <a href="{% url 'registrar_adquisicion' %}" class="btn olive-btn btn-lg">
                     <i class="bi bi-box-seam me-2"></i>Registrar adquisicion
                 </a>
                 <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#nuevoProveedorModal">
@@ -75,29 +216,33 @@
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="panel-card rounded-4 p-4 h-100">
                     <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Directorio</div>
-                    <div class="display-6 fw-semibold" style="color: var(--primary);">{{ total_proveedores }}</div>
+                    <div class="display-6 fw-semibold metric-value">{{ total_proveedores }}</div>
                     <div class="small" style="color: var(--text-muted);">proveedores registrados</div>
+                    <i class="bi bi-buildings ghost-stat"></i>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="panel-card rounded-4 p-4 h-100">
                     <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Activos</div>
-                    <div class="display-6 fw-semibold text-success">{{ proveedores_activos }}</div>
+                    <div class="display-6 fw-semibold metric-value">{{ proveedores_activos }}</div>
                     <div class="small" style="color: var(--text-muted);">disponibles para compra</div>
+                    <i class="bi bi-check2-circle ghost-stat"></i>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="panel-card rounded-4 p-4 h-100">
                     <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Lotes</div>
-                    <div class="display-6 fw-semibold text-primary">{{ compras_registradas }}</div>
+                    <div class="display-6 fw-semibold metric-value">{{ compras_registradas }}</div>
                     <div class="small" style="color: var(--text-muted);">adquisiciones capturadas</div>
+                    <i class="bi bi-journal-bookmark ghost-stat"></i>
                 </div>
             </div>
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="panel-card rounded-4 p-4 h-100">
                     <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Gasto</div>
-                    <div class="display-6 fw-semibold text-warning">${{ gasto_total }}</div>
+                    <div class="display-6 fw-semibold" style="color: #7a5a12;">${{ gasto_total }}</div>
                     <div class="small" style="color: var(--text-muted);">acumulado en compras</div>
+                    <i class="bi bi-cash-stack ghost-stat"></i>
                 </div>
             </div>
         </div>
@@ -105,15 +250,17 @@
         <div class="surface-card rounded-4 p-4">
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                 <div>
-                    <h2 class="h3 fst-italic mb-1" style="font-family: 'Newsreader', serif;">Directorio operativo</h2>
+                    <h2 class="section-title h3 mb-1">Directorio operativo</h2>
                     <p class="mb-0 small" style="color: var(--text-muted);">Busca por nombre, contacto, teléfono o correo.</p>
                 </div>
                 <form method="get" class="d-flex gap-2 w-100 w-lg-auto">
                     <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar proveedor...">
-                    <button type="submit" class="btn btn-outline-secondary">
+                    <button type="submit" class="btn btn-outline-secondary icon-action" title="Buscar" aria-label="Buscar">
                         <i class="bi bi-search"></i>
                     </button>
-                    <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary">Limpiar</a>
+                    <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary icon-action" title="Limpiar" aria-label="Limpiar">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                 </form>
             </div>
 
@@ -132,10 +279,17 @@
                     </thead>
                     <tbody>
                         {% for proveedor in proveedores %}
-                            <tr>
+                            <tr class="provider-row">
                                 <td>
-                                    <div class="fw-semibold">{{ proveedor.nombre }}</div>
-                                    <div class="small" style="color: var(--text-muted);">Alta: {{ proveedor.fecha_registro|date:"d/m/Y" }}</div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="provider-avatar">
+                                            <i class="bi bi-shop"></i>
+                                        </span>
+                                        <div>
+                                            <div class="fw-semibold">{{ proveedor.nombre }}</div>
+                                            <div class="small" style="color: var(--text-muted);">Alta: {{ proveedor.fecha_registro|date:"d/m/Y" }}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <div>{{ proveedor.contacto|default:"Sin contacto" }}</div>
@@ -147,19 +301,23 @@
                                 </td>
                                 <td>
                                     {% if proveedor.activo %}
-                                        <span class="badge text-bg-success">Activo</span>
+                                        <span class="soft-badge success"><i class="bi bi-check-circle"></i>Activo</span>
                                     {% else %}
-                                        <span class="badge text-bg-secondary">Inactivo</span>
+                                        <span class="soft-badge muted"><i class="bi bi-pause-circle"></i>Inactivo</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end fw-semibold">{{ proveedor.total_adquisiciones }}</td>
                                 <td class="text-end fw-semibold">${{ proveedor.gasto_acumulado }}</td>
                                 <td>
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{% url 'detalle_proveedor' proveedor.id %}" class="btn btn-sm btn-outline-primary">Historial</a>
-                                        <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="btn btn-sm btn-outline-success">Lote</a>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editarProveedorModal-{{ proveedor.id }}">
-                                            Editar
+                                        <a href="{% url 'detalle_proveedor' proveedor.id %}" class="btn btn-sm btn-outline-primary icon-action" title="Historial" aria-label="Historial de {{ proveedor.nombre }}">
+                                            <i class="bi bi-clock-history"></i>
+                                        </a>
+                                        <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="btn btn-sm btn-outline-success icon-action" title="Registrar lote" aria-label="Registrar lote para {{ proveedor.nombre }}">
+                                            <i class="bi bi-box-seam"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary icon-action" data-bs-toggle="modal" data-bs-target="#editarProveedorModal-{{ proveedor.id }}" title="Editar" aria-label="Editar {{ proveedor.nombre }}">
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -188,7 +346,7 @@
                 {% csrf_token %}
                 <div class="modal-header border-0 pb-0">
                     <div>
-                        <h2 class="modal-title fs-3 fst-italic" style="font-family: 'Newsreader', serif;">Nuevo proveedor</h2>
+                        <h2 class="modal-title section-title fs-3">Nuevo proveedor</h2>
                         <p class="small mb-0" style="color: var(--text-muted);">Agrega un nuevo contacto al directorio de compras.</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -225,7 +383,7 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar proveedor</button>
+                    <button type="submit" class="btn olive-btn">Guardar proveedor</button>
                 </div>
             </form>
         </div>
@@ -240,7 +398,7 @@
                     {% csrf_token %}
                     <div class="modal-header border-0 pb-0">
                         <div>
-                            <h2 class="modal-title fs-3 fst-italic" style="font-family: 'Newsreader', serif;">Editar proveedor</h2>
+                            <h2 class="modal-title section-title fs-3">Editar proveedor</h2>
                             <p class="small mb-0" style="color: var(--text-muted);">{{ proveedor.nombre }}</p>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -279,7 +437,7 @@
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        <button type="submit" class="btn olive-btn">Guardar cambios</button>
                     </div>
                 </form>
             </div>
