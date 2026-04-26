@@ -40,6 +40,38 @@
         letter-spacing: 0.12em;
         text-transform: uppercase;
         padding: 0.85rem 1.1rem;
+        transition: all 0.2s ease;
+    }
+
+    .reportes-shell .pill-group {
+        background-color: var(--surface);
+        border: 1px solid rgba(197, 200, 184, 0.4);
+        padding: 0.25rem;
+        border-radius: 999px;
+    }
+
+    .dark .reportes-shell .pill-group {
+        border-color: rgba(80, 85, 60, 0.4);
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .delay-1 { animation-delay: 0.05s; }
+    .delay-2 { animation-delay: 0.1s; }
+    .delay-3 { animation-delay: 0.15s; }
+    
+    #page-loader {
+        position: fixed; inset: 0; background: var(--bg); z-index: 9999; 
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.4s ease; pointer-events: none; opacity: 0;
+    }
+    #page-loader.active {
+        opacity: 0.7; pointer-events: all; cursor: wait;
     }
 
     .reportes-shell .section-title {
@@ -77,6 +109,7 @@
   {% include 'partials/admin_sidebar.html' with request=request user=user only %}
   <div class="flex-1 min-w-0">
 <div class="reportes-shell py-4">
+    <div id="page-loader"><div class="spinner-border text-success" role="status"></div></div>
     <div class="container py-2">
         <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
             <div>
@@ -90,23 +123,32 @@
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap align-items-center gap-3">
                 <a href="{% url 'centro_alertas' %}"
-                   class="filter-pill text-decoration-none text-white"
-                   style="background-color: #7a3b2e;">
-                    Alertas
+                   class="filter-pill text-decoration-none text-white d-inline-flex align-items-center gap-2"
+                   style="background-color: #7a3b2e; box-shadow: 0 4px 12px rgba(122, 59, 46, 0.2);">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Alertas
                 </a>
-                {% for key, label in periodos.items %}
-                    <a href="?periodo={{ key }}"
-                       class="filter-pill text-decoration-none {% if periodo == key %}text-white{% endif %}"
-                       style="{% if periodo == key %}background-color: var(--primary);{% else %}background-color: var(--surface); color: var(--text-muted); border: 1px solid var(--border);{% endif %}">
-                        {{ label }}
-                    </a>
-                {% endfor %}
+
+                <div class="pill-group d-flex flex-wrap align-items-center shadow-sm">
+                    {% for key, label in periodos.items %}
+                        <a href="?periodo={{ key }}"
+                           class="filter-pill text-decoration-none {% if periodo == key %}text-white{% endif %}"
+                           style="{% if periodo == key %}background-color: var(--primary);{% else %}color: var(--text-muted); background-color: transparent;{% endif %} border: none;">
+                            {{ label }}
+                        </a>
+                    {% endfor %}
+                    
+                    <button type="button" class="filter-pill border-0 {% if periodo == 'custom' %}text-white{% else %}text-muted bg-transparent{% endif %}" 
+                            style="{% if periodo == 'custom' %}background-color: var(--primary);{% else %}color: var(--text-muted);{% endif %}"
+                            data-bs-toggle="modal" data-bs-target="#customDateModal">
+                        <i class="bi bi-calendar3 me-1"></i> Rango
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4 fade-in-up delay-1">
             <div class="col-12 col-md-6 col-xxl-3">
                 <div class="report-card rounded-4 h-100 p-4">
                     <div class="d-flex justify-content-between align-items-start mb-4">
@@ -180,7 +222,7 @@
             </div>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 fade-in-up delay-2">
             <div class="col-12 col-xl-8">
                 <div class="report-panel rounded-4 p-4 h-100">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
@@ -207,8 +249,8 @@
 
             <div class="col-12 col-xl-4">
                 <div class="report-panel rounded-4 p-4 h-100">
-                    <h2 class="section-title h2 mb-3">Stock bajo</h2>
-                    <p class="small mb-4" style="color: var(--text-muted);">Títulos que requieren atención porque tienen menos de 3 unidades.</p>
+                    <h2 class="section-title h2 mb-3">Stock agotado</h2>
+                    <p class="small mb-4" style="color: var(--text-muted);">Títulos que se han quedado completamente sin unidades.</p>
 
                     {% if stock_bajo %}
                         <div class="d-flex flex-column gap-3">
@@ -227,7 +269,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <div class="alert alert-success mb-0">No hay títulos en estado crítico de stock.</div>
+                        <div class="alert alert-success mb-0">No hay títulos con stock agotado.</div>
                     {% endif %}
                 </div>
             </div>
@@ -305,6 +347,37 @@
 </div>
 </div>
 
+
+<div class="modal fade" id="customDateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="get" action="{% url 'dashboard_reportes' %}">
+                <input type="hidden" name="periodo" value="custom">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title section-title h3" style="color: var(--primary);">Periodo Personalizado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-uppercase fw-bold small mb-2" style="letter-spacing: 0.1em; color: var(--text-muted); font-size: 0.75rem;">Fecha Inicio</label>
+                            <input type="date" name="fecha_inicio" class="form-control form-control-lg bg-light border-0 shadow-sm" required value="{{ request.GET.fecha_inicio|default:'' }}">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-uppercase fw-bold small mb-2" style="letter-spacing: 0.1em; color: var(--text-muted); font-size: 0.75rem;">Fecha Fin</label>
+                            <input type="date" name="fecha_fin" class="form-control form-control-lg bg-light border-0 shadow-sm" required value="{{ request.GET.fecha_fin|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4 justify-content-between">
+                    <button type="button" class="filter-pill bg-transparent text-muted border-0" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="filter-pill text-white border-0 shadow-sm" style="background-color: var(--primary);">Aplicar Filtro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{ chart_labels|json_script:"chart-labels" }}
 {{ chart_totals|json_script:"chart-totals" }}
 {{ chart_tickets|json_script:"chart-tickets" }}
@@ -352,6 +425,10 @@
                 ]
             },
             options: {
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: {
@@ -402,5 +479,15 @@
             }
         });
     }
+</script>
+<script>
+    document.querySelectorAll('.filter-pill[href]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('page-loader').classList.add('active');
+        });
+    });
+    document.querySelector('#customDateModal form').addEventListener('submit', () => {
+        document.getElementById('page-loader').classList.add('active');
+    });
 </script>
 {% endblock %}

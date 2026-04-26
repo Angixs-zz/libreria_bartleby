@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum, F, DecimalField, ExpressionWrapper, Q, Max
-from django.db.models.functions import Coalesce, TruncDay, TruncMonth
+from django.db.models.functions import Coalesce, TruncDay, TruncMonth, TruncHour
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
@@ -22,7 +22,7 @@ PERIODOS = {
     'month': 'Este mes',
 }
 
-ALERTA_STOCK_CRITICO = 3
+ALERTA_STOCK_CRITICO = 1
 ALERTA_PROVEEDOR_INACTIVO_DIAS = 90
 ALERTA_CLIENTE_INACTIVO_DIAS = 60
 ALERTA_CLIENTE_FRECUENTE_MOVIMIENTOS = 3
@@ -44,21 +44,37 @@ def _inicio_periodo(periodo, ahora):
 @require_http_methods(["GET"])
 def dashboard_reportes(request):
     periodo = request.GET.get('periodo', 'month')
-    if periodo not in PERIODOS:
+    if periodo not in PERIODOS and periodo != 'custom':
         periodo = 'month'
 
     ahora = timezone.localtime()
-    inicio_periodo = _inicio_periodo(periodo, ahora)
+    
+    if periodo == 'custom':
+        try:
+            inicio_periodo = timezone.make_aware(datetime.strptime(request.GET.get('fecha_inicio'), '%Y-%m-%d'))
+            fin_periodo = timezone.make_aware(datetime.strptime(request.GET.get('fecha_fin'), '%Y-%m-%d')).replace(hour=23, minute=59, second=59)
+            periodo_label = f"{inicio_periodo.strftime('%d/%m/%Y')} al {fin_periodo.strftime('%d/%m/%Y')}"
+        except (ValueError, TypeError):
+            # fallback
+            inicio_periodo = _inicio_periodo('month', ahora)
+            fin_periodo = ahora
+            periodo = 'month'
+            periodo_label = PERIODOS['month']
+    else:
+        inicio_periodo = _inicio_periodo(periodo, ahora)
+        fin_periodo = ahora
+        periodo_label = PERIODOS[periodo]
+
     inicio_7_dias = ahora.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
     inicio_180_dias = ahora - timedelta(days=180)
 
     ventas_periodo = Venta.objects.filter(
         fecha_venta__gte=inicio_periodo,
-        fecha_venta__lte=ahora,
+        fecha_venta__lte=fin_periodo,
     )
     detalle_periodo = DetalleVenta.objects.filter(
         venta__fecha_venta__gte=inicio_periodo,
-        venta__fecha_venta__lte=ahora,
+        venta__fecha_venta__lte=fin_periodo,
     )
 
     ganancia_expr = ExpressionWrapper(
@@ -91,33 +107,73 @@ def dashboard_reportes(request):
             ejemplares_registrados=Count('ejemplares', distinct=True),
         ).filter(
             ejemplares_registrados__gt=0,
-            stock_total__lt=3,
+            stock_total__lt=1,
         ).order_by('stock_total', 'titulo')[:8]
     )
 
-    ventas_diarias_qs = (
-        Venta.objects.filter(fecha_venta__gte=inicio_7_dias, fecha_venta__lte=ahora)
-        .annotate(periodo=TruncDay('fecha_venta'))
-        .values('periodo')
-        .annotate(
-            total=Coalesce(Sum('total'), Decimal('0.00')),
-            tickets=Count('id'),
-        )
-        .order_by('periodo')
-    )
-    ventas_diarias_map = {
-        item['periodo'].date(): item for item in ventas_diarias_qs
-    }
+    delta_days = (fin_periodo - inicio_periodo).days
 
-    chart_labels = []
-    chart_totals = []
-    chart_tickets = []
-    for offset in range(7):
-        fecha = (inicio_7_dias + timedelta(days=offset)).date()
-        dato = ventas_diarias_map.get(fecha)
-        chart_labels.append(fecha.strftime('%d %b'))
-        chart_totals.append(float(dato['total']) if dato else 0)
-        chart_tickets.append(dato['tickets'] if dato else 0)
+    if delta_days <= 1:
+        # Agrupar por hora
+        ventas_chart_qs = (
+            Venta.objects.filter(fecha_venta__gte=inicio_periodo, fecha_venta__lte=fin_periodo)
+            .annotate(periodo_agrupado=TruncHour('fecha_venta'))
+            .values('periodo_agrupado')
+            .annotate(
+                total=Coalesce(Sum('total'), Decimal('0.00')),
+                tickets=Count('id'),
+            )
+            .order_by('periodo_agrupado')
+        )
+        
+        ventas_chart_map = {
+            item['periodo_agrupado'].replace(minute=0, second=0, microsecond=0): item for item in ventas_chart_qs if item['periodo_agrupado']
+        }
+
+        chart_labels = []
+        chart_totals = []
+        chart_tickets = []
+        
+        # Generar las 24 horas del dia
+        for i in range(24):
+            hora_actual = inicio_periodo.replace(hour=i, minute=0, second=0, microsecond=0)
+            if hora_actual > ahora:
+                break
+            dato = ventas_chart_map.get(hora_actual)
+            chart_labels.append(hora_actual.strftime('%H:00'))
+            chart_totals.append(float(dato['total']) if dato else 0)
+            chart_tickets.append(dato['tickets'] if dato else 0)
+
+    else:
+        # Agrupar por dia
+        ventas_chart_qs = (
+            Venta.objects.filter(fecha_venta__gte=inicio_periodo, fecha_venta__lte=fin_periodo)
+            .annotate(periodo_agrupado=TruncDay('fecha_venta'))
+            .values('periodo_agrupado')
+            .annotate(
+                total=Coalesce(Sum('total'), Decimal('0.00')),
+                tickets=Count('id'),
+            )
+            .order_by('periodo_agrupado')
+        )
+        
+        ventas_chart_map = {
+            item['periodo_agrupado'].date(): item for item in ventas_chart_qs if item['periodo_agrupado']
+        }
+
+        chart_labels = []
+        chart_totals = []
+        chart_tickets = []
+        
+        dias_a_mostrar = min(delta_days + 1, 60) # Limitar a 60 dias maximo para que no explote la grafica
+        for offset in range(dias_a_mostrar):
+            fecha_actual = (inicio_periodo + timedelta(days=offset)).date()
+            if fecha_actual > ahora.date() and periodo != 'custom':
+                continue
+            dato = ventas_chart_map.get(fecha_actual)
+            chart_labels.append(fecha_actual.strftime('%d %b'))
+            chart_totals.append(float(dato['total']) if dato else 0)
+            chart_tickets.append(dato['tickets'] if dato else 0)
 
     ventas_mensuales = list(
         Venta.objects.filter(fecha_venta__gte=inicio_180_dias, fecha_venta__lte=ahora)
@@ -140,7 +196,7 @@ def dashboard_reportes(request):
     context = {
         'periodo': periodo,
         'periodos': PERIODOS,
-        'periodo_label': PERIODOS[periodo],
+        'periodo_label': periodo_label,
         'ventas_monto': ventas_totales['total'],
         'ventas_tickets': ventas_totales['tickets'],
         'ganancia_neta': ganancia_neta,
@@ -153,7 +209,7 @@ def dashboard_reportes(request):
         'chart_tickets': chart_tickets,
         'ventas_mensuales': ventas_mensuales,
         'filtro_desde': inicio_periodo,
-        'filtro_hasta': ahora,
+        'filtro_hasta': fin_periodo,
     }
     return render(request, 'reportes/dashboard_reportes.html', context)
 
