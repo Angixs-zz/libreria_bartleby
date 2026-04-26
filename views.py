@@ -10,7 +10,6 @@ def agregar_libro(request):
         titulo = request.POST.get('titulo')
         autor = request.POST.get('autor')
         isbn = request.POST.get('isbn', '')
-        edicion = request.POST.get('edicion', '')
         editorial = request.POST.get('editorial', '')
         categoria_id = request.POST.get('categoria')
         estado_fisico = request.POST.get('estado_fisico')
@@ -29,7 +28,6 @@ def agregar_libro(request):
                 titulo=titulo,
                 autor=autor,
                 isbn=isbn,
-                edicion=edicion,
                 editorial=editorial,
                 categoria=categoria_obj,
                 estado_fisico=estado_fisico,

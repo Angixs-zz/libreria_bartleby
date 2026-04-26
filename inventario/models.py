@@ -35,7 +35,7 @@ class Libro(models.Model):
         db_index=True,
         help_text="ISBN-10 o ISBN-13"
     )
-    edicion = models.CharField(max_length=100, blank=True, null=True)
+    editorial = models.CharField(max_length=100, blank=True, null=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True)
     descripcion = models.TextField(blank=True, null=True)
     portada = models.ImageField(upload_to='portadas/', blank=True, null=True)

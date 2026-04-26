@@ -240,8 +240,8 @@
                             {{ libro_form.autor }}
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Edición</label>
-                            {{ libro_form.edicion }}
+                            <label class="form-label">Editorial</label>
+                            {{ libro_form.editorial }}
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Categoría</label>
@@ -356,7 +356,7 @@ document.getElementById('btn-buscar-isbn').addEventListener('click', async () =>
         document.querySelector('#form-libro-rapido [name=titulo]').value  = data.titulo;
         document.querySelector('#form-libro-rapido [name=autor]').value   = data.autor;
         document.querySelector('#form-libro-rapido [name=isbn]').value    = isbn;
-        document.querySelector('#form-libro-rapido [name=edicion]').value = data.edicion || '';
+        document.querySelector('#form-libro-rapido [name=editorial]').value = data.editorial || '';
         if (data.categoria_id) document.querySelector('#form-libro-rapido [name=categoria]').value = data.categoria_id;
         const fuente = data.fuente === 'local' ? '✅ Encontrado en tu catálogo' : '🌐 Encontrado en Open Library';
         fb.innerHTML = `<span style="color:var(--primary);">${fuente}: <em>${data.titulo}</em></span>`;
