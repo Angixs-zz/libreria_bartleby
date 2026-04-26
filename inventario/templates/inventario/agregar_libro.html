@@ -68,11 +68,11 @@
                 <input type="hidden" name="accion" value="sumar_stock">
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Lote (SKU)</label>
-                    <select name="ejemplar_id" id="select-ejemplar" class="rounded-lg border-gray-300 p-2 text-sm"></select>
+                    <select name="ejemplar_id" id="select-ejemplar" class="rounded-lg p-2 text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"></select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cuántos llegan</label>
-                    <input type="number" name="cantidad" value="1" min="1" class="w-24 rounded-lg border-gray-200 p-2 font-mono text-sm">
+                    <input type="number" name="cantidad" value="1" min="1" class="w-24 rounded-lg p-2 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                 </div>
                 <button type="submit" class="bg-[#3e5219] text-white px-5 py-2 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90">
                     Sumar al stock
@@ -88,26 +88,26 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
-                        <select name="estado_fisico_select" class="w-full rounded-lg border-gray-200 p-2 text-sm font-body" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
+                        <select name="estado_fisico_select" class="w-full rounded-lg p-2 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                             {% for estado in estados_fisicos %}
                                 <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
                             {% endfor %}
-                            <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
+                            <option value="__nuevo__" class="font-bold" style="color: var(--primary);">+ Crear nueva condición...</option>
                         </select>
-                        <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg border-gray-200 p-2 text-sm font-body border-dashed border-[#3e5219]" placeholder="Escribe aquí el nuevo estado...">
+                        <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-2 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
                         <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio venta ($)</label>
-                        <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                        <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio costo ($)</label>
-                        <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                        <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad</label>
-                        <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                        <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada (opcional)</label>
@@ -167,28 +167,28 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
-                            <select name="estado_fisico_select" class="w-full rounded-lg border-gray-200 p-3 text-sm font-body" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
+                            <select name="estado_fisico_select" class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                                 {% for estado in estados_fisicos %}
                                     <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
                                 {% endfor %}
-                                <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
+                                <option value="__nuevo__" class="font-bold" style="color: var(--primary);">+ Crear nueva condición...</option>
                             </select>
-                            <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg border-gray-200 p-3 text-sm font-body border-dashed border-[#3e5219]" placeholder="Escribe aquí el nuevo estado...">
+                            <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
                             <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo ($)</label>
-                                <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                                <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Venta ($)</label>
-                                <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                                <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad inicial</label>
-                            <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg border-gray-200 p-2 font-mono">
+                            <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada</label>
