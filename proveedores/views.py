@@ -305,7 +305,7 @@ def buscar_libro_isbn(request):
             'fuente': 'local',
             'titulo': libro_local.titulo,
             'autor': libro_local.autor,
-            'edicion': libro_local.edicion or '',
+            'editorial': libro_local.editorial or '',
             'categoria_id': libro_local.categoria_id,
             'libro_id': libro_local.id,
         })
@@ -319,7 +319,7 @@ def buscar_libro_isbn(request):
                 'fuente': 'externa',
                 'titulo': datos.get('titulo', ''),
                 'autor': datos.get('autor', ''),
-                'edicion': datos.get('edicion', ''),
+                'editorial': datos.get('editorial', ''),
                 'categoria_id': None,
             })
     except Exception:
@@ -361,7 +361,7 @@ def crear_ejemplar_rapido(request):
                 defaults={
                     'titulo': titulo,
                     'autor': autor,
-                    'edicion': libro_form.cleaned_data.get('edicion') or '',
+                    'editorial': libro_form.cleaned_data.get('editorial') or '',
                     'categoria': libro_form.cleaned_data.get('categoria'),
                 }
             )
@@ -369,7 +369,7 @@ def crear_ejemplar_rapido(request):
             libro = Libro.objects.create(
                 titulo=titulo,
                 autor=autor,
-                edicion=libro_form.cleaned_data.get('edicion') or '',
+                editorial=libro_form.cleaned_data.get('editorial') or '',
                 categoria=libro_form.cleaned_data.get('categoria'),
             )
 

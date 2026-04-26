@@ -39,12 +39,12 @@ class LibroRapidoForm(forms.ModelForm):
     """Crea o recupera un Libro por ISBN o título+autor desde el modal inline."""
     class Meta:
         model = Libro
-        fields = ['isbn', 'titulo', 'autor', 'edicion', 'categoria']
+        fields = ['isbn', 'titulo', 'autor', 'editorial', 'categoria']
         widgets = {
             'isbn':     forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ISBN-10 o ISBN-13 (opcional)'}),
             'titulo':   forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título'}),
             'autor':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Autor'}),
-            'edicion':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Edición / año (opcional)'}),
+            'editorial':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Editorial (opcional)'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
         }
 

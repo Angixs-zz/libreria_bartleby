@@ -70,7 +70,7 @@ def agregar_libro(request):
                 titulo = request.POST.get('titulo', '').strip()
                 autor = request.POST.get('autor', '').strip()
                 isbn = request.POST.get('isbn', '').strip()
-                edicion = request.POST.get('edicion', '').strip()
+                editorial = request.POST.get('editorial', '').strip()
                 descripcion = request.POST.get('descripcion', '').strip()
                 portada = request.FILES.get('portada')
                 nombre_categoria = request.POST.get('categoria_texto', '').strip()
@@ -120,7 +120,7 @@ def agregar_libro(request):
                     titulo=titulo,
                     autor=autor,
                     isbn=isbn if isbn else None,
-                    edicion=edicion if edicion else None,
+                    editorial=editorial if editorial else None,
                     categoria=categoria_obj,
                     descripcion=descripcion if descripcion else None,
                     portada=portada if portada else None
@@ -311,7 +311,7 @@ def buscar_libro_ajax(request):
             'titulo': libro.titulo,
             'autor': libro.autor,
             'isbn': libro.isbn or '',
-            'edicion': libro.edicion or '',
+            'editorial': libro.editorial or '',
             'ejemplares': ejemplares,
         })
 
@@ -414,7 +414,7 @@ def detalle_ejemplar(request, ejemplar_id):
             titulo = request.POST.get('titulo', '').strip()
             autor = request.POST.get('autor', '').strip()
             isbn = request.POST.get('isbn', '').strip()
-            edicion = request.POST.get('edicion', '').strip()
+            editorial = request.POST.get('editorial', '').strip()
             descripcion_libro = request.POST.get('descripcion', '').strip()
             portada = request.FILES.get('portada')
             categoria_texto = request.POST.get('categoria_texto', '').strip()
@@ -431,8 +431,8 @@ def detalle_ejemplar(request, ejemplar_id):
                     return redirect('detalle_ejemplar', ejemplar_id=ejemplar_id)
                 cambios.append('ISBN actualizado')
                 libro.isbn = isbn
-            if edicion != (libro.edicion or ''):
-                libro.edicion = edicion or None
+            if editorial != (libro.editorial or ''):
+                libro.editorial = editorial or None
             if descripcion_libro != (libro.descripcion or ''):
                 libro.descripcion = descripcion_libro or None
             if portada:
