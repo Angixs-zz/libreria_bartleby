@@ -145,24 +145,44 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Editorial</label>
-                        <input type="text" name="editorial" class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                        <input type="text" name="editorial" id="nuevo-editorial" class="w-full border-0 py-3 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Año de publicación</label>
+                        <input type="number" name="anio_publicacion" id="nuevo-anio" min="1000" max="2099" class="w-full border-0 py-3 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="Ej. 2023">
+                    </div>
+                    <div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
+                        <input type="text" name="categoria_texto" id="nuevo-categoria" list="categorias_list"
+                               class="w-full border-0 py-3 focus:ring-0 bg-transparent"
+                               style="border-bottom: 1px solid var(--border); color: var(--text);"
+                               placeholder="Escribe o crea una nueva">
+                        <datalist id="categorias_list">
+                            {% for cat in categorias %}
+                                <option value="{{ cat.nombre }}">
+                            {% endfor %}
+                        </datalist>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
-                    <input type="text" name="categoria_texto" list="categorias_list" required
-                           class="w-full border-0 border-b border-gray-300 focus:ring-0 focus:border-[#3e5219] py-3"
-                           placeholder="Escribe o crea una nueva">
-                    <datalist id="categorias_list">
-                        {% for cat in categorias %}
-                            <option value="{{ cat.nombre }}">
-                        {% endfor %}
-                    </datalist>
-                    <p class="text-[10px] text-gray-400 mt-1 italic">Si no existe, se creará automáticamente.</p>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Sinopsis / Descripción</label>
+                    <textarea name="descripcion" id="nuevo-descripcion" rows="4"
+                              class="w-full rounded-lg p-3 text-sm font-body resize-none"
+                              style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
+                              placeholder="Se autocompleta al buscar por ISBN…"></textarea>
                 </div>
             </div>
-            <div class="md:col-span-5 space-y-6">
-                <div class="p-8 rounded-xl" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
+            <div class="md:col-span-5 space-y-4">
+                <!-- Portada preview from ISBN -->
+                <div id="portada-preview-wrap" class="hidden rounded-xl p-5 gap-3 flex-col items-center" style="border: 1px solid var(--border); background-color: var(--surface);">
+                    <img id="portada-preview-img" src="" alt="Portada" class="w-full max-w-[150px] rounded-lg shadow-lg mx-auto" style="aspect-ratio:3/4;object-fit:cover;">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-center" style="color:var(--text-faint);">Portada detectada por ISBN</span>
+                    <input type="hidden" name="portada_url_externa" id="portada-url-hidden">
+                </div>
+                <div class="p-6 rounded-xl" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
                     <h3 class="text-xs uppercase tracking-widest font-bold mb-4 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Estado y Costos del Primer Lote</h3>
                     <div class="space-y-4">
                         <div>
@@ -208,6 +228,9 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+// BÚSQUEDA POR TÍTULO — Sugerencias en tiempo real
+// ═══════════════════════════════════════════════════════════
 let debounceTimer = null;
 
 document.getElementById('input-titulo').addEventListener('input', function() {
@@ -227,7 +250,7 @@ function buscarSugerencias(query) {
         .then(r => r.json())
         .then(data => {
             const box = document.getElementById('sugerencias');
-            if (data.libros.length === 0) { box.classList.add('hidden'); return; }
+            if (!data.libros || data.libros.length === 0) { box.classList.add('hidden'); return; }
             box.innerHTML = data.libros.map(libro => `
                 <div class="sugerencia-item px-4 py-3 hover:bg-[#f4f9ee] cursor-pointer border-b border-gray-100 last:border-0"
                      data-libro='${JSON.stringify(libro)}'>
@@ -293,7 +316,7 @@ function mostrarLibroEncontrado(libro) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// BÚSQUEDA POR ISBN — 4 niveles, sin duplicados
+// BÚSQUEDA POR ISBN — Enriquecida via API del servidor
 // ═══════════════════════════════════════════════════════════
 
 function mostrarStatus(el, texto, color) {
@@ -308,120 +331,67 @@ function mostrarStatus(el, texto, color) {
     el.classList.remove('hidden');
 }
 
-function aplicarResultado(resultado, cleanIsbn, statusEl) {
-    mostrarStatus(statusEl, '¡Libro encontrado! Revisa los datos.', 'green');
-    document.getElementById('input-titulo').value = resultado.titulo;
-    document.getElementById('input-autor').value  = resultado.autor;
-    const nt = document.getElementById('nuevo-titulo'); if (nt) nt.value = resultado.titulo;
-    const na = document.getElementById('nuevo-autor');  if (na) na.value = resultado.autor;
-    const ni = document.getElementById('nuevo-isbn');   if (ni) ni.value = cleanIsbn;
+function aplicarResultadoEnriquecido(data, cleanIsbn, statusEl) {
+    const etiqueta = data.fuente === 'local'
+        ? '✅ Encontrado en tu inventario'
+        : '🌐 Encontrado en Open Library';
+    mostrarStatus(statusEl, `${etiqueta}. Revisa y completa los datos.`, 'green');
+
+    // Llenar campos del formulario "Nuevo libro"
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    set('input-titulo',     data.titulo);
+    set('input-autor',      data.autor);
+    set('nuevo-titulo',     data.titulo);
+    set('nuevo-autor',      data.autor);
+    set('nuevo-isbn',       cleanIsbn);
+    set('nuevo-editorial',  data.editorial);
+    set('nuevo-anio',       data.anio);
+    set('nuevo-categoria',  data.categoria);
+    set('nuevo-descripcion',data.descripcion);
+
+    // Portada preview
+    if (data.portada_url) {
+        const wrap = document.getElementById('portada-preview-wrap');
+        const img  = document.getElementById('portada-preview-img');
+        const hid  = document.getElementById('portada-url-hidden');
+        img.src = data.portada_url;
+        if (hid) hid.value = data.portada_url;
+        wrap.classList.remove('hidden');
+        wrap.style.display = 'flex';
+    }
+
+    // Mostrar sección nueva obra
     document.getElementById('resultado-encontrado').classList.add('hidden');
     document.getElementById('resultado-nuevo').classList.remove('hidden');
-    setTimeout(() => statusEl.classList.add('hidden'), 4000);
+
+    setTimeout(() => statusEl.classList.add('hidden'), 5000);
 }
 
-async function intentarOpenLibraryDirecto(isbn) {
-    try {
-        const res = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        if (!data || !data.title) return null;
-        let autor = 'Autor desconocido';
-        if (data.authors && data.authors.length > 0) {
-            try {
-                const autorRes = await fetch(`https://openlibrary.org${data.authors[0].key}.json`);
-                if (autorRes.ok) {
-                    const autorData = await autorRes.json();
-                    autor = autorData.name || autorData.personal_name || 'Autor desconocido';
-                }
-            } catch(e) {}
-        }
-        return { titulo: data.title, autor };
-    } catch(e) { return null; }
-}
-
-async function intentarOpenLibrarySearch(isbn) {
-    try {
-        const res = await fetch(`https://openlibrary.org/search.json?isbn=${isbn}&fields=title,author_name&limit=1`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        if (!data.docs || data.docs.length === 0) return null;
-        const doc = data.docs[0];
-        return {
-            titulo: doc.title || '',
-            autor: (doc.author_name && doc.author_name.length > 0) ? doc.author_name.join(', ') : 'Autor desconocido'
-        };
-    } catch(e) { return null; }
-}
-/*
-async function intentarGoogleBooks(isbn) {
-    const API_KEY = 'AIzaSyDhb3fJ_21KfxdA7Dc4FOxJD8N6RfJYbeI';
-    try {
-        // Intento 1: ISBN + idioma español
-        let res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&langRestrict=es&key=${API_KEY}`);
-        let data = await res.json();
-        if (data.items && data.items.length > 0) {
-            const info = data.items[0].volumeInfo;
-            return {
-                titulo: info.title || '',
-                autor: (info.authors && info.authors.length > 0) ? info.authors.join(', ') : 'Autor desconocido'
-            };
-        }
-        // Intento 2: ISBN sin restricción de idioma
-        res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${API_KEY}`);
-        data = await res.json();
-        if (data.items && data.items.length > 0) {
-            const info = data.items[0].volumeInfo;
-            return {
-                titulo: info.title || '',
-                autor: (info.authors && info.authors.length > 0) ? info.authors.join(', ') : 'Autor desconocido'
-            };
-        }
-        return null;
-    } catch(e) { return null; }
-}
-*/
-async function buscarEnAPIsExternas(cleanIsbn, statusEl) {
-    mostrarStatus(statusEl, 'Consultando Open Library...', 'blue');
-    let resultado = await intentarOpenLibraryDirecto(cleanIsbn);
-    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
-
-    mostrarStatus(statusEl, 'Buscando en catálogo mundial...', 'blue');
-    resultado = await intentarOpenLibrarySearch(cleanIsbn);
-    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
-
-    mostrarStatus(statusEl, 'Consultando Google Books...', 'blue');
-    resultado = await intentarGoogleBooks(cleanIsbn);
-    if (resultado) return aplicarResultado(resultado, cleanIsbn, statusEl);
-
-    mostrarStatus(statusEl, 'No encontrado. Rellena los datos manualmente.', 'amber');
-    document.getElementById('resultado-encontrado').classList.add('hidden');
-    document.getElementById('resultado-nuevo').classList.remove('hidden');
-}
-
-function buscarPorISBN() {
+async function buscarPorISBN() {
     const isbnInput = document.getElementById('input-isbn-api').value.trim();
     const statusEl  = document.getElementById('isbn-status');
     if (!isbnInput) { mostrarStatus(statusEl, 'Por favor, ingresa un ISBN.', 'red'); return; }
-    const cleanIsbn = isbnInput.replace(/[- ]/g, "");
-    mostrarStatus(statusEl, 'Buscando en tu inventario...', 'blue');
 
-    fetch(`/inventario/buscar-libro/?isbn=${encodeURIComponent(cleanIsbn)}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.libros && data.libros.length > 0) {
-                mostrarStatus(statusEl, '¡Encontrado en tu inventario!', 'green');
-                const libro = data.libros[0];
-                document.getElementById('input-titulo').value = libro.titulo;
-                document.getElementById('input-autor').value  = libro.autor;
-                mostrarLibroEncontrado(libro);
-                setTimeout(() => statusEl.classList.add('hidden'), 3000);
-                return;
-            }
-            mostrarStatus(statusEl, 'No está en inventario. Buscando en bases de datos...', 'blue');
-            buscarEnAPIsExternas(cleanIsbn, statusEl);
-        })
-        .catch(() => buscarEnAPIsExternas(cleanIsbn, statusEl));
+    const cleanIsbn = isbnInput.replace(/[- ]/g, '');
+    mostrarStatus(statusEl, '🔍 Buscando información del libro…', 'blue');
+
+    try {
+        const res = await fetch(`/inventario/buscar-isbn/?isbn=${encodeURIComponent(cleanIsbn)}`);
+        if (res.ok) {
+            const data = await res.json();
+            aplicarResultadoEnriquecido(data, cleanIsbn, statusEl);
+        } else if (res.status === 404) {
+            mostrarStatus(statusEl, 'No encontrado en ninguna base de datos. Rellena los datos manualmente.', 'amber');
+            document.getElementById('resultado-nuevo').classList.remove('hidden');
+            const ni = document.getElementById('nuevo-isbn');
+            if (ni) ni.value = cleanIsbn;
+        } else {
+            mostrarStatus(statusEl, 'Error al consultar. Intenta de nuevo.', 'red');
+        }
+    } catch(e) {
+        mostrarStatus(statusEl, 'Sin conexión a la API. Ingresa los datos manualmente.', 'amber');
+        document.getElementById('resultado-nuevo').classList.remove('hidden');
+    }
 }
 
 document.getElementById('input-isbn-api').addEventListener('keypress', function(e) {
