@@ -1,5 +1,24 @@
+# Entorno virtual
 venv/
-*.pyc
+env/
+
+# Bytecode de Python
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Base de datos
 db.sqlite3
-.vscode/
+db.sqlite3-journal
+
+# Logs
+*.log
+
+# Variables de entorno
+.env
+.env.local
+
+# Bytecode de Python
+__pycache__/
+*.pyc
+db.sqlite3
