@@ -56,19 +56,75 @@
         font-size: 1.5rem;
     }
 
-    .personal-shell .table-shell,
-    .personal-shell .modal-content {
+    .personal-shell .table-shell {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.92));
         border: 1px solid rgba(197, 200, 184, 0.7);
         box-shadow: 0 20px 55px rgba(28, 32, 19, 0.08);
         color: var(--text);
     }
+    
+    .personal-shell .modal-content {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 244, 240, 0.90));
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(197, 200, 184, 0.8);
+        box-shadow: 0 30px 80px rgba(28, 32, 19, 0.15);
+        color: var(--text);
+    }
 
-    .dark .personal-shell .table-shell,
-    .dark .personal-shell .modal-content {
+    .dark .personal-shell .table-shell {
         background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
         border-color: rgba(80, 85, 60, 0.6);
         box-shadow: 0 20px 55px rgba(0, 0, 0, 0.24);
+    }
+    
+    .dark .personal-shell .modal-content {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.85), rgba(30, 30, 24, 0.85));
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-color: rgba(80, 85, 60, 0.8);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    }
+    
+    .modal-backdrop.show {
+        opacity: 1 !important;
+        background-color: rgba(22, 26, 17, 0.5) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+    }
+    
+    .personal-shell .modal-content input[type="text"],
+    .personal-shell .modal-content input[type="email"],
+    .personal-shell .modal-content input[type="password"],
+    .personal-shell .modal-content select {
+        width: 100% !important;
+        padding: 0.85rem 1.25rem !important;
+        background-color: rgba(255, 255, 255, 0.4) !important;
+        border: 1px solid rgba(197, 200, 184, 0.8) !important;
+        border-radius: 1rem !important;
+        color: var(--text) !important;
+        font-size: 0.95rem !important;
+        transition: all 0.25s ease !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+    }
+    .dark .personal-shell .modal-content input[type="text"],
+    .dark .personal-shell .modal-content input[type="email"],
+    .dark .personal-shell .modal-content input[type="password"],
+    .dark .personal-shell .modal-content select {
+        background-color: rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(80, 85, 60, 0.6) !important;
+        color: #fff !important;
+    }
+    .personal-shell .modal-content input:focus,
+    .personal-shell .modal-content select:focus {
+        outline: none !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px rgba(74, 93, 35, 0.15) !important;
+        background-color: #fff !important;
+    }
+    .dark .personal-shell .modal-content input:focus,
+    .dark .personal-shell .modal-content select:focus {
+        background-color: rgba(0,0,0,0.4) !important;
     }
 
     .personal-shell .olive-btn {
@@ -358,16 +414,18 @@
                 <div class="modal-content rounded-4 overflow-hidden">
                     <form method="post" action="{% url 'editar_personal' empleado.id %}">
                         {% csrf_token %}
-                        <div class="modal-header border-0 pb-0">
+                        <div class="modal-header border-0 pb-0 pt-5 px-5 relative">
                             <div>
-                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: var(--primary);">
                                     Editar empleado
                                 </h2>
-                                <p class="small mb-0" style="color: var(--text-muted);">
+                                <p class="small mb-0 mt-1" style="color: var(--text-muted);">
                                     Ajusta los datos básicos de {{ empleado.get_full_name|default:empleado.username }}.
                                 </p>
                             </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                                <span class="material-symbols-outlined text-[20px]">close</span>
+                            </button>
                         </div>
 
                         <div class="modal-body px-4 px-md-5 py-4">
@@ -397,9 +455,9 @@
                             {% endwith %}
                         </div>
 
-                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn olive-btn px-4">Guardar cambios</button>
+                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
+                            <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Guardar cambios</button>
                         </div>
                     </form>
                 </div>
@@ -411,16 +469,18 @@
                 <div class="modal-content rounded-4 overflow-hidden">
                     <form method="post" action="{% url 'resetear_password_personal' empleado.id %}">
                         {% csrf_token %}
-                        <div class="modal-header border-0 pb-0">
+                        <div class="modal-header border-0 pb-0 pt-5 px-5 relative">
                             <div>
-                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: var(--primary);">
                                     Resetear contraseña
                                 </h2>
-                                <p class="small mb-0" style="color: var(--text-muted);">
+                                <p class="small mb-0 mt-1" style="color: var(--text-muted);">
                                     Define una nueva contraseña para {{ empleado.username }}.
                                 </p>
                             </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                                <span class="material-symbols-outlined text-[20px]">close</span>
+                            </button>
                         </div>
 
                         <div class="modal-body px-4 px-md-5 py-4">
@@ -438,9 +498,9 @@
                             {% endwith %}
                         </div>
 
-                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn olive-btn px-4">Actualizar contraseña</button>
+                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
+                            <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Actualizar contraseña</button>
                         </div>
                     </form>
                 </div>
@@ -452,23 +512,20 @@
 <div class="modal fade" id="nuevoStaffModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4 overflow-hidden">
-            <div class="position-relative">
-                <div class="position-absolute top-0 end-0 m-4 opacity-25">
-                    <i class="bi bi-journal-bookmark-fill" style="font-size: 4rem; color: #4A5D23;"></i>
-                </div>
-            </div>
             <form method="post" action="{% url 'crear_staff' %}">
                 {% csrf_token %}
-                <div class="modal-header border-0 pb-0">
+                <div class="modal-header border-0 pb-0 pt-5 px-5 relative z-10">
                     <div>
-                        <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: #4A5D23;">
+                        <h2 class="modal-title fs-1 fst-italic mb-2" style="font-family: 'Newsreader', serif; color: var(--primary);">
                             Nuevo empleado
                         </h2>
-                        <p class="small mb-0" style="color: var(--text-muted);">
-                            Registra una nueva cuenta de cajero o staff con la misma estética sobria de Bartleby.
+                        <p class="text-sm mb-0" style="color: var(--text-muted);">
+                            Registra una nueva cuenta asignando un rol específico en el sistema.
                         </p>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
                 </div>
 
                 <div class="modal-body px-4 px-md-5 py-4">
@@ -490,19 +547,38 @@
                             {{ staff_form.email }}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Contrasena</label>
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Contraseña</label>
                             {{ staff_form.password1 }}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contrasena</label>
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                             {{ staff_form.password2 }}
+                        </div>
+                        
+                        <div class="col-12 mt-4 pt-4 border-t border-dashed" style="border-color: rgba(197, 200, 184, 0.5);">
+                            <h3 class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style="color: var(--primary);">
+                                <span class="material-symbols-outlined text-[16px] p-1.5 rounded-full" style="background-color: rgba(163,196,106,0.15);">security</span>
+                                Seguridad y Permisos
+                            </h3>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Rol del empleado</label>
+                            <select name="rol_empleado" class="w-full rounded-2xl px-5 py-[0.85rem] text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50" style="background-color: rgba(255, 255, 255, 0.4); border: 1px solid rgba(197, 200, 184, 0.8); color: var(--text); --tw-ring-color: var(--primary); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234A5D23%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;" required>
+                                <option value="cajero">Cajero / Operativo</option>
+                                <option value="director">Director General (Admin)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Tu contraseña</label>
+                            <input type="password" name="admin_password" class="w-full rounded-2xl px-5 py-[0.85rem] text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50" style="background-color: rgba(255, 255, 255, 0.4); border: 1px solid rgba(197, 200, 184, 0.8); color: var(--text); --tw-ring-color: var(--primary); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" required placeholder="Autoriza la creación">
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-4">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn olive-btn px-4">Guardar empleado</button>
+                <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
+                    <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Guardar empleado</button>
                 </div>
             </form>
         </div>

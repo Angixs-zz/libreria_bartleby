@@ -474,16 +474,26 @@ def panel_auditoria(request):
 @director_required
 @require_http_methods(["POST"])
 def crear_staff(request):
+    admin_password = request.POST.get('admin_password', '')
+    if not request.user.check_password(admin_password):
+        messages.error(request, 'La contraseña de autorización es incorrecta. No se pudo registrar al empleado.')
+        return redirect('panel_personal')
+
     form = StaffCreationForm(request.POST)
     if form.is_valid():
+        rol_seleccionado = request.POST.get('rol_empleado', 'cajero')
+        
         user = form.save(commit=False)
         user.is_staff = True
-        user.is_superuser = False
+        if rol_seleccionado == 'director':
+            user.is_superuser = True
+        else:
+            user.is_superuser = False
         user.is_active = True
         user.save()
 
         perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
-        perfil.rol = 'cajero'
+        perfil.rol = rol_seleccionado
         perfil.save()
         registrar_auditoria(
             actor=request.user,
@@ -492,11 +502,11 @@ def crear_staff(request):
             entidad_tipo='usuario_staff',
             entidad_id=user.id,
             entidad_nombre=user.username,
-            descripcion=f'Se creó la cuenta de staff "{user.username}".',
+            descripcion=f'Se creó la cuenta de {rol_seleccionado} "{user.username}".',
             metadata={'rol': perfil.rol},
         )
 
-        messages.success(request, f'La cuenta de staff para "{user.username}" fue creada correctamente.')
+        messages.success(request, f'La cuenta de {rol_seleccionado} para "{user.username}" fue creada correctamente.')
     else:
         errores = []
         for field_errors in form.errors.values():
