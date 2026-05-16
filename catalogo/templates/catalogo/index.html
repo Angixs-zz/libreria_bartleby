@@ -1,7 +1,22 @@
 {% extends 'base.html' %}
 
+{% block breadcrumbs %}
+<div class="w-full" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+    <div class="max-w-7xl mx-auto px-8 py-3">
+        <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+            <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">home</span>
+                Inicio
+            </a>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text);">Explorar</span>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<section class="py-20" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+<section class="py-12" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
     <div class="max-w-7xl mx-auto px-8">
         <div class="max-w-2xl">
             <h1 class="text-5xl lg:text-7xl font-headline italic mb-6" style="color: var(--primary);">
