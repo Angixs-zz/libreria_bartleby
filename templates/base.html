@@ -91,6 +91,12 @@ body {
   font-family: 'Manrope', sans-serif;
   background-color: var(--bg);
   color: var(--text);
+  cursor: default; /* Previene el cursor I-beam de texto globalmente */
+}
+
+/* Restaura el cursor de texto en elementos interactivos de formulario */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="search"], textarea {
+  cursor: text;
 }
 
 h1, h2, h3 {
