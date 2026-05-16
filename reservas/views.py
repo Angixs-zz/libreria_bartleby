@@ -19,7 +19,7 @@ from django.utils import timezone
 from reservas.models import Reserva
 from inventario.models import Ejemplar
 from services.inventario_service import InventarioService
-from decorators import admin_required
+from decorators import admin_required, cajero_required
 from usuarios.auditoria import registrar_auditoria
 
 
@@ -106,7 +106,7 @@ def cancelar_reserva(request, reserva_id):
 # ── Vistas del Panel Admin ─────────────────────────────────────────────────
 
 @login_required
-@admin_required
+@cajero_required
 @require_http_methods(["GET"])
 def gestor_reservas(request):
     """
@@ -152,7 +152,7 @@ def gestor_reservas(request):
 
 
 @login_required
-@admin_required
+@cajero_required
 @require_http_methods(["POST"])
 def marcar_entregada(request, reserva_id):
     """
@@ -204,7 +204,7 @@ def marcar_entregada(request, reserva_id):
 
 
 @login_required
-@admin_required
+@cajero_required
 @require_http_methods(["POST"])
 def liberar_reserva(request, reserva_id):
     """

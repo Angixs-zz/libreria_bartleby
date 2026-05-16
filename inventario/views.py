@@ -37,7 +37,7 @@ from utils.helpers import (
     buscar_por_isbn,
     generar_sku_mejorado
 )
-from decorators import admin_required, api_ajax_required, rate_limit_por_usuario, json_response_handler
+from decorators import admin_required, api_ajax_required, rate_limit_por_usuario, json_response_handler, cajero_required, director_required
 from usuarios.auditoria import registrar_auditoria
 
 
@@ -45,7 +45,7 @@ from usuarios.auditoria import registrar_auditoria
 # GESTIÓN DE LIBROS Y EJEMPLARES (ADMIN)
 # ─────────────────────────────────────────────────────────────────────────────
 
-@staff_member_required
+@director_required
 @require_http_methods(["GET", "POST"])
 def agregar_libro(request):
     """
@@ -294,7 +294,7 @@ def agregar_libro(request):
     )
 
 
-@staff_member_required
+@cajero_required
 @require_http_methods(["GET"])
 @json_response_handler
 def buscar_libro_ajax(request):
@@ -348,7 +348,7 @@ def buscar_libro_ajax(request):
     return JsonResponse({'libros': resultados})
 
 
-@staff_member_required
+@cajero_required
 @require_http_methods(["GET"])
 def buscar_isbn_enriquecido(request):
     """
@@ -513,7 +513,7 @@ def buscar_isbn_enriquecido(request):
     return JsonResponse({'error': 'No se encontró información para este ISBN'}, status=404)
 
 
-@staff_member_required
+@director_required
 @require_http_methods(["GET", "POST"])
 def gestion_inventario(request):
     """
@@ -541,7 +541,7 @@ def gestion_inventario(request):
     return render(request, 'gestion_inventario.html', context)
 
 
-@staff_member_required
+@director_required
 @require_http_methods(["GET", "POST"])
 def detalle_ejemplar(request, ejemplar_id):
     """
@@ -680,7 +680,7 @@ def detalle_ejemplar(request, ejemplar_id):
     })
 
 
-@staff_member_required
+@director_required
 @require_http_methods(["POST"])
 def eliminar_ejemplar(request, ejemplar_id):
     """
@@ -731,7 +731,7 @@ def eliminar_ejemplar(request, ejemplar_id):
 # PUNTO DE VENTA (POS)
 # ─────────────────────────────────────────────────────────────────────────────
 
-@staff_member_required
+@cajero_required
 @ensure_csrf_cookie
 @require_http_methods(["GET"])
 def punto_de_venta(request):
@@ -743,7 +743,7 @@ def punto_de_venta(request):
     return render(request, 'pos.html')
 
 
-@staff_member_required
+@cajero_required
 @rate_limit_por_usuario('30/m')
 @require_http_methods(["GET"])
 @json_response_handler
@@ -804,7 +804,7 @@ def api_buscar_codigo(request):
     })
 
 
-@staff_member_required
+@cajero_required
 @require_http_methods(["POST"])
 @json_response_handler
 def api_procesar_venta(request):

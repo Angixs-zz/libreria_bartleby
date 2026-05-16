@@ -7,12 +7,13 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
+from django.shortcuts import redirect
 
 
 def admin_required(view_func):
     """
-    Decorador que requiere que el usuario sea administrador (staff).
-    Reemplaza la lógica dispersa: user.is_staff
+    Decorador que requiere Director General (superusuario).
+    Los cajeros NO tienen acceso a rutas protegidas con este decorador.
     
     Usage:
         @admin_required
@@ -20,7 +21,7 @@ def admin_required(view_func):
             ...
     """
     return user_passes_test(
-        lambda user: user.is_staff,
+        lambda user: user.is_authenticated and user.is_superuser,
         login_url='login'
     )(view_func)
 
@@ -28,9 +29,26 @@ def admin_required(view_func):
 def director_required(view_func):
     """
     Decorador que restringe el acceso al Director General (superusuario).
+    Alias de admin_required, ambos exigen is_superuser.
     """
     return user_passes_test(
-        lambda user: user.is_superuser,
+        lambda user: user.is_authenticated and user.is_superuser,
+        login_url='login'
+    )(view_func)
+
+
+def cajero_required(view_func):
+    """
+    Decorador que permite acceso a cualquier empleado (cajero o director).
+    Ideal para vistas operativas: POS, reservas, catálogo de ventas.
+    
+    Usage:
+        @cajero_required
+        def pos(request):
+            ...
+    """
+    return user_passes_test(
+        lambda user: user.is_authenticated and user.is_staff,
         login_url='login'
     )(view_func)
 
