@@ -637,7 +637,8 @@ details.nav-dropdown[open] summary .dropdown-arrow {
       {% if user.is_authenticated %}
         <div class="user-zone-divider"></div>
 
-        {% if user.is_staff %}
+        {% if user.is_superuser %}
+          <!-- Director: menú de Gestión completo -->
           <details class="nav-dropdown">
             <summary class="nav-dropdown-trigger transition-all hover:scale-105" style="font-size:0.75rem;padding:0.65rem 1rem;border-radius:12px;background:rgba(210,236,162,0.1);border-color:rgba(210,236,162,0.3);box-shadow:0 4px 15px rgba(0,0,0,0.1);">
               <span class="material-symbols-outlined" style="font-size:1.1rem;">dashboard_customize</span>
@@ -665,19 +666,38 @@ details.nav-dropdown[open] summary .dropdown-arrow {
                 <span class="material-symbols-outlined text-[#d2eca2]">groups</span>
                 <span><strong>Clientes</strong><span>Reservas e historial</span></span>
               </a>
-              {% if user.is_superuser %}
-                <a href="{% url 'panel_personal' %}" class="nav-dropdown-item">
-                  <span class="material-symbols-outlined text-[#d2eca2]">badge</span>
-                  <span><strong>Personal</strong><span>Staff y cuentas internas</span></span>
-                </a>
-                <a href="{% url 'panel_auditoria' %}" class="nav-dropdown-item">
-                  <span class="material-symbols-outlined text-[#d2eca2]">history</span>
-                  <span><strong>Auditoría</strong><span>Bitácora y control</span></span>
-                </a>
-              {% endif %}
+              <a href="{% url 'panel_personal' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined text-[#d2eca2]">badge</span>
+                <span><strong>Personal</strong><span>Staff y cuentas internas</span></span>
+              </a>
+              <a href="{% url 'panel_auditoria' %}" class="nav-dropdown-item">
+                <span class="material-symbols-outlined text-[#d2eca2]">history</span>
+                <span><strong>Auditoría</strong><span>Bitácora y control</span></span>
+              </a>
             </div>
           </details>
+
+        {% elif user.is_staff %}
+          <!-- Cajero: accesos rápidos a sus funciones -->
+          <div class="flex items-center gap-1.5 rounded-2xl p-1.5" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);">
+            <a href="{% url 'pos' %}"
+               class="flex items-center gap-1.5 text-white/80 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all font-bold text-xs tracking-wider uppercase {% if request.resolver_match.url_name == 'pos' %}bg-white/15 text-white{% endif %}">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">point_of_sale</span>
+              <span class="hidden sm:inline">POS</span>
+            </a>
+            <a href="{% url 'gestor_reservas' %}"
+               class="flex items-center gap-1.5 text-white/80 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all font-bold text-xs tracking-wider uppercase {% if request.resolver_match.url_name == 'gestor_reservas' %}bg-white/15 text-white{% endif %}">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">confirmation_number</span>
+              <span class="hidden sm:inline">Reservas</span>
+            </a>
+            <a href="{% url 'lista_libros' %}"
+               class="flex items-center gap-1.5 text-white/80 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-xl transition-all font-bold text-xs tracking-wider uppercase {% if request.resolver_match.url_name == 'lista_libros' %}bg-white/15 text-white{% endif %}">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">storefront</span>
+              <span class="hidden sm:inline">Catálogo</span>
+            </a>
+          </div>
         {% endif %}
+
 
         <!-- User pill -->
         <a href="{% url 'mi_perfil' %}"

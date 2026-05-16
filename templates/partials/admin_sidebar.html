@@ -69,20 +69,16 @@ Uso: include 'partials/admin_sidebar.html'
 </style>
 
 <aside class="adm-sidebar">
+
+  {% if user.is_superuser %}
   <div class="adm-sidebar-panel">
-    <p class="adm-section-label">Módulos Admin</p>
+    <p class="adm-section-label">Administración</p>
 
     <a href="{% url 'gestion_inventario' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestion_inventario' %}active{% endif %}">
       <span class="material-symbols-outlined">inventory_2</span> Inventario
     </a>
     <a href="{% url 'agregar_libro' %}" class="adm-chip {% if request.resolver_match.url_name == 'agregar_libro' %}active{% endif %}">
       <span class="material-symbols-outlined">add_box</span> Agregar Libro
-    </a>
-    <a href="{% url 'pos' %}" class="adm-chip {% if request.resolver_match.url_name == 'pos' %}active{% endif %}">
-      <span class="material-symbols-outlined">point_of_sale</span> POS
-    </a>
-    <a href="{% url 'gestor_reservas' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestor_reservas' %}active{% endif %}">
-      <span class="material-symbols-outlined">confirmation_number</span> Reservas
     </a>
     <a href="{% url 'directorio_proveedores' %}" class="adm-chip {% if request.resolver_match.url_name == 'directorio_proveedores' %}active{% endif %}">
       <span class="material-symbols-outlined">local_shipping</span> Proveedores
@@ -96,20 +92,26 @@ Uso: include 'partials/admin_sidebar.html'
     <a href="{% url 'panel_clientes' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_clientes' %}active{% endif %}">
       <span class="material-symbols-outlined">groups</span> Clientes
     </a>
-    {% if user.is_superuser %}
     <a href="{% url 'panel_personal' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_personal' %}active{% endif %}">
       <span class="material-symbols-outlined">badge</span> Personal
     </a>
     <a href="{% url 'panel_auditoria' %}" class="adm-chip {% if request.resolver_match.url_name == 'panel_auditoria' %}active{% endif %}">
       <span class="material-symbols-outlined">history</span> Auditoría
     </a>
-    {% endif %}
   </div>
+  {% endif %}
 
   <div class="adm-sidebar-panel">
-    <p class="adm-section-label">Tienda</p>
-    <a href="{% url 'lista_libros' %}" class="adm-chip">
-      <span class="material-symbols-outlined">storefront</span> Ver catálogo
+    <p class="adm-section-label">Operaciones</p>
+    <a href="{% url 'pos' %}" class="adm-chip {% if request.resolver_match.url_name == 'pos' %}active{% endif %}">
+      <span class="material-symbols-outlined">point_of_sale</span> POS
+    </a>
+    <a href="{% url 'gestor_reservas' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestor_reservas' %}active{% endif %}">
+      <span class="material-symbols-outlined">confirmation_number</span> Reservas
+    </a>
+    <a href="{% url 'lista_libros' %}" class="adm-chip {% if request.resolver_match.url_name == 'lista_libros' %}active{% endif %}">
+      <span class="material-symbols-outlined">storefront</span> Catálogo
     </a>
   </div>
+
 </aside>
