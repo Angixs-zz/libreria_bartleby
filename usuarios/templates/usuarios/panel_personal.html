@@ -166,62 +166,66 @@
 
         <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
             <!-- Equipo -->
-            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">groups</span>
-                </div>
-                <div class="relative z-10">
-                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
-                        <span class="material-symbols-outlined">shield_person</span>
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(62, 82, 25, 0.12); color: var(--primary);">
+                        shield_person
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Equipo</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Cuentas admin</h2>
                     </div>
-                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Equipo</p>
-                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ total_personal }}</p>
-                    <p class="text-xs" style="color: var(--text-faint);">cuentas administrativas</p>
+                </div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: var(--primary); letter-spacing: -0.02em;">{{ total_personal }}</p>
                 </div>
             </article>
 
             <!-- Cajeros -->
-            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">point_of_sale</span>
-                </div>
-                <div class="relative z-10">
-                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
-                        <span class="material-symbols-outlined">storefront</span>
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(217, 119, 6, 0.12); color: #d97706;">
+                        storefront
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Cajeros</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Staff activo</h2>
                     </div>
-                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Cajeros</p>
-                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ staff_activo }}</p>
-                    <p class="text-xs" style="color: var(--text-faint);">staff activo</p>
+                </div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: #d97706; letter-spacing: -0.02em;">{{ staff_activo }}</p>
                 </div>
             </article>
 
             <!-- Direccion -->
-            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">admin_panel_settings</span>
-                </div>
-                <div class="relative z-10">
-                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
-                        <span class="material-symbols-outlined">stars</span>
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(25, 135, 84, 0.12); color: #198754;">
+                        stars
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Dirección</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Director{{ directores|pluralize:"es" }}</h2>
                     </div>
-                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Dirección</p>
-                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ directores }}</p>
-                    <p class="text-xs" style="color: var(--text-faint);">director{{ directores|pluralize:"es" }} activo{{ directores|pluralize:"s" }}</p>
+                </div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: #198754; letter-spacing: -0.02em;">{{ directores }}</p>
                 </div>
             </article>
 
             <!-- Bajas -->
-            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                    <span class="material-symbols-outlined text-8xl" style="color: #dc2626;">person_off</span>
-                </div>
-                <div class="relative z-10">
-                    <div class="kpi-icon mb-5" style="background-color: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.15);">
-                        <span class="material-symbols-outlined">block</span>
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(220, 38, 38, 0.12); color: #dc2626;">
+                        block
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Bajas</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Sin acceso</h2>
                     </div>
-                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Bajas lógicas</p>
-                    <p class="font-headline text-5xl mb-2" style="color: #dc2626;">{{ cuentas_inactivas }}</p>
-                    <p class="text-xs" style="color: var(--text-faint);">cuentas sin acceso</p>
+                </div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: #dc2626; letter-spacing: -0.02em;">{{ cuentas_inactivas }}</p>
                 </div>
             </article>
         </section>
@@ -251,71 +255,78 @@
                 </form>
             </div>
 
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left whitespace-nowrap">
                     <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Usuario</th>
-                            <th>Rol</th>
-                            <th>Ultimo acceso</th>
-                            <th>Estado</th>
-                            <th class="text-end">Acciones</th>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold" style="color: var(--text);">Nombre</th>
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold" style="color: var(--text);">Usuario</th>
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold" style="color: var(--text);">Rol</th>
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold" style="color: var(--text);">Ultimo acceso</th>
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold" style="color: var(--text);">Estado</th>
+                            <th class="py-3 px-2 text-[11px] uppercase tracking-widest font-extrabold text-right" style="color: var(--text);">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for empleado in personal %}
-                            <tr class="staff-row">
-                                <td>
-                                    <div class="fw-semibold">{{ empleado.get_full_name|default:empleado.username }}</div>
-                                    <div class="small" style="color: var(--text-muted);">{{ empleado.email|default:"Sin correo" }}</div>
+                            <tr class="transition-colors hover:bg-black/5 dark:hover:bg-white/5" style="border-bottom: 1px solid var(--border);">
+                                <td class="py-4 px-2">
+                                    <div class="text-sm font-bold" style="color: var(--text);">{{ empleado.get_full_name|default:empleado.username }}</div>
+                                    <div class="text-[11px]" style="color: var(--text-muted);">{{ empleado.email|default:"Sin correo" }}</div>
                                 </td>
-                                <td>
-                                    <span class="fw-semibold">{{ empleado.username }}</span>
+                                <td class="py-4 px-2">
+                                    <span class="text-sm font-bold" style="color: var(--text);">{{ empleado.username }}</span>
                                 </td>
-                                <td>
-                                    <span class="badge rounded-pill role-badge px-3 py-2">{{ empleado.rol_panel }}</span>
+                                <td class="py-4 px-2">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wide" 
+                                          style="background-color: rgba(62, 82, 25, 0.1); color: var(--primary); border: 1px solid rgba(62, 82, 25, 0.2);">
+                                        {{ empleado.rol_panel }}
+                                    </span>
                                 </td>
-                                <td>
+                                <td class="py-4 px-2 text-sm" style="color: var(--text);">
                                     {% if empleado.last_login %}
                                         {{ empleado.last_login|date:"d/m/Y H:i" }}
                                     {% else %}
                                         <span style="color: var(--text-muted);">Sin ingreso registrado</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="py-4 px-2">
                                     {% if empleado.is_active %}
-                                        <span class="badge text-bg-success">Activo</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest text-white" style="background-color: #198754;">
+                                            Activo
+                                        </span>
                                     {% else %}
-                                        <span class="badge text-bg-secondary">Desactivado</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest text-white" style="background-color: #6c757d;">
+                                            Inactivo
+                                        </span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">
+                                <td class="py-4 px-2 text-right">
                                     {% if empleado.is_superuser %}
-                                        <span class="small fw-semibold" style="color: var(--text-muted);">Cuenta protegida</span>
+                                        <span class="text-[11px] font-bold" style="color: var(--text-muted);">Cuenta protegida</span>
                                     {% elif empleado.is_active %}
-                                        <div class="table-actions">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--text-muted);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
                                                 Editar
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal-{{ empleado.id }}">
-                                                Resetear contraseña
+                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #0d6efd;" data-bs-toggle="modal" data-bs-target="#resetPasswordModal-{{ empleado.id }}">
+                                                Reset
                                             </button>
-                                            <form method="post" action="{% url 'desactivar_personal' empleado.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'desactivar_personal' empleado.id %}" class="inline m-0">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    Desactivar usuario
+                                                <button type="submit" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #dc2626;">
+                                                    Baja
                                                 </button>
                                             </form>
                                         </div>
                                     {% else %}
-                                        <div class="table-actions">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--text-muted);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
                                                 Editar
                                             </button>
-                                            <form method="post" action="{% url 'reactivar_personal' empleado.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'reactivar_personal' empleado.id %}" class="inline m-0">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm olive-btn">
+                                                <button type="submit" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--primary);">
                                                     Reactivar
                                                 </button>
                                             </form>
@@ -325,8 +336,8 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-5" style="color: var(--text-muted);">
-                                    No hay empleados que coincidan con la busqueda.
+                                <td colspan="6" class="text-center py-10" style="color: var(--text-muted);">
+                                    No hay empleados que coincidan con la búsqueda.
                                 </td>
                             </tr>
                         {% endfor %}
