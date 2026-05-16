@@ -67,25 +67,36 @@
 </style>
 {% endblock %}
 
+{% block breadcrumbs %}
+<div class="w-full" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+    <div class="max-w-7xl mx-auto px-8 py-3">
+        <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+            <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">home</span>
+                Inicio
+            </a>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <a href="{% url 'lista_libros' %}" class="transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                Catálogo
+            </a>
+            {% if ejemplar.libro.categoria %}
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <a href="{% url 'lista_libros' %}?genero={{ ejemplar.libro.categoria.id }}" class="transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                {{ ejemplar.libro.categoria.nombre }}
+            </a>
+            {% endif %}
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span class="truncate max-w-xs" style="color: var(--text);">{{ ejemplar.libro.titulo }}</span>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<main class="pt-10 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
+<main class="pt-8 pb-24 px-4 sm:px-8" style="background-color: var(--bg); min-height: calc(100vh - 5rem);">
 <div class="max-w-6xl mx-auto">
 
-    <!-- ── Breadcrumb ──────────────────────────────────── -->
-    <nav class="flex items-center gap-2 text-xs font-body mb-10" style="color: var(--text-faint);">
-        <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 hover:opacity-80 transition-opacity" style="color: var(--text-muted);">
-            <span class="material-symbols-outlined text-sm">storefront</span>
-            Catálogo
-        </a>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        {% if ejemplar.libro.categoria %}
-        <a href="{% url 'lista_libros' %}?genero={{ ejemplar.libro.categoria.id }}" class="hover:opacity-80 transition-opacity" style="color: var(--text-muted);">
-            {{ ejemplar.libro.categoria.nombre }}
-        </a>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        {% endif %}
-        <span class="truncate max-w-xs" style="color: var(--text);">{{ ejemplar.libro.titulo }}</span>
-    </nav>
+
 
     <!-- ── Layout Principal ───────────────────────────── -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16">

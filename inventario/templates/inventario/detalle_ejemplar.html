@@ -1,5 +1,25 @@
 {% extends 'base.html' %}
 
+{% block breadcrumbs %}
+<div class="w-full" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+    <div class="max-w-7xl mx-auto px-8 py-3">
+        <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+            <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">home</span>
+                Inicio
+            </a>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text-muted);">Gestión</span>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text-muted);">Inventario</span>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text);">Detalle Ejemplar</span>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+
 {% block extra_head %}
 <style>
 .field-group {
