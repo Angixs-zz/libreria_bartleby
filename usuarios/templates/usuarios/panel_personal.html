@@ -28,7 +28,34 @@
         --bs-body-color: var(--text);
     }
 
-    .personal-shell .summary-card,
+    .personal-shell .kpi-card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 240, 0.92));
+        border: 1px solid rgba(197, 200, 184, 0.7);
+        box-shadow: 0 20px 60px rgba(23, 29, 15, 0.08);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dark .personal-shell .kpi-card {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
+        border-color: rgba(80, 85, 60, 0.6);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    }
+    .personal-shell .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 60px rgba(23, 29, 15, 0.12);
+    }
+    .dark .personal-shell .kpi-card:hover {
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    }
+    .personal-shell .kpi-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.25rem;
+        font-size: 1.5rem;
+    }
+
     .personal-shell .table-shell,
     .personal-shell .modal-content {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.92));
@@ -37,7 +64,6 @@
         color: var(--text);
     }
 
-    .dark .personal-shell .summary-card,
     .dark .personal-shell .table-shell,
     .dark .personal-shell .modal-content {
         background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
@@ -115,70 +141,113 @@
   <div class="flex-1 min-w-0">
 <div class="personal-shell py-4">
     <div class="container py-2">
-        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
-            <div>
-                <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
-                    Direccion General · Personal
+        <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 py-10 mb-8">
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">
+                    Dirección General · Personal
                 </p>
-                <h1 class="display-4 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: #4A5D23;">
-                    Gestion de Personal
+                <h1 class="font-headline italic text-5xl md:text-6xl tracking-tight mb-4" style="color: var(--text);">
+                    Gestión de Personal
                 </h1>
-                <p class="mb-0" style="max-width: 760px; color: var(--text-muted);">
+                <p class="text-sm md:text-base max-w-2xl leading-relaxed" style="color: var(--text-muted);">
                     Administra cuentas de cajeros y staff, controla accesos y mantén la operación bajo supervisión del Director General.
                 </p>
             </div>
 
-            <div class="d-flex gap-2 flex-wrap">
-                <button type="button" class="btn olive-btn btn-lg" data-bs-toggle="modal" data-bs-target="#nuevoStaffModal">
-                    <i class="bi bi-person-plus-fill me-2"></i>Agregar Empleado
+            <div class="flex-shrink-0">
+                <button type="button" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-1 hover:shadow-xl"
+                        style="background-color: var(--primary); color: white; box-shadow: 0 8px 24px rgba(62,82,25,0.25);"
+                        data-bs-toggle="modal" data-bs-target="#nuevoStaffModal">
+                    <span class="material-symbols-outlined text-sm">person_add</span>
+                    Agregar Empleado
                 </button>
             </div>
-        </div>
+        </section>
 
-        <div class="row g-4 mb-4">
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="summary-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Equipo</div>
-                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ total_personal }}</div>
-                    <div class="small" style="color: var(--text-muted);">cuentas administrativas</div>
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+            <!-- Equipo -->
+            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">groups</span>
                 </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="summary-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Cajeros</div>
-                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ staff_activo }}</div>
-                    <div class="small" style="color: var(--text-muted);">staff activo</div>
+                <div class="relative z-10">
+                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
+                        <span class="material-symbols-outlined">shield_person</span>
+                    </div>
+                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Equipo</p>
+                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ total_personal }}</p>
+                    <p class="text-xs" style="color: var(--text-faint);">cuentas administrativas</p>
                 </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="summary-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Direccion</div>
-                    <div class="display-6 fw-semibold" style="color: #4A5D23;">{{ directores }}</div>
-                    <div class="small" style="color: var(--text-muted);">director{{ directores|pluralize:"es" }} activo{{ directores|pluralize:"s" }}</div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="summary-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Bajas logicas</div>
-                    <div class="display-6 fw-semibold" style="color: #7a3b2e;">{{ cuentas_inactivas }}</div>
-                    <div class="small" style="color: var(--text-muted);">cuentas sin acceso</div>
-                </div>
-            </div>
-        </div>
+            </article>
 
-        <div class="table-shell rounded-4 p-4">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <!-- Cajeros -->
+            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">point_of_sale</span>
+                </div>
+                <div class="relative z-10">
+                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
+                        <span class="material-symbols-outlined">storefront</span>
+                    </div>
+                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Cajeros</p>
+                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ staff_activo }}</p>
+                    <p class="text-xs" style="color: var(--text-faint);">staff activo</p>
+                </div>
+            </article>
+
+            <!-- Direccion -->
+            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-8xl" style="color: var(--primary);">admin_panel_settings</span>
+                </div>
+                <div class="relative z-10">
+                    <div class="kpi-icon mb-5" style="background-color: rgba(62,82,25,0.08); color: var(--primary); border: 1px solid rgba(62,82,25,0.15);">
+                        <span class="material-symbols-outlined">stars</span>
+                    </div>
+                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Dirección</p>
+                    <p class="font-headline text-5xl mb-2" style="color: var(--text);">{{ directores }}</p>
+                    <p class="text-xs" style="color: var(--text-faint);">director{{ directores|pluralize:"es" }} activo{{ directores|pluralize:"s" }}</p>
+                </div>
+            </article>
+
+            <!-- Bajas -->
+            <article class="kpi-card rounded-3xl p-6 sm:p-7 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-8xl" style="color: #dc2626;">person_off</span>
+                </div>
+                <div class="relative z-10">
+                    <div class="kpi-icon mb-5" style="background-color: rgba(220,38,38,0.08); color: #dc2626; border: 1px solid rgba(220,38,38,0.15);">
+                        <span class="material-symbols-outlined">block</span>
+                    </div>
+                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-2" style="color: var(--text-muted);">Bajas lógicas</p>
+                    <p class="font-headline text-5xl mb-2" style="color: #dc2626;">{{ cuentas_inactivas }}</p>
+                    <p class="text-xs" style="color: var(--text-faint);">cuentas sin acceso</p>
+                </div>
+            </article>
+        </section>
+
+        <div class="table-shell rounded-3xl p-6 sm:p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
                 <div>
-                    <h2 class="h3 fst-italic mb-1" style="font-family: 'Newsreader', serif; color: #4A5D23;">Directorio interno</h2>
-                    <p class="mb-0 small" style="color: var(--text-muted);">Consulta el estado del personal y el último acceso a la bitácora.</p>
+                    <h2 class="font-headline italic text-3xl mb-2" style="color: var(--text);">Directorio interno</h2>
+                    <p class="text-sm" style="color: var(--text-muted);">Consulta el estado del personal y el último acceso a la bitácora.</p>
                 </div>
 
-                <form method="get" class="d-flex gap-2 w-100 w-lg-auto">
-                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre o usuario">
-                    <button type="submit" class="btn btn-outline-secondary">
-                        <i class="bi bi-search"></i>
+                <form method="get" class="flex w-full lg:w-auto gap-3">
+                    <div class="relative flex-grow min-w-[240px]">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style="color: var(--text-faint);">search</span>
+                        <input type="text" name="q" value="{{ query }}" placeholder="Buscar nombre o usuario"
+                               class="w-full rounded-xl pr-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                               style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text); --tw-ring-color: var(--primary); padding-left: 2.75rem;">
+                    </div>
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5 shadow-sm whitespace-nowrap"
+                            style="background-color: var(--primary); color: white;">
+                        Filtrar
                     </button>
-                    <a href="{% url 'panel_personal' %}" class="btn btn-outline-secondary">Limpiar</a>
+                    <a href="{% url 'panel_personal' %}" class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:opacity-70 whitespace-nowrap"
+                       style="background-color: transparent; border: 1px solid var(--border); color: var(--text-muted);">
+                        Limpiar
+                    </a>
                 </form>
             </div>
 
