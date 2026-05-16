@@ -27,35 +27,80 @@
         --bs-body-color: var(--text);
     }
 
-    .audit-shell .audit-card,
-    .audit-shell .audit-panel {
+    .audit-shell .kpi-card {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 240, 0.92));
         border: 1px solid rgba(197, 200, 184, 0.7);
         box-shadow: 0 20px 60px rgba(23, 29, 15, 0.08);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .dark .audit-shell .audit-card,
-    .dark .audit-shell .audit-panel {
+    .dark .audit-shell .kpi-card {
         background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
         border-color: rgba(80, 85, 60, 0.6);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
     }
+    .audit-shell .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 60px rgba(23, 29, 15, 0.12);
+    }
+    .dark .audit-shell .kpi-card:hover {
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    }
+    .audit-shell .kpi-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.25rem;
+        font-size: 1.5rem;
+    }
 
-    .audit-shell .section-title {
-        font-family: 'Newsreader', serif;
-        font-style: italic;
-        letter-spacing: -0.02em;
+    .audit-shell .table-shell {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.92));
+        border: 1px solid rgba(197, 200, 184, 0.7);
+        box-shadow: 0 20px 55px rgba(28, 32, 19, 0.08);
+        color: var(--text);
+    }
+
+    .dark .audit-shell .table-shell {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
+        border-color: rgba(80, 85, 60, 0.6);
+        box-shadow: 0 20px 55px rgba(0, 0, 0, 0.24);
     }
 
     .audit-shell .timeline-item {
         border-radius: 1rem;
-        background-color: rgba(62, 82, 25, 0.06);
-        border: 1px solid rgba(62, 82, 25, 0.12);
+        background-color: rgba(62, 82, 25, 0.04);
+        border: 1px solid rgba(62, 82, 25, 0.1);
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .audit-shell .timeline-item:hover {
+        transform: translateX(4px);
+        background-color: rgba(62, 82, 25, 0.08);
     }
 
     .dark .audit-shell .timeline-item {
-        background-color: rgba(163, 196, 106, 0.08);
+        background-color: rgba(163, 196, 106, 0.05);
         border-color: rgba(163, 196, 106, 0.15);
+    }
+    .dark .audit-shell .timeline-item:hover {
+        background-color: rgba(163, 196, 106, 0.1);
+    }
+    .audit-shell .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .audit-shell .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .audit-shell .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(62, 82, 25, 0.15);
+        border-radius: 20px;
+    }
+    .dark .audit-shell .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(163, 196, 106, 0.2);
+    }
+    .audit-shell .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(62, 82, 25, 0.3);
     }
 </style>
 {% endblock %}
@@ -67,114 +112,164 @@
   <div class="flex-1 min-w-0">
 <div class="audit-shell py-4">
     <div class="container py-2">
-        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
-            <div>
-                <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
+        <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 py-10 mb-8">
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">
                     Dirección General · Auditoría
                 </p>
-                <h1 class="section-title display-4 mb-3" style="color: var(--primary);">Bitácora del Sistema</h1>
-                <p class="mb-0 fs-6" style="max-width: 760px; color: var(--text-muted);">
+                <h1 class="font-headline italic text-5xl md:text-6xl tracking-tight mb-4" style="color: var(--text);">
+                    Auditoría
+                </h1>
+                <p class="text-sm md:text-base max-w-2xl leading-relaxed" style="color: var(--text-muted);">
                     Registro de quién creó, editó, canceló, reactivó o modificó acciones críticas dentro de la operación.
                 </p>
             </div>
-        </div>
+        </section>
 
-        <div class="row g-4 mb-4">
-            <div class="col-12 col-md-4">
-                <div class="audit-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Eventos</div>
-                    <div class="display-6 fw-semibold" style="color: var(--primary);">{{ total_eventos }}</div>
-                    <div class="small" style="color: var(--text-muted);">registros acumulados</div>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Eventos -->
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(62, 82, 25, 0.12); color: var(--primary);">
+                        list_alt
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Eventos</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Registros acumulados</h2>
+                    </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="audit-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Hoy</div>
-                    <div class="display-6 fw-semibold" style="color: #0d6efd;">{{ eventos_hoy }}</div>
-                    <div class="small" style="color: var(--text-muted);">movimientos registrados</div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: var(--primary); letter-spacing: -0.02em;">{{ total_eventos }}</p>
                 </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="audit-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.18em; color: var(--text-muted);">Usuarios</div>
-                    <div class="display-6 fw-semibold" style="color: #198754;">{{ usuarios_activos }}</div>
-                    <div class="small" style="color: var(--text-muted);">actores identificados</div>
-                </div>
-            </div>
-        </div>
+            </article>
 
-        <div class="audit-panel rounded-4 p-4 mb-4">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-4">
-                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Buscar</label>
-                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Usuario, entidad o descripción">
+            <!-- Hoy -->
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(13, 110, 253, 0.12); color: #0d6efd;">
+                        today
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Hoy</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Movimientos registrados</h2>
+                    </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-2">
-                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Acción</label>
-                    <select name="accion" class="form-select">
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: #0d6efd; letter-spacing: -0.02em;">{{ eventos_hoy }}</p>
+                </div>
+            </article>
+
+            <!-- Usuarios -->
+            <article class="kpi-card rounded-2xl h-full p-6 flex flex-col">
+                <div class="flex items-center gap-4 mb-5">
+                    <span class="kpi-icon flex-shrink-0 material-symbols-outlined rounded-[14px]" style="background-color: rgba(25, 135, 84, 0.12); color: #198754;">
+                        group
+                    </span>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-1" style="color: var(--text-muted);">Usuarios</p>
+                        <h2 class="font-headline italic text-xl leading-tight" style="color: var(--text);">Actores identificados</h2>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2">
+                    <p class="font-headline text-5xl font-bold mb-1" style="color: #198754; letter-spacing: -0.02em;">{{ usuarios_activos }}</p>
+                </div>
+            </article>
+        </section>
+
+        <div class="table-shell rounded-3xl p-6 sm:p-8 mb-10">
+            <form method="get" class="flex flex-wrap lg:flex-nowrap items-end gap-4">
+                <div class="flex-grow min-w-[240px]">
+                    <label class="block text-[10px] uppercase tracking-[0.12em] font-bold mb-2" style="color: var(--text-muted);">Buscar</label>
+                    <input type="text" name="q" value="{{ query }}" placeholder="Usuario, entidad o descripción"
+                           class="w-full rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                           style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text); --tw-ring-color: var(--primary);">
+                </div>
+                <div class="w-full sm:w-auto">
+                    <label class="block text-[10px] uppercase tracking-[0.12em] font-bold mb-2" style="color: var(--text-muted);">Acción</label>
+                    <select name="accion" class="w-full rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50 appearance-none bg-no-repeat"
+                            style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text); --tw-ring-color: var(--primary); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231b1c1a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-position: right 1rem top 50%; background-size: 0.65rem auto; padding-right: 2.5rem; min-width: 140px;">
                         {% for key, label in acciones_auditoria.items %}
                             <option value="{{ key }}" {% if accion_activa == key %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-12 col-md-6 col-lg-2">
-                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Módulo</label>
-                    <select name="modulo" class="form-select">
+                <div class="w-full sm:w-auto">
+                    <label class="block text-[10px] uppercase tracking-[0.12em] font-bold mb-2" style="color: var(--text-muted);">Módulo</label>
+                    <select name="modulo" class="w-full rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50 appearance-none bg-no-repeat"
+                            style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text); --tw-ring-color: var(--primary); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231b1c1a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-position: right 1rem top 50%; background-size: 0.65rem auto; padding-right: 2.5rem; min-width: 140px;">
                         {% for key, label in modulos_auditoria.items %}
                             <option value="{{ key }}" {% if modulo_activo == key %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-12 col-md-6 col-lg-2">
-                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Cantidad</label>
-                    <select name="limite" class="form-select">
+                <div class="w-full sm:w-auto">
+                    <label class="block text-[10px] uppercase tracking-[0.12em] font-bold mb-2" style="color: var(--text-muted);">Cantidad</label>
+                    <select name="limite" class="w-full rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50 appearance-none bg-no-repeat"
+                            style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text); --tw-ring-color: var(--primary); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231b1c1a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-position: right 1rem top 50%; background-size: 0.65rem auto; padding-right: 2.5rem; min-width: 100px;">
                         {% for limite in limites_auditoria %}
                             <option value="{{ limite }}" {% if limite_activo == limite %}selected{% endif %}>{{ limite }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-12 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn text-white flex-fill" style="background-color: var(--primary);">Filtrar</button>
-                    <a href="{% url 'panel_auditoria' %}" class="btn btn-outline-secondary">Limpiar</a>
+                <div class="flex gap-2">
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5 shadow-sm whitespace-nowrap"
+                            style="background-color: var(--primary); color: white;">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'panel_auditoria' %}" class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:opacity-70 whitespace-nowrap"
+                       style="background-color: transparent; border: 1px solid var(--border); color: var(--text-muted);">
+                        Limpiar
+                    </a>
                 </div>
             </form>
         </div>
 
-        <div class="audit-panel rounded-4 p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="table-shell rounded-3xl p-6 sm:p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
                 <div>
-                    <h2 class="section-title h2 mb-2">Eventos recientes</h2>
-                    <p class="small mb-0" style="color: var(--text-muted);">
+                    <h2 class="font-headline italic text-3xl mb-2" style="color: var(--text);">Eventos recientes</h2>
+                    <p class="text-sm" style="color: var(--text-muted);">
                         Se muestran hasta {{ limite_activo }} registros según el filtro activo. La bitácora conserva eventos por {{ retencion_auditoria_dias }} días.
                     </p>
                 </div>
             </div>
 
-            <div class="d-flex flex-column gap-3">
+            <div class="flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-2" style="max-height: 600px;">
                 {% for evento in eventos %}
-                    <article class="timeline-item p-4">
-                        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-2">
+                    <article class="timeline-item p-5">
+                        <div class="flex flex-col lg:flex-row justify-between gap-4 mb-2">
                             <div>
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                                    <span class="badge rounded-pill text-bg-dark">{{ evento.modulo|title }}</span>
-                                    <span class="badge rounded-pill {% if evento.accion == 'cancelar' or evento.accion == 'desactivar' %}text-bg-danger{% elif evento.accion == 'reactivar' or evento.accion == 'crear' %}text-bg-success{% elif evento.accion == 'editar' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
+                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                                          style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+                                        {{ evento.modulo|title }}
+                                    </span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                                          style="
+                                          {% if evento.accion == 'cancelar' or evento.accion == 'desactivar' %}background-color: #dc2626; color: white;
+                                          {% elif evento.accion == 'reactivar' or evento.accion == 'crear' %}background-color: #198754; color: white;
+                                          {% elif evento.accion == 'editar' %}background-color: #f59e0b; color: white;
+                                          {% else %}background-color: #6b7280; color: white;
+                                          {% endif %}">
                                         {{ evento.accion|title }}
                                     </span>
                                 </div>
-                                <h3 class="h5 mb-1" style="color: var(--text);">{{ evento.entidad_tipo|title }} · {{ evento.entidad_nombre|default:"Sin etiqueta" }}</h3>
-                                <p class="mb-0 small" style="color: var(--text-muted);">{{ evento.descripcion }}</p>
+                                <h3 class="font-headline text-lg font-bold mb-1" style="color: var(--text);">{{ evento.entidad_tipo|title }} · {{ evento.entidad_nombre|default:"Sin etiqueta" }}</h3>
+                                <p class="text-sm m-0" style="color: var(--text-muted);">{{ evento.descripcion }}</p>
                             </div>
-                            <div class="text-lg-end">
-                                <div class="fw-semibold" style="color: var(--text);">{{ evento.actor.get_full_name|default:evento.actor.username|default:"Sistema" }}</div>
-                                <div class="small" style="color: var(--text-muted);">{{ evento.creado_en|date:"d/m/Y H:i" }}</div>
+                            <div class="lg:text-right flex flex-col justify-center">
+                                <div class="text-sm font-bold" style="color: var(--text);">{{ evento.actor.get_full_name|default:evento.actor.username|default:"Sistema" }}</div>
+                                <div class="text-xs" style="color: var(--text-muted);">{{ evento.creado_en|date:"d/m/Y H:i" }}</div>
                             </div>
                         </div>
-                        <div class="small" style="color: var(--text-faint);">
+                        <div class="text-[11px] font-bold mt-2" style="color: var(--text-faint);">
                             {{ evento.entidad_tipo }}{% if evento.entidad_id %} #{{ evento.entidad_id }}{% endif %}
                         </div>
                     </article>
                 {% empty %}
-                    <div class="alert alert-secondary mb-0">No hay eventos de auditoría con los filtros actuales.</div>
+                    <div class="p-6 text-center text-sm rounded-xl" style="background-color: var(--bg-subtle); color: var(--text-muted);">
+                        No hay eventos de auditoría con los filtros actuales.
+                    </div>
                 {% endfor %}
             </div>
         </div>
