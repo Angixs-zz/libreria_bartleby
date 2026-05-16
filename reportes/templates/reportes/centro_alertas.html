@@ -59,14 +59,53 @@
 
     .alertas-shell .alert-item {
         border-radius: 1rem;
-        background-color: rgba(62, 82, 25, 0.06);
-        border: 1px solid rgba(62, 82, 25, 0.12);
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(197, 200, 184, 0.4);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .dark .alertas-shell .alert-item {
+        background-color: rgba(0, 0, 0, 0.15);
+        border-color: rgba(80, 85, 60, 0.4);
+    }
+    
+    .alertas-shell .alert-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+    .dark .alertas-shell .alert-item:hover {
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        background-color: rgba(0, 0, 0, 0.3);
     }
 
-    .dark .alertas-shell .alert-item {
-        background-color: rgba(163, 196, 106, 0.08);
-        border-color: rgba(163, 196, 106, 0.15);
+    .alertas-shell .alert-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: transparent;
     }
+
+    .alertas-shell .alert-item.alert-warning::before { background-color: #d97706; }
+    .alertas-shell .alert-item.alert-warning { background-image: linear-gradient(90deg, rgba(217, 119, 6, 0.05), transparent 60%); }
+
+    .alertas-shell .alert-item.alert-primary::before { background-color: #0d6efd; }
+    .alertas-shell .alert-item.alert-primary { background-image: linear-gradient(90deg, rgba(13, 110, 253, 0.05), transparent 60%); }
+
+    .alertas-shell .alert-item.alert-secondary::before { background-color: #6c757d; }
+    .alertas-shell .alert-item.alert-secondary { background-image: linear-gradient(90deg, rgba(108, 117, 125, 0.05), transparent 60%); }
+
+    .alertas-shell .alert-item.alert-dark::before { background-color: #343a40; }
+    .dark .alertas-shell .alert-item.alert-dark::before { background-color: #adb5bd; }
+    .alertas-shell .alert-item.alert-dark { background-image: linear-gradient(90deg, rgba(52, 58, 64, 0.05), transparent 60%); }
+    .dark .alertas-shell .alert-item.alert-dark { background-image: linear-gradient(90deg, rgba(173, 181, 189, 0.05), transparent 60%); }
+
+    .alertas-shell .alert-item.alert-success::before { background-color: #198754; }
+    .alertas-shell .alert-item.alert-success { background-image: linear-gradient(90deg, rgba(25, 135, 84, 0.05), transparent 60%); }
 
     .alertas-shell .alert-card {
         display: flex;
@@ -82,6 +121,46 @@
     .dark .alertas-shell .alert-card:hover {
         box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
     }
+
+    /* ── Pill Group for Navigation ── */
+    .alertas-shell .pill-group {
+        background-color: rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--border);
+        padding: 0.35rem;
+        border-radius: 16px;
+        display: inline-flex;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .dark .alertas-shell .pill-group {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .alertas-shell .nav-pill {
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.65rem 1.2rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        color: var(--text-muted);
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+    .alertas-shell .nav-pill:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        color: var(--text);
+    }
+    .dark .alertas-shell .nav-pill:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: white;
+    }
+
 </style>
 {% endblock %}
 
@@ -103,12 +182,14 @@
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'dashboard_reportes' %}" class="btn btn-outline-secondary rounded-pill px-4 py-3">
-                    <i class="bi bi-bar-chart-line me-2"></i>Dashboard
+            <div class="pill-group d-flex flex-wrap align-items-center">
+                <a href="{% url 'dashboard_reportes' %}" class="nav-pill">
+                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">bar_chart</span>
+                    Dashboard
                 </a>
-                <a href="{% url 'panel_clientes' %}" class="btn rounded-pill px-4 py-3 text-white" style="background-color: var(--primary);">
-                    <i class="bi bi-people me-2"></i>Clientes
+                <a href="{% url 'panel_clientes' %}" class="nav-pill">
+                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">groups</span>
+                    Clientes
                 </a>
             </div>
         </div>
@@ -200,7 +281,7 @@
 
                     <div class="d-flex flex-column gap-3">
                         {% for reserva in reservas_por_vencer %}
-                            <div class="alert-item p-3">
+                            <div class="alert-item alert-warning p-3">
                                 <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                     <div>
                                         <a href="{% url 'detalle_ticket' reserva.id %}" class="fw-semibold text-decoration-none" style="color: var(--primary);">
@@ -242,7 +323,7 @@
 
                     <div class="d-flex flex-column gap-3">
                         {% for libro in stock_critico %}
-                            <div class="alert-item p-3">
+                            <div class="alert-item alert-primary p-3">
                                 <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                     <div>
                                         <div class="fw-semibold" style="color: var(--text);">{{ libro.titulo }}</div>
@@ -279,7 +360,7 @@
 
                     <div class="d-flex flex-column gap-3">
                         {% for venta in ventas_sin_cliente %}
-                            <div class="alert-item p-3">
+                            <div class="alert-item alert-secondary p-3">
                                 <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                     <div>
                                         <div class="fw-semibold" style="color: var(--text);">Ticket #{{ venta.id }}</div>
@@ -288,7 +369,7 @@
                                             {% if venta.cajero %}· {{ venta.cajero.username }}{% endif %}
                                         </div>
                                     </div>
-                                    <div class="fw-semibold" style="color: #0d6efd;">${{ venta.total }}</div>
+                                    <div class="fw-semibold" style="color: var(--text);">${{ venta.total }}</div>
                                 </div>
                                 <div class="small" style="color: var(--text-muted);">
                                     {% for detalle in venta.detalles.all %}
@@ -319,7 +400,7 @@
 
                     <div class="d-flex flex-column gap-3">
                         {% for proveedor in proveedores_inactivos %}
-                            <div class="alert-item p-3">
+                            <div class="alert-item alert-dark p-3">
                                 <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                     <div>
                                         <div class="fw-semibold" style="color: var(--text);">{{ proveedor.nombre }}</div>
@@ -362,7 +443,7 @@
                     <div class="row g-3">
                         {% for cliente in clientes_frecuentes_inactivos %}
                             <div class="col-12 col-lg-6">
-                                <div class="alert-item p-3 h-100">
+                                <div class="alert-item alert-success p-3 h-100">
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                         <div>
                                             <div class="fw-semibold" style="color: var(--text);">{{ cliente.get_full_name|default:cliente.username }}</div>
