@@ -51,25 +51,70 @@
         font-size: 1.4rem;
     }
 
-    .reportes-shell .filter-pill {
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        padding: 0.85rem 1.1rem;
-        transition: all 0.2s ease;
-    }
-
     .reportes-shell .pill-group {
-        background-color: var(--surface);
-        border: 1px solid rgba(197, 200, 184, 0.4);
-        padding: 0.25rem;
-        border-radius: 999px;
+        background-color: rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--border);
+        padding: 0.35rem;
+        border-radius: 16px;
+        display: inline-flex;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .dark .reportes-shell .pill-group {
-        border-color: rgba(80, 85, 60, 0.4);
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .reportes-shell .filter-pill {
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.65rem 1.2rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        color: var(--text-muted);
+        background: transparent;
+    }
+    
+    .reportes-shell .filter-pill:hover:not(.active-pill) {
+        background-color: rgba(0, 0, 0, 0.04);
+        color: var(--text);
+    }
+    .dark .reportes-shell .filter-pill:hover:not(.active-pill) {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: white;
+    }
+
+    .reportes-shell .filter-pill.active-pill {
+        background-color: var(--surface);
+        color: var(--primary);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+        transform: translateY(-1px);
+    }
+
+    .reportes-shell .alert-pill {
+        border-radius: 14px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(220, 38, 38, 0.02));
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        color: #dc2626;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dark .reportes-shell .alert-pill {
+        background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(248, 113, 113, 0.04));
+        border-color: rgba(248, 113, 113, 0.25);
+        color: #f87171;
+    }
+    .reportes-shell .alert-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.05));
     }
 
     @keyframes fadeInUp {
@@ -134,33 +179,31 @@
                 <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
                     Dirección General · Reportes
                 </p>
-                <h1 class="section-title display-4 mb-3" style="color: var(--primary);">Dashboard Ejecutivo</h1>
+                <h1 class="section-title display-4 mb-3" style="color: var(--primary);">Reportes</h1>
                 <p class="mb-0 fs-6" style="max-width: 720px; color: var(--text-muted);">
                     Lectura operativa de ventas, margen estimado, stock y apartados activos. El periodo visible va del
                     {{ filtro_desde|date:"d/m/Y H:i" }} al {{ filtro_hasta|date:"d/m/Y H:i" }}.
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-center gap-4">
                 <a href="{% url 'centro_alertas' %}"
-                   class="filter-pill text-decoration-none text-white d-inline-flex align-items-center gap-2"
-                   style="background-color: #7a3b2e; box-shadow: 0 4px 12px rgba(122, 59, 46, 0.2);">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Alertas
+                   class="alert-pill text-decoration-none d-inline-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">notifications_active</span> Alertas
                 </a>
 
-                <div class="pill-group d-flex flex-wrap align-items-center shadow-sm">
+                <div class="pill-group d-flex flex-wrap align-items-center">
                     {% for key, label in periodos.items %}
                         <a href="?periodo={{ key }}"
-                           class="filter-pill text-decoration-none {% if periodo == key %}text-white{% endif %}"
-                           style="{% if periodo == key %}background-color: var(--primary);{% else %}color: var(--text-muted); background-color: transparent;{% endif %} border: none;">
+                           class="filter-pill text-decoration-none {% if periodo == key %}active-pill{% endif %}"
+                           style="border: none;">
                             {{ label }}
                         </a>
                     {% endfor %}
                     
-                    <button type="button" class="filter-pill border-0 {% if periodo == 'custom' %}text-white{% else %}text-muted bg-transparent{% endif %}" 
-                            style="{% if periodo == 'custom' %}background-color: var(--primary);{% else %}color: var(--text-muted);{% endif %}"
+                    <button type="button" class="filter-pill border-0 {% if periodo == 'custom' %}active-pill{% endif %}" 
                             data-bs-toggle="modal" data-bs-target="#customDateModal">
-                        <i class="bi bi-calendar3 me-1"></i> Rango
+                        <span class="material-symbols-outlined me-1" style="font-size: 1rem; vertical-align: -3px;">calendar_month</span> Rango
                     </button>
                 </div>
             </div>
