@@ -75,14 +75,17 @@
     }
 
     .proveedores-shell .modal-content {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 244, 240, 0.95));
+        background: var(--surface);
         color: var(--text);
-        border: 1px solid var(--border);
-        box-shadow: 0 24px 70px rgba(23, 29, 15, 0.18);
+        border: 1px solid rgba(197, 200, 184, 0.85);
+        box-shadow: 0 26px 72px rgba(23, 29, 15, 0.22);
+        overflow: hidden;
     }
 
     .dark .proveedores-shell .modal-content {
-        background: linear-gradient(180deg, rgba(39, 39, 31, 0.98), rgba(30, 30, 24, 0.96));
+        background: var(--surface);
+        border-color: rgba(80, 85, 60, 0.72);
+        box-shadow: 0 26px 72px rgba(0, 0, 0, 0.36);
     }
 
     .proveedores-shell .modal-header,
@@ -93,6 +96,141 @@
     .dark .proveedores-shell .modal-header,
     .dark .proveedores-shell .modal-footer {
         border-color: rgba(80, 85, 60, 0.4);
+    }
+
+    .proveedores-shell .provider-modal .modal-header {
+        padding: 1.35rem 1.5rem 1rem;
+        background: var(--bg-subtle);
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    .proveedores-shell .provider-modal .modal-body {
+        padding: 1.5rem;
+    }
+
+    .proveedores-shell .provider-modal .modal-footer {
+        padding: 1rem 1.5rem 1.25rem;
+        background: var(--bg-subtle);
+        border-top: 1px solid var(--border) !important;
+    }
+
+    .proveedores-shell .provider-modal-title {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .proveedores-shell .provider-modal-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        background: rgba(62, 82, 25, 0.12);
+        color: var(--primary);
+        flex: 0 0 auto;
+    }
+
+    .proveedores-shell .provider-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 1.25rem;
+    }
+
+    .proveedores-shell .provider-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    .proveedores-shell .provider-field-wide {
+        grid-column: 1 / -1;
+    }
+
+    .proveedores-shell .provider-field .form-label {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .proveedores-shell .provider-field .form-control,
+    .proveedores-shell .provider-field textarea {
+        min-height: 2.85rem;
+        border-radius: 0.65rem;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        padding: 0.72rem 0.85rem;
+        color: var(--text);
+    }
+
+    .proveedores-shell .provider-field textarea {
+        min-height: 5rem;
+        resize: vertical;
+    }
+
+    .proveedores-shell .provider-status {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--bg-subtle);
+    }
+
+    .proveedores-shell .provider-status .form-check-input {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin: 0;
+        border-color: var(--border);
+    }
+
+    .proveedores-shell .provider-status .form-check-label {
+        margin: 0;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text);
+    }
+
+    .proveedores-shell .provider-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .proveedores-shell .provider-actions .btn {
+        border-radius: 0.65rem;
+        padding: 0.68rem 1rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+    }
+
+    .proveedores-shell .provider-modal .btn-close {
+        opacity: 0.65;
+    }
+
+    .proveedores-shell .provider-modal .btn-close:hover {
+        opacity: 1;
+    }
+
+    @media (max-width: 767px) {
+        .proveedores-shell .provider-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .proveedores-shell .provider-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
     }
 </style>
 {% endblock %}
@@ -304,49 +442,57 @@
 
 <div class="modal fade" id="nuevoProveedorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
+        <div class="modal-content provider-modal rounded-4">
             <form method="post" action="{% url 'crear_proveedor' %}">
                 {% csrf_token %}
-                <div class="modal-header border-0 pb-0">
-                    <div>
-                        <h2 class="modal-title section-title fs-3">Nuevo proveedor</h2>
-                        <p class="small mb-0" style="color: var(--text-muted);">Agrega un nuevo contacto al directorio de compras.</p>
+                <div class="modal-header">
+                    <div class="provider-modal-title">
+                        <span class="provider-modal-icon material-symbols-outlined">local_shipping</span>
+                        <div>
+                            <h2 class="modal-title section-title fs-3 mb-1">Nuevo proveedor</h2>
+                            <p class="small mb-0" style="color: var(--text-muted);">Agrega un contacto al directorio de compras.</p>
+                        </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <div class="provider-form-grid">
+                        <div class="provider-field">
                             <label class="form-label">Nombre</label>
                             {{ proveedor_form.nombre }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="provider-field">
                             <label class="form-label">Contacto</label>
                             {{ proveedor_form.contacto }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="provider-field">
                             <label class="form-label">Telefono</label>
                             {{ proveedor_form.telefono }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="provider-field">
                             <label class="form-label">Email</label>
                             {{ proveedor_form.email }}
                         </div>
-                        <div class="col-12">
+                        <div class="provider-field provider-field-wide">
                             <label class="form-label">Direccion</label>
                             {{ proveedor_form.direccion }}
                         </div>
-                        <div class="col-12">
-                            <div class="form-check">
+                        <div class="provider-field provider-field-wide">
+                            <div class="provider-status">
                                 {{ proveedor_form.activo }}
                                 <label class="form-check-label" for="{{ proveedor_form.activo.id_for_label }}">Proveedor activo</label>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn olive-btn">Guardar proveedor</button>
+                <div class="modal-footer">
+                    <div class="provider-actions">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn olive-btn">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
+                            Guardar proveedor
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
