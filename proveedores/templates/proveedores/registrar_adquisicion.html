@@ -176,6 +176,10 @@
                     <p class="mb-0 small" style="color:var(--text-muted);">Cada renglón registra lo comprado al proveedor y sube el stock del ejemplar seleccionado.</p>
                 </div>
                 <div class="d-flex gap-2">
+                    <a href="{% url 'agregar_libro_compra' %}" class="btn olive-btn" id="btn-compra-suelta">
+                        <span class="material-symbols-outlined align-middle" style="font-size:1rem;">library_add</span>
+                        Registrar libros sueltos
+                    </a>
                     <button type="button" class="btn btn-outline-primary" id="btn-abrir-modal-libro">
                         <span class="material-symbols-outlined align-middle" style="font-size:1rem;">auto_fix_high</span>
                         Libro suelto nuevo
@@ -384,6 +388,16 @@
 const detalleSec = document.getElementById('detalle-lote-section');
 const hint       = document.getElementById('hint-lote');
 const btnLabel   = document.getElementById('btn-submit-label');
+const proveedorSelect = document.querySelector('[name=proveedor]');
+const btnCompraSuelta = document.getElementById('btn-compra-suelta');
+
+function actualizarCompraSueltaLink() {
+    if (!btnCompraSuelta || !proveedorSelect) return;
+    const proveedorId = proveedorSelect.value;
+    btnCompraSuelta.href = proveedorId
+        ? `{% url 'agregar_libro_compra' %}?proveedor=${encodeURIComponent(proveedorId)}&nueva_compra=1`
+        : `{% url 'agregar_libro_compra' %}`;
+}
 
 function actualizarTipo() {
     const tipo = document.querySelector('[name=tipo]:checked').value;
@@ -400,7 +414,17 @@ function actualizarTipo() {
     }
 }
 document.querySelectorAll('[name=tipo]').forEach(r => r.addEventListener('change', actualizarTipo));
+if (proveedorSelect) proveedorSelect.addEventListener('change', actualizarCompraSueltaLink);
+if (btnCompraSuelta) {
+    btnCompraSuelta.addEventListener('click', (event) => {
+        if (proveedorSelect && !proveedorSelect.value) {
+            event.preventDefault();
+            alert('Selecciona primero el proveedor para ligar la compra.');
+        }
+    });
+}
 actualizarTipo();
+actualizarCompraSueltaLink();
 
 // ── Tabla de detalles ───────────────────────────────────────────────────
 function recalcularTotales() {
