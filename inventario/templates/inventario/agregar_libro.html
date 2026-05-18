@@ -11,9 +11,9 @@
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
             <span style="color: var(--text-muted);">Gestión</span>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text-muted);">Inventario</span>
+            <span style="color: var(--text-muted);">{% if modo_compra_suelta %}Proveedores{% else %}Inventario{% endif %}</span>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text);">Agregar Libro</span>
+            <span style="color: var(--text);">{% if modo_compra_suelta %}Libros sueltos{% else %}Agregar Libro{% endif %}</span>
         </nav>
     </div>
 </div>
@@ -73,6 +73,14 @@
         padding: 1rem;
     }
 
+    .entry-purchase-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--primary);
+        border-radius: 0.85rem;
+        padding: 1.25rem;
+    }
+
     @media (min-width: 900px) {
         .entry-two-column {
             grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
@@ -99,9 +107,40 @@
 
 
     <header class="mb-12 pb-8" style="border-bottom: 1px solid var(--border);">
-        <h1 class="text-4xl md:text-5xl font-headline italic leading-tight" style="color: var(--primary);">Ingreso de Ejemplar</h1>
-        <p class="mt-2 font-body" style="color: var(--text-muted);">Registra una obra nueva o añade un lote a una existente.</p>
+        <p class="text-[10px] uppercase tracking-[0.24em] font-bold mb-3" style="color: var(--text-muted);">
+            {% if modo_compra_suelta %}Compras · Libros sueltos{% else %}Inventario{% endif %}
+        </p>
+        <h1 class="text-4xl md:text-5xl font-headline italic leading-tight" style="color: var(--primary);">
+            {% if modo_compra_suelta %}Ingreso de compra suelta{% else %}Ingreso de Ejemplar{% endif %}
+        </h1>
+        <p class="mt-2 font-body" style="color: var(--text-muted);">
+            {% if modo_compra_suelta %}
+                Registra uno o varios ejemplares sueltos y liga cada entrada al proveedor que los vendió.
+            {% else %}
+                Registra una obra nueva o añade un lote a una existente.
+            {% endif %}
+        </p>
     </header>
+
+    {% if modo_compra_suelta %}
+    <section class="entry-purchase-panel mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] gap-5 items-end">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color: var(--primary);">Proveedor de esta compra</p>
+                <p class="text-sm mb-0" style="color: var(--text-muted);">Este dato creará la adquisición y quedará como historial del ejemplar.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Proveedor</label>
+                <select id="proveedor-compra-select" required class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                    <option value="">Selecciona proveedor...</option>
+                    {% for proveedor in proveedores %}
+                        <option value="{{ proveedor.id }}" {% if proveedor_compra and proveedor_compra.id == proveedor.id %}selected{% endif %}>{{ proveedor.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <div class="p-8 rounded-xl shadow-sm mb-8" style="background-color: var(--surface); border: 1px solid var(--border);">
         <h3 class="text-xs uppercase tracking-widest font-bold mb-6 pb-2" style="color: var(--text-faint); border-bottom: 1px solid var(--border);">Paso 1: Búsqueda y Coincidencias</h3>
@@ -153,9 +192,13 @@
         <div id="lotes-existentes" class="mb-6"></div>
         <div class="p-6 rounded-xl mb-4" style="background-color: var(--surface); border: 1px solid var(--border);">
             <h4 class="text-xs uppercase font-bold mb-4" style="color: var(--text-faint);">Opción A — Sumar unidades a un lote existente</h4>
+            <p class="text-xs mb-4" style="color: var(--text-muted);">Usa esta opción si el ejemplar que compraste tiene la misma condición y precio de venta que un lote ya registrado.</p>
             <form method="POST" class="flex flex-wrap gap-4 items-end">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="sumar_stock">
+                {% if modo_compra_suelta %}
+                <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+                {% endif %}
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Lote (SKU)</label>
                     <select name="ejemplar_id" id="select-ejemplar" class="rounded-lg p-2 text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"></select>
@@ -164,17 +207,27 @@
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cuántos llegan</label>
                     <input type="number" name="cantidad" value="1" min="1" class="w-24 rounded-lg p-2 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                 </div>
+                {% if modo_compra_suelta %}
+                <div>
+                    <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo unitario ($)</label>
+                    <input type="number" name="precio_compra" step="0.01" min="0.01" required class="w-36 rounded-lg p-2 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                </div>
+                {% endif %}
                 <button type="submit" class="bg-[#3e5219] text-white px-5 py-2 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90">
-                    Sumar al stock
+                    {% if modo_compra_suelta %}Registrar compra{% else %}Sumar al stock{% endif %}
                 </button>
             </form>
         </div>
         <div class="p-6 rounded-xl" style="background-color: var(--surface); border: 1px solid var(--border);">
             <h4 class="text-xs uppercase font-bold mb-4" style="color: var(--text-faint);">Opción B — Registrar como lote diferente (otro estado/precio)</h4>
+            <p class="text-xs mb-4" style="color: var(--text-muted);">Usa esta opción si es el mismo libro, pero cambia la condición física, el precio de venta o necesitas separarlo como otro lote.</p>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="nuevo_ejemplar">
                 <input type="hidden" name="libro_id" id="libro-id-hidden">
+                {% if modo_compra_suelta %}
+                <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+                {% endif %}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
@@ -205,7 +258,7 @@
                     </div>
                 </div>
                 <button type="submit" class="mt-4 bg-[#3e5219] text-white px-5 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90">
-                    Crear nuevo lote
+                    {% if modo_compra_suelta %}Registrar ejemplar comprado{% else %}Crear nuevo lote{% endif %}
                 </button>
             </form>
         </div>
@@ -215,6 +268,9 @@
         <form method="POST" enctype="multipart/form-data" class="entry-two-column">
             {% csrf_token %}
             <input type="hidden" name="accion" value="crear_todo">
+            {% if modo_compra_suelta %}
+            <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+            {% endif %}
 
             <div class="entry-main-panel">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 pb-3" style="border-bottom: 1px solid var(--border);">
@@ -311,7 +367,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-[#3e5219] text-white py-4 rounded-lg font-bold uppercase tracking-widest hover:opacity-90 shadow-md">
-                    Guardar nueva obra
+                    {% if modo_compra_suelta %}Guardar compra del ejemplar{% else %}Guardar nueva obra{% endif %}
                 </button>
             </aside>
         </form>
@@ -326,6 +382,29 @@
 // BÚSQUEDA POR TÍTULO — Sugerencias en tiempo real
 // ═══════════════════════════════════════════════════════════
 let debounceTimer = null;
+const modoCompraSuelta = {{ modo_compra_suelta|yesno:"true,false" }};
+const proveedorCompraSelect = document.getElementById('proveedor-compra-select');
+
+function actualizarProveedorCompra() {
+    if (!modoCompraSuelta || !proveedorCompraSelect) return;
+    document.querySelectorAll('.proveedor-compra-hidden').forEach(input => {
+        input.value = proveedorCompraSelect.value;
+    });
+}
+
+if (proveedorCompraSelect) {
+    proveedorCompraSelect.addEventListener('change', actualizarProveedorCompra);
+    actualizarProveedorCompra();
+}
+
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(event) {
+        if (modoCompraSuelta && proveedorCompraSelect && !proveedorCompraSelect.value) {
+            event.preventDefault();
+            alert('Selecciona el proveedor antes de registrar la compra.');
+        }
+    });
+});
 
 document.getElementById('input-titulo').addEventListener('input', function() {
     clearTimeout(debounceTimer);
@@ -430,9 +509,24 @@ function aplicarResultadoEnriquecido(data, cleanIsbn, statusEl) {
         ? '✅ Encontrado en tu inventario'
         : '🌐 Encontrado en Open Library';
     mostrarStatus(statusEl, `${etiqueta}. Revisa y completa los datos.`, 'green');
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+    if (data.fuente === 'local') {
+        set('input-titulo', data.titulo);
+        set('input-autor', data.autor);
+        mostrarLibroEncontrado({
+            id: data.id,
+            titulo: data.titulo,
+            autor: data.autor,
+            isbn: data.isbn || cleanIsbn,
+            editorial: data.editorial || '',
+            ejemplares: data.ejemplares || [],
+        });
+        document.getElementById('resultado-nuevo').classList.add('hidden');
+        return;
+    }
 
     // Llenar campos del formulario "Nuevo libro"
-    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     set('input-titulo',     data.titulo);
     set('input-autor',      data.autor);
     set('nuevo-titulo',     data.titulo);

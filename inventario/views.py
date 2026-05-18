@@ -16,14 +16,15 @@ Protecciones:
 import json
 from decimal import Decimal
 
+from django.db import transaction
 from django.db.models.deletion import ProtectedError
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from inventario.models import Libro, Ejemplar, Categoria, EstadoFisico
@@ -34,16 +35,112 @@ from utils.helpers import (
     validar_precio,
     validar_isbn,
     validar_cantidad,
-    buscar_por_isbn,
-    generar_sku_mejorado
 )
-from decorators import admin_required, api_ajax_required, rate_limit_por_usuario, json_response_handler, cajero_required, director_required
+from decorators import rate_limit_por_usuario, json_response_handler, cajero_required, director_required
 from usuarios.auditoria import registrar_auditoria
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # GESTIÓN DE LIBROS Y EJEMPLARES (ADMIN)
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _serializar_libro_para_busqueda(libro):
+    ejemplares = []
+    for e in libro.ejemplares.all():
+        ejemplares.append({
+            'id': e.id,
+            'sku': e.sku,
+            'estado': e.estado_fisico.nombre if e.estado_fisico else 'Sin estado',
+            'precio_venta': str(e.precio_venta),
+            'stock': e.stock,
+        })
+
+    return {
+        'id': libro.id,
+        'titulo': libro.titulo,
+        'autor': libro.autor,
+        'isbn': libro.isbn or '',
+        'editorial': libro.editorial or '',
+        'anio': libro.anio_publicacion or '',
+        'descripcion': libro.descripcion or '',
+        'categoria': libro.categoria.nombre if libro.categoria else '',
+        'portada_url': libro.portada.url if libro.portada else '',
+        'ejemplares': ejemplares,
+    }
+
+def _redirect_ingreso_ejemplar(modo_compra_suelta=False, proveedor=None):
+    url_name = 'agregar_libro_compra' if modo_compra_suelta else 'agregar_libro'
+    url = reverse(url_name)
+    if modo_compra_suelta and proveedor:
+        url = f'{url}?proveedor={proveedor.id}'
+    return redirect(url)
+
+
+def _get_proveedor_compra(request):
+    proveedor_id = (
+        request.POST.get('proveedor_compra')
+        or request.GET.get('proveedor')
+        or ''
+    ).strip()
+    if not proveedor_id:
+        return None
+
+    try:
+        from proveedores.models import Proveedor
+        return Proveedor.objects.filter(pk=proveedor_id, activo=True).first()
+    except Exception:
+        return None
+
+
+def _registrar_detalle_compra_suelta(request, proveedor, ejemplar, cantidad, costo_unitario):
+    from proveedores.models import Adquisicion, DetalleAdquisicion
+
+    with transaction.atomic():
+        adquisicion = None
+        adquisicion_id = request.session.get('compra_suelta_adquisicion_id')
+        if adquisicion_id:
+            adquisicion = Adquisicion.objects.filter(
+                pk=adquisicion_id,
+                proveedor=proveedor,
+                tipo='identificado',
+            ).first()
+
+        if not adquisicion:
+            adquisicion = Adquisicion.objects.create(
+                proveedor=proveedor,
+                tipo='identificado',
+                estado='completado',
+                creado_por=request.user,
+                observaciones='Compra de libros sueltos registrada desde Ingreso de Ejemplar.',
+            )
+            request.session['compra_suelta_adquisicion_id'] = adquisicion.id
+
+        DetalleAdquisicion.objects.create(
+            adquisicion=adquisicion,
+            ejemplar=ejemplar,
+            cantidad=cantidad,
+            costo_unitario=costo_unitario,
+        )
+
+    registrar_auditoria(
+        actor=request.user,
+        accion='crear',
+        modulo='proveedores',
+        entidad_tipo='adquisicion',
+        entidad_id=adquisicion.id,
+        entidad_nombre=f'Compra suelta #{adquisicion.id}',
+        descripcion=(
+            f'Se registró una compra suelta de "{ejemplar.libro.titulo}" '
+            f'para "{proveedor.nombre}".'
+        ),
+        metadata={
+            'proveedor_id': proveedor.id,
+            'ejemplar_id': ejemplar.id,
+            'cantidad': cantidad,
+            'costo_unitario': str(costo_unitario),
+        },
+    )
+    return adquisicion
 
 @director_required
 @require_http_methods(["GET", "POST"])
@@ -61,10 +158,19 @@ def agregar_libro(request):
     - ISBN formato válido (opcional)
     - Stock positivo
     """
+    modo_compra_suelta = request.resolver_match.url_name == 'agregar_libro_compra'
+    proveedor_compra = _get_proveedor_compra(request)
+    if modo_compra_suelta and request.method == 'GET' and request.GET.get('nueva_compra') == '1':
+        request.session.pop('compra_suelta_adquisicion_id', None)
+
     if request.method == 'POST':
         accion = request.POST.get('accion', '').strip()
 
         try:
+            if modo_compra_suelta and not proveedor_compra:
+                messages.error(request, 'Selecciona el proveedor que vendió estos libros.')
+                return _redirect_ingreso_ejemplar(modo_compra_suelta)
+
             # ─── ACCIÓN: Crear libro + ejemplar nuevo ───────────────────────
             if accion == 'crear_todo':
                 titulo = request.POST.get('titulo', '').strip()
@@ -86,28 +192,31 @@ def agregar_libro(request):
                 # Validaciones
                 if not titulo or not autor:
                     messages.error(request, '❌ Título y autor son requeridos.')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
                 # Validar ISBN si se proporciona
                 if isbn and not validar_isbn(isbn):
                     messages.error(request, '❌ Formato ISBN inválido.')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
                 # Validar precios
                 precio_venta, error = validar_precio(precio_venta_str)
                 if error:
                     messages.error(request, f'❌ Precio venta: {error}')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
                 precio_compra, error = validar_precio(precio_compra_str)
                 if error:
+                    if modo_compra_suelta:
+                        messages.error(request, f'❌ Precio costo: {error}')
+                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
                     precio_compra = Decimal('0.00')
 
                 # Validar stock
                 stock, error = validar_cantidad(stock_str)
                 if error:
                     messages.error(request, f'❌ Stock: {error}')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
                 # Crear categoría si no existe
                 categoria_obj = None
@@ -161,15 +270,25 @@ def agregar_libro(request):
                     estado_fisico_obj = EstadoFisico.objects.create(nombre=estado_final.capitalize())
 
                 # Crear ejemplar
-                Ejemplar.objects.create(
+                ejemplar_obj = Ejemplar.objects.create(
                     # El SKU se asigna automáticamente en el modelo.
                     libro=libro_obj,
                     estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
-                    stock=stock
+                    stock=0 if modo_compra_suelta else stock
                 )
-                primer_ejemplar = libro_obj.ejemplares.order_by('-creado_en').first()
+                if modo_compra_suelta:
+                    adquisicion = _registrar_detalle_compra_suelta(
+                        request,
+                        proveedor_compra,
+                        ejemplar_obj,
+                        stock,
+                        precio_compra,
+                    )
+                else:
+                    adquisicion = None
+                ejemplar_obj.refresh_from_db()
                 registrar_auditoria(
                     actor=request.user,
                     accion='crear',
@@ -178,14 +297,14 @@ def agregar_libro(request):
                     entidad_id=libro_obj.id,
                     entidad_nombre=libro_obj.titulo,
                     descripcion=f'Se registró el libro "{libro_obj.titulo}" con su primer ejemplar.',
-                    metadata={'ejemplar_id': primer_ejemplar.id if primer_ejemplar else None},
+                    metadata={'ejemplar_id': ejemplar_obj.id},
                 )
 
-                messages.success(
-                    request,
-                    f'✅ "{titulo}" registrado con su primer ejemplar (SKU: {generar_sku_mejorado()}).'
-                )
-                return redirect('agregar_libro')
+                if adquisicion:
+                    messages.success(request, f'✅ "{titulo}" registrado y ligado a {proveedor_compra.nombre}.')
+                else:
+                    messages.success(request, f'✅ "{titulo}" registrado con su primer ejemplar.')
+                return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
             # ─── ACCIÓN: Nuevo ejemplar a libro existente ────────────────────
             elif accion == 'nuevo_ejemplar':
@@ -204,30 +323,43 @@ def agregar_libro(request):
                 precio_venta, error = validar_precio(precio_venta_str)
                 if error:
                     messages.error(request, f'❌ Precio venta: {error}')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
-                precio_compra, _ = validar_precio(precio_compra_str)
+                precio_compra, error = validar_precio(precio_compra_str)
                 if not precio_compra:
+                    if modo_compra_suelta:
+                        messages.error(request, f'❌ Precio costo: {error or "El precio debe ser mayor a 0"}')
+                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
                     precio_compra = Decimal('0.00')
 
                 stock, error = validar_cantidad(stock_str)
                 if error:
                     messages.error(request, f'❌ Stock: {error}')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
                 estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
                 if not estado_fisico_obj:
                     estado_fisico_obj = EstadoFisico.objects.create(nombre=estado_final.capitalize())
 
                 # Crear ejemplar
-                Ejemplar.objects.create(
+                nuevo_ejemplar = Ejemplar.objects.create(
                     libro=libro_obj,
                     estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
-                    stock=stock
+                    stock=0 if modo_compra_suelta else stock
                 )
-                nuevo_ejemplar = libro_obj.ejemplares.order_by('-creado_en').first()
+                if modo_compra_suelta:
+                    adquisicion = _registrar_detalle_compra_suelta(
+                        request,
+                        proveedor_compra,
+                        nuevo_ejemplar,
+                        stock,
+                        precio_compra,
+                    )
+                    nuevo_ejemplar.refresh_from_db()
+                else:
+                    adquisicion = None
 
                 if portada:
                     libro_obj.portada = portada
@@ -247,22 +379,40 @@ def agregar_libro(request):
                     request,
                     f'✅ Nuevo ejemplar añadido a "{libro_obj.titulo}".'
                 )
-                return redirect('agregar_libro')
+                if adquisicion:
+                    messages.success(request, f'Compra ligada a {proveedor_compra.nombre}.')
+                return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
             # ─── ACCIÓN: Aumentar stock ──────────────────────────────────────
             elif accion == 'sumar_stock':
                 ejemplar_id = request.POST.get('ejemplar_id')
                 cantidad_str = request.POST.get('cantidad', '1')
+                precio_compra_str = request.POST.get('precio_compra', '')
                 
                 ejemplar = get_object_or_404(Ejemplar, id=ejemplar_id)
                 
                 cantidad, error = validar_cantidad(cantidad_str)
                 if error:
                     messages.error(request, f'❌ Cantidad: {error}')
-                    return redirect('agregar_libro')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
-                ejemplar.stock += cantidad
-                ejemplar.save()
+                if modo_compra_suelta:
+                    precio_compra, error = validar_precio(precio_compra_str)
+                    if error:
+                        messages.error(request, f'❌ Precio costo: {error}')
+                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
+                    adquisicion = _registrar_detalle_compra_suelta(
+                        request,
+                        proveedor_compra,
+                        ejemplar,
+                        cantidad,
+                        precio_compra,
+                    )
+                    ejemplar.refresh_from_db()
+                else:
+                    adquisicion = None
+                    ejemplar.stock += cantidad
+                    ejemplar.save()
                 registrar_auditoria(
                     actor=request.user,
                     accion='editar',
@@ -279,18 +429,31 @@ def agregar_libro(request):
                     f'✅ +{cantidad} unidades al {ejemplar.sku}. '
                     f'Stock actual: {ejemplar.stock}'
                 )
-                return redirect('agregar_libro')
+                if adquisicion:
+                    messages.success(request, f'Compra ligada a {proveedor_compra.nombre}.')
+                return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
         except Exception as e:
             messages.error(request, f'❌ Error: {str(e)}')
-            return redirect('agregar_libro')
+            return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra)
 
     categorias = Categoria.objects.all()
     estados_fisicos = EstadoFisico.objects.all()
+    proveedores = []
+    if modo_compra_suelta:
+        from proveedores.models import Proveedor
+        proveedores = Proveedor.objects.filter(activo=True).order_by('nombre')
+
     return render(
         request,
         'inventario/agregar_libro.html',
-        {'categorias': categorias, 'estados_fisicos': estados_fisicos}
+        {
+            'categorias': categorias,
+            'estados_fisicos': estados_fisicos,
+            'modo_compra_suelta': modo_compra_suelta,
+            'proveedores': proveedores,
+            'proveedor_compra': proveedor_compra,
+        }
     )
 
 
@@ -313,11 +476,11 @@ def buscar_libro_ajax(request):
 
     libros = []
     
-    # Prioridad: ISBN exacto
+    # Prioridad: ISBN exacto o normalizado
     if isbn:
-        libros = Libro.objects.filter(isbn=isbn)[:1]
+        isbn_limpio = isbn.replace('-', '').replace(' ', '')
+        libros = Libro.objects.filter(isbn__in=[isbn, isbn_limpio])[:1]
         if not libros:
-            isbn_limpio = isbn.replace('-', '').replace(' ', '')
             libros = Libro.objects.filter(isbn__icontains=isbn_limpio)[:1]
     
     # Si no by ISBN, buscar por título
@@ -327,23 +490,7 @@ def buscar_libro_ajax(request):
         ).select_related('categoria')[:8]
 
     for libro in libros:
-        ejemplares = []
-        for e in libro.ejemplares.all():
-            ejemplares.append({
-                'id': e.id,
-                'sku': e.sku,
-                'estado': e.estado_fisico.nombre if e.estado_fisico else 'Sin estado',
-                'precio_venta': str(e.precio_venta),
-                'stock': e.stock,
-            })
-        resultados.append({
-            'id': libro.id,
-            'titulo': libro.titulo,
-            'autor': libro.autor,
-            'isbn': libro.isbn or '',
-            'editorial': libro.editorial or '',
-            'ejemplares': ejemplares,
-        })
+        resultados.append(_serializar_libro_para_busqueda(libro))
 
     return JsonResponse({'libros': resultados})
 
@@ -370,18 +517,13 @@ def buscar_isbn_enriquecido(request):
     isbn = isbn_raw.replace('-', '').replace(' ', '')
 
     # ── Nivel 1: inventario local (solo si tiene ejemplares activos) ─────────
-    libro_local = Libro.objects.filter(isbn=isbn).first()
+    libro_local = Libro.objects.filter(isbn__in=[isbn_raw, isbn]).first()
     if libro_local and libro_local.ejemplares.exists():
-        return JsonResponse({
+        data = _serializar_libro_para_busqueda(libro_local)
+        data.update({
             'fuente': 'local',
-            'titulo': libro_local.titulo,
-            'autor': libro_local.autor,
-            'editorial': libro_local.editorial or '',
-            'anio': libro_local.anio_publicacion or '',
-            'descripcion': libro_local.descripcion or '',
-            'categoria': libro_local.categoria.nombre if libro_local.categoria else '',
-            'portada_url': libro_local.portada.url if libro_local.portada else '',
         })
+        return JsonResponse(data)
 
     def _fetch_json(url, timeout=6):
         try:
