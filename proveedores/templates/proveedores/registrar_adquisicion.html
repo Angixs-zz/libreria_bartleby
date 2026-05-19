@@ -61,6 +61,32 @@
 }
 .tipo-pill .pill-label .material-symbols-outlined { font-size:2rem; }
 #detalle-lote-section { transition: opacity .3s, max-height .4s; }
+.adquisiciones-shell .decision-panel {
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+    border-radius: .9rem;
+    padding: 1.15rem;
+}
+.adquisiciones-shell .primary-flow {
+    border: 1px solid rgba(74,93,35,.22);
+    background: rgba(163,196,106,.10);
+    border-radius: .9rem;
+    padding: 1.1rem;
+}
+.adquisiciones-shell .advanced-entry {
+    border: 1px dashed var(--border);
+    border-radius: .9rem;
+    background: var(--surface);
+}
+.adquisiciones-shell .advanced-entry summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1rem 1.15rem;
+}
+.adquisiciones-shell .advanced-entry summary::-webkit-details-marker { display: none; }
+.adquisiciones-shell .advanced-entry-body {
+    padding: 0 1.15rem 1.15rem;
+}
 .adquisiciones-shell .section-title { font-family:'Newsreader',serif; font-style:italic; color:var(--primary); }
 .adquisiciones-shell .olive-btn { background:var(--primary); border-color:var(--primary); color:#fff; }
 .adquisiciones-shell .olive-btn:hover,
@@ -116,10 +142,16 @@
                 Elige si conoces los libros desde ya, o si llegó una caja cerrada para inventariar después.
             </p>
         </div>
-        <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary btn-lg">
-            <span class="material-symbols-outlined align-middle" style="font-size:1rem;">arrow_back</span>
-            Volver al directorio
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'historial_adquisiciones' %}" class="btn olive-btn btn-lg">
+                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">receipt_long</span>
+                Ver adquisiciones
+            </a>
+            <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary btn-lg">
+                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">arrow_back</span>
+                Volver al directorio
+            </a>
+        </div>
     </div>
 
     <form method="post" class="surface-card p-4 p-xl-5">
@@ -152,7 +184,7 @@
         </div>
 
         <!-- ── Datos generales ──────────────────────────────────── -->
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4" id="datos-generales-section">
             <div class="col-lg-4">
                 <label class="form-label">Proveedor</label>
                 {{ form.proveedor }}
@@ -167,86 +199,112 @@
             </div>
         </div>
 
-        <!-- ── Detalle de libros (solo para "identificado") ─────── -->
+        <!-- ── Flujo identificado ───────────────────────────────── -->
         <div id="detalle-lote-section">
 
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                <div>
-                    <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;">Detalle del lote</h2>
-                    <p class="mb-0 small" style="color:var(--text-muted);">Cada renglón registra lo comprado al proveedor y sube el stock del ejemplar seleccionado.</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'agregar_libro_compra' %}" class="btn olive-btn" id="btn-compra-suelta">
-                        <span class="material-symbols-outlined align-middle" style="font-size:1rem;">library_add</span>
-                        Registrar libros sueltos
-                    </a>
-                    <button type="button" class="btn btn-outline-primary" id="btn-abrir-modal-libro">
-                        <span class="material-symbols-outlined align-middle" style="font-size:1rem;">auto_fix_high</span>
-                        Libro suelto nuevo
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" id="agregar-renglon">
-                        <span class="material-symbols-outlined align-middle" style="font-size:1rem;">add</span>
-                        Agregar renglón
-                    </button>
+            <div class="decision-panel mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-8">
+                        <div class="primary-flow">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                <div>
+                                    <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;">Libros sueltos identificados</h2>
+                                    <p class="mb-0 small" style="color:var(--text-muted);">Usa esta ruta cuando el proveedor te vendió uno o varios libros y necesitas registrarlos con ISBN, condición, costo y precio.</p>
+                                </div>
+                                <a href="{% url 'agregar_libro_compra' %}" class="btn olive-btn btn-lg" id="btn-compra-suelta">
+                                    <span class="material-symbols-outlined align-middle" style="font-size:1rem;">library_add</span>
+                                    Registrar libros sueltos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <p class="mb-0 small" style="color:var(--text-muted);">La relación con proveedor se guarda como historial de adquisición. Si el libro ya existe, podrás sumar a un lote existente o crear otro por estado/precio.</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="table-responsive mb-4">
-                <table class="table align-middle" id="tabla-detalles">
-                    <thead>
-                        <tr>
-                            <th style="min-width:320px;">Libro / lote</th>
-                            <th style="width:130px;">Cantidad</th>
-                            <th style="width:170px;">Costo unitario</th>
-                            <th style="width:160px;" class="text-end">Subtotal</th>
-                            <th style="width:70px;" class="text-end">—</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for fila in filas %}
-                        <tr class="detalle-row">
-                            <td>
-                                <select name="ejemplar_id" class="form-select">
-                                    <option value="">— Selecciona un libro —</option>
-                                    {% for ej in ejemplares %}
-                                    <option value="{{ ej.id }}" {% if fila.ejemplar_id == ej.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td><input type="number" min="1" name="cantidad" class="form-control cantidad-input" value="{{ fila.cantidad }}"></td>
-                            <td>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" min="0.01" step="0.01" name="costo_unitario" class="form-control costo-input" value="{{ fila.costo_unitario }}">
-                                </div>
-                            </td>
-                            <td class="text-end fw-semibold subtotal-cell">$0.00</td>
-                            <td class="text-end">
-                                <button type="button" class="btn btn-sm btn-outline-danger eliminar-renglon">
-                                    <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end">Total estimado</th>
-                            <th class="text-end" id="total-adquisicion">$0.00</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+            <details class="advanced-entry mb-4" id="entrada-rapida-existente">
+                <summary>
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                        <div>
+                            <h3 class="h6 fw-bold mb-1">Entrada rápida a lote existente</h3>
+                            <p class="mb-0 small" style="color:var(--text-muted);">Úsalo solo si ya sabes exactamente a qué SKU/lote existente quieres sumar unidades.</p>
+                        </div>
+                        <span class="small fw-bold" style="color:var(--primary);">Mostrar tabla</span>
+                    </div>
+                </summary>
+                <div class="advanced-entry-body">
+                    <div class="d-flex justify-content-end mb-3">
+                        <button type="button" class="btn btn-outline-secondary" id="agregar-renglon">
+                            <span class="material-symbols-outlined align-middle" style="font-size:1rem;">add</span>
+                            Agregar renglón
+                        </button>
+                    </div>
+                    <div class="table-responsive mb-4">
+                        <table class="table align-middle" id="tabla-detalles">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:320px;">Libro / lote</th>
+                                    <th style="width:130px;">Cantidad</th>
+                                    <th style="width:170px;">Costo unitario</th>
+                                    <th style="width:160px;" class="text-end">Subtotal</th>
+                                    <th style="width:70px;" class="text-end">—</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in filas %}
+                                <tr class="detalle-row">
+                                    <td>
+                                        <select name="ejemplar_id" class="form-select">
+                                            <option value="">— Selecciona un libro —</option>
+                                            {% for ej in ejemplares %}
+                                            <option value="{{ ej.id }}" {% if fila.ejemplar_id == ej.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td><input type="number" min="1" name="cantidad" class="form-control cantidad-input" value="{{ fila.cantidad }}"></td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" min="0.01" step="0.01" name="costo_unitario" class="form-control costo-input" value="{{ fila.costo_unitario }}">
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-semibold subtotal-cell">$0.00</td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-danger eliminar-renglon">
+                                            <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total estimado</th>
+                                    <th class="text-end" id="total-adquisicion">$0.00</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn olive-btn">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
+                            Guardar entrada rápida
+                        </button>
+                    </div>
+                </div>
+            </details>
         </div><!-- /detalle-lote-section -->
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <p class="mb-0 small" style="color:var(--text-muted);" id="hint-lote">
                 Para <strong>lote cerrado</strong> solo se guarda la cabecera. Luego inventarías libro por libro.
             </p>
-            <button type="submit" class="btn olive-btn btn-lg">
+            <button type="submit" class="btn olive-btn btn-lg" id="btn-submit-main">
                 <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
                 <span id="btn-submit-label">Guardar adquisición</span>
             </button>
@@ -386,8 +444,10 @@
 <script>
 // ── Tipo de adquisición controlado por pills ────────────────────────────
 const detalleSec = document.getElementById('detalle-lote-section');
+const datosGeneralesSec = document.getElementById('datos-generales-section');
 const hint       = document.getElementById('hint-lote');
 const btnLabel   = document.getElementById('btn-submit-label');
+const btnSubmitMain = document.getElementById('btn-submit-main');
 const proveedorSelect = document.querySelector('[name=proveedor]');
 const btnCompraSuelta = document.getElementById('btn-compra-suelta');
 
@@ -402,25 +462,24 @@ function actualizarCompraSueltaLink() {
 function actualizarTipo() {
     const tipo = document.querySelector('[name=tipo]:checked').value;
     if (tipo === 'lote_cerrado') {
-        detalleSec.style.opacity = '0.3';
-        detalleSec.style.pointerEvents = 'none';
+        if (datosGeneralesSec) datosGeneralesSec.style.display = '';
+        detalleSec.style.display = 'none';
+        if (btnSubmitMain) btnSubmitMain.style.display = '';
         btnLabel.textContent = 'Guardar lote cerrado';
-        hint.innerHTML = '📦 Se guardará solo la cabecera. <strong>Inventarías los libros al abrir la caja.</strong>';
+        hint.innerHTML = 'Se guardará la caja como pendiente. Después inventarías libro por libro.';
     } else {
-        detalleSec.style.opacity = '1';
-        detalleSec.style.pointerEvents = '';
+        if (datosGeneralesSec) datosGeneralesSec.style.display = 'none';
+        detalleSec.style.display = '';
+        if (btnSubmitMain) btnSubmitMain.style.display = 'none';
         btnLabel.textContent = 'Guardar adquisición';
-        hint.innerHTML = 'El costo de compra actualiza el precio de adquisición de cada ejemplar.';
+        hint.innerHTML = 'Para compras identificadas usa el botón principal. La entrada rápida queda solo para casos donde ya sabes el SKU exacto.';
     }
 }
 document.querySelectorAll('[name=tipo]').forEach(r => r.addEventListener('change', actualizarTipo));
 if (proveedorSelect) proveedorSelect.addEventListener('change', actualizarCompraSueltaLink);
 if (btnCompraSuelta) {
-    btnCompraSuelta.addEventListener('click', (event) => {
-        if (proveedorSelect && !proveedorSelect.value) {
-            event.preventDefault();
-            alert('Selecciona primero el proveedor para ligar la compra.');
-        }
+    btnCompraSuelta.addEventListener('click', () => {
+        actualizarCompraSueltaLink();
     });
 }
 actualizarTipo();
@@ -461,10 +520,14 @@ document.getElementById('agregar-renglon').addEventListener('click', () => {
 });
 
 // ── Modal libro rápido ──────────────────────────────────────────────────
-const modal = new bootstrap.Modal(document.getElementById('modal-libro-rapido'));
+const modalEl = document.getElementById('modal-libro-rapido');
+const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
 const CSRF  = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-document.getElementById('btn-abrir-modal-libro').addEventListener('click', () => modal.show());
+const btnAbrirModalLibro = document.getElementById('btn-abrir-modal-libro');
+if (btnAbrirModalLibro && modal) {
+    btnAbrirModalLibro.addEventListener('click', () => modal.show());
+}
 
 // Búsqueda ISBN
 function setLibroRapidoValue(name, value) {

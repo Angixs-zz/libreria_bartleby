@@ -285,6 +285,68 @@ def registrar_adquisicion(request):
 @login_required
 @admin_required
 @require_http_methods(["GET"])
+def historial_adquisiciones(request):
+    query = request.GET.get('q', '').strip()
+    tipo = request.GET.get('tipo', '').strip()
+    estado = request.GET.get('estado', '').strip()
+
+    adquisiciones = Adquisicion.objects.select_related(
+        'proveedor',
+        'creado_por',
+    ).prefetch_related(
+        'detalles__ejemplar__libro',
+        'detalles__ejemplar__estado_fisico',
+    )
+
+    if query:
+        adquisiciones = adquisiciones.filter(
+            Q(proveedor__nombre__icontains=query) |
+            Q(observaciones__icontains=query) |
+            Q(detalles__ejemplar__libro__titulo__icontains=query) |
+            Q(detalles__ejemplar__libro__autor__icontains=query) |
+            Q(detalles__ejemplar__sku__icontains=query)
+        ).distinct()
+
+    if tipo in dict(Adquisicion.TIPO_CHOICES):
+        adquisiciones = adquisiciones.filter(tipo=tipo)
+
+    if estado in dict(Adquisicion.ESTADO_CHOICES):
+        adquisiciones = adquisiciones.filter(estado=estado)
+
+    adquisicion_ids = list(adquisiciones.values_list('id', flat=True))
+    resumen = Adquisicion.objects.filter(id__in=adquisicion_ids).aggregate(
+        gasto_total=Coalesce(Sum('total'), Decimal('0.00')),
+        unidades=Coalesce(Sum('detalles__cantidad'), 0),
+        total_registros=Count('id', distinct=True),
+    )
+    pendientes = Adquisicion.objects.filter(
+        id__in=adquisicion_ids,
+        estado='por_inventariar',
+    ).count()
+
+    adquisiciones = adquisiciones.annotate(
+        total_unidades=Coalesce(Sum('detalles__cantidad'), 0),
+        total_renglones=Count('detalles', distinct=True),
+    ).order_by('-fecha', '-creado_en')
+
+    context = {
+        'adquisiciones': adquisiciones,
+        'query': query,
+        'tipo': tipo,
+        'estado': estado,
+        'tipo_choices': Adquisicion.TIPO_CHOICES,
+        'estado_choices': Adquisicion.ESTADO_CHOICES,
+        'gasto_total': resumen['gasto_total'],
+        'unidades_adquiridas': resumen['unidades'],
+        'total_registros': resumen['total_registros'],
+        'pendientes': pendientes,
+    }
+    return render(request, 'proveedores/historial_adquisiciones.html', context)
+
+
+@login_required
+@admin_required
+@require_http_methods(["GET"])
 def detalle_proveedor(request, proveedor_id):
     proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
     adquisiciones = proveedor.adquisiciones.select_related(

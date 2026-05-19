@@ -83,6 +83,9 @@ Uso: include 'partials/admin_sidebar.html'
     <a href="{% url 'directorio_proveedores' %}" class="adm-chip {% if request.resolver_match.url_name == 'directorio_proveedores' %}active{% endif %}">
       <span class="material-symbols-outlined">local_shipping</span> Proveedores
     </a>
+    <a href="{% url 'historial_adquisiciones' %}" class="adm-chip {% if request.resolver_match.url_name == 'historial_adquisiciones' or request.resolver_match.url_name == 'registrar_adquisicion' or request.resolver_match.url_name == 'inventariar_lote' or request.resolver_match.url_name == 'agregar_libro_compra' %}active{% endif %}">
+      <span class="material-symbols-outlined">receipt_long</span> Adquisiciones
+    </a>
     <a href="{% url 'dashboard_reportes' %}" class="adm-chip {% if request.resolver_match.url_name == 'dashboard_reportes' %}active{% endif %}">
       <span class="material-symbols-outlined">monitoring</span> Reportes
     </a>
