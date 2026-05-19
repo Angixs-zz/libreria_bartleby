@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block breadcrumbs %}
+<div class="w-full" style="background-color: var(--bg); border-bottom: 1px solid var(--border);">
+    <div class="max-w-7xl mx-auto px-8 py-3">
+        <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+            <a href="{% url 'lista_libros' %}" class="flex items-center gap-1 transition-opacity hover:opacity-70" style="color: var(--text-muted);">
+                <span class="material-symbols-outlined text-sm">home</span>
+                Inicio
+            </a>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text-muted);">Gestión</span>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text);">Adquisiciones</span>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .adq-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        box-shadow: 0 12px 35px rgba(23, 29, 15, 0.06);
+    }
+    .adq-kpi {
+        min-height: 7rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .adq-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.28rem 0.65rem;
+        font-size: 0.64rem;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+    }
+    .adq-row {
+        border-top: 1px solid var(--border);
+    }
+    .adq-row:first-child {
+        border-top: 0;
+    }
+    .adq-detail-line {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-top: 1px dashed var(--border);
+    }
+    .adq-detail-line:first-child {
+        border-top: 0;
+    }
+    @media (max-width: 760px) {
+        .adq-detail-line {
+            grid-template-columns: 1fr;
+            gap: 0.35rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pt-16 pb-12 px-4 sm:px-8" style="background: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="max-w-[1400px] mx-auto flex gap-6 items-start">
+    {% include 'partials/admin_sidebar.html' with request=request user=user only %}
+    <main class="flex-1 min-w-0" style="color: var(--text);">
+
+        <section class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
+            <div>
+                <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">Compras · Historial</p>
+                <h1 class="font-headline italic text-5xl md:text-6xl leading-tight" style="color: var(--primary);">Adquisiciones</h1>
+                <p class="mt-2 max-w-2xl text-sm" style="color: var(--text-muted);">
+                    Consulta qué se compró, a qué proveedor, cuánto costó y si fue una compra suelta o una caja pendiente de inventariar.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'registrar_adquisicion' %}" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest"
+                   style="background: var(--primary); color: white;">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    Nueva adquisición
+                </a>
+                <a href="{% url 'directorio_proveedores' %}" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest"
+                   style="border: 1px solid var(--border); color: var(--text);">
+                    <span class="material-symbols-outlined text-base">local_shipping</span>
+                    Proveedores
+                </a>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <article class="adq-card adq-kpi p-5">
+                <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Registros</p>
+                <strong class="font-headline text-4xl" style="color: var(--primary);">{{ total_registros }}</strong>
+            </article>
+            <article class="adq-card adq-kpi p-5">
+                <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Unidades</p>
+                <strong class="font-headline text-4xl" style="color: var(--text);">{{ unidades_adquiridas }}</strong>
+            </article>
+            <article class="adq-card adq-kpi p-5">
+                <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Pendientes</p>
+                <strong class="font-headline text-4xl" style="color: #d97706;">{{ pendientes }}</strong>
+            </article>
+            <article class="adq-card adq-kpi p-5">
+                <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Gasto</p>
+                <strong class="font-headline text-4xl" style="color: var(--primary);">${{ gasto_total }}</strong>
+            </article>
+        </section>
+
+        <section class="adq-card p-5 mb-6">
+            <form method="get" class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto] gap-3 items-end">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold mb-2" style="color: var(--text-muted);">Buscar</label>
+                    <input type="text" name="q" value="{{ query }}" placeholder="Proveedor, libro, autor, SKU o nota..."
+                           class="w-full rounded-lg px-4 py-3 text-sm"
+                           style="background: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold mb-2" style="color: var(--text-muted);">Tipo</label>
+                    <select name="tipo" class="w-full rounded-lg px-3 py-3 text-sm" style="background: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <option value="">Todos</option>
+                        {% for value,label in tipo_choices %}
+                            <option value="{{ value }}" {% if tipo == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold mb-2" style="color: var(--text-muted);">Estado</label>
+                    <select name="estado" class="w-full rounded-lg px-3 py-3 text-sm" style="background: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <option value="">Todos</option>
+                        {% for value,label in estado_choices %}
+                            <option value="{{ value }}" {% if estado == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="rounded-lg px-5 py-3 text-xs font-bold uppercase tracking-widest" style="background: var(--primary); color: white;">
+                    Filtrar
+                </button>
+            </form>
+        </section>
+
+        <section class="adq-card overflow-hidden">
+            {% for adquisicion in adquisiciones %}
+                <article class="adq-row p-5">
+                    <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="adq-pill" style="background: rgba(62,82,25,0.12); color: var(--primary);">
+                                    {{ adquisicion.get_tipo_display }}
+                                </span>
+                                <span class="adq-pill" style="{% if adquisicion.estado == 'completado' %}background: rgba(25,135,84,0.12); color: #198754;{% else %}background: rgba(217,119,6,0.13); color: #b45309;{% endif %}">
+                                    {{ adquisicion.get_estado_display }}
+                                </span>
+                                <span class="text-xs font-bold" style="color: var(--text-muted);">#{{ adquisicion.id }} · {{ adquisicion.fecha|date:"d/m/Y" }}</span>
+                            </div>
+                            <h2 class="font-headline italic text-2xl leading-tight" style="color: var(--text);">{{ adquisicion.proveedor.nombre }}</h2>
+                            {% if adquisicion.observaciones %}
+                                <p class="text-sm mt-1" style="color: var(--text-muted);">{{ adquisicion.observaciones }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-left lg:text-right shrink-0">
+                            <p class="text-[10px] uppercase tracking-widest font-bold mb-1" style="color: var(--text-muted);">Total</p>
+                            <p class="font-headline text-3xl font-bold mb-1" style="color: var(--primary);">${{ adquisicion.total }}</p>
+                            <p class="text-xs" style="color: var(--text-muted);">{{ adquisicion.total_unidades }} unidades · {{ adquisicion.total_renglones }} renglones</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        {% if adquisicion.detalles.all %}
+                            {% for detalle in adquisicion.detalles.all %}
+                                <div class="adq-detail-line">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold mb-0" style="color: var(--text);">{{ detalle.ejemplar.libro.titulo }}</p>
+                                        <p class="text-xs mb-0" style="color: var(--text-muted);">
+                                            {{ detalle.ejemplar.libro.autor }} · {{ detalle.ejemplar.sku }}
+                                            {% if detalle.ejemplar.estado_fisico %} · {{ detalle.ejemplar.estado_fisico.nombre }}{% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="text-sm font-bold" style="color: var(--text);">{{ detalle.cantidad }} x ${{ detalle.costo_unitario }}</div>
+                                    <div class="text-sm font-bold text-right" style="color: var(--primary);">${{ detalle.subtotal }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg p-4" style="background: var(--bg-subtle); border: 1px dashed var(--border);">
+                                <p class="text-sm mb-0" style="color: var(--text-muted);">Caja registrada, pendiente de inventariar libro por libro.</p>
+                                <a href="{% url 'inventariar_lote' adquisicion.id %}" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest" style="background: var(--primary); color: white;">
+                                    Inventariar
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% empty %}
+                <div class="p-10 text-center" style="color: var(--text-muted);">No hay adquisiciones con esos filtros.</div>
+            {% endfor %}
+        </section>
+    </main>
+</div>
+</div>
+{% endblock %}
