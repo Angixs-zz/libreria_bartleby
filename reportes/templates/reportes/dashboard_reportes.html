@@ -209,7 +209,8 @@
                     <span class="material-symbols-outlined" style="font-size: 1.2rem;">notifications_active</span> Alertas
                 </a>
                 <a href="{% url 'exportar_reporte_pdf' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
-                   class="filter-pill active-pill text-decoration-none d-inline-flex align-items-center gap-2">
+                   class="filter-pill active-pill text-decoration-none d-inline-flex align-items-center gap-2"
+                   data-skip-page-loader="true">
                     <span class="material-symbols-outlined" style="font-size: 1rem;">picture_as_pdf</span> Exportar PDF
                 </a>
 
@@ -747,13 +748,22 @@
     }
 </script>
 <script>
+    const reportPageLoader = document.getElementById('page-loader');
+    const hideReportPageLoader = () => reportPageLoader?.classList.remove('active');
+
     document.querySelectorAll('.filter-pill[href]').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.getElementById('page-loader').classList.add('active');
+            if (btn.dataset.skipPageLoader === 'true') {
+                hideReportPageLoader();
+                return;
+            }
+            reportPageLoader?.classList.add('active');
         });
     });
-    document.querySelector('#customDateModal form').addEventListener('submit', () => {
-        document.getElementById('page-loader').classList.add('active');
+    document.querySelector('#customDateModal form')?.addEventListener('submit', () => {
+        reportPageLoader?.classList.add('active');
     });
+    window.addEventListener('focus', hideReportPageLoader);
+    window.addEventListener('pageshow', hideReportPageLoader);
 </script>
 {% endblock %}
