@@ -199,6 +199,21 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4" id="lote-cerrado-campos" style="display: none;">
+            <div class="col-lg-3">
+                <label class="form-label">Cant. de libros aprox.</label>
+                {{ form.cantidad_libros_lote }}
+                <div class="form-text text-muted" style="font-size: 0.75rem;">Opcional</div>
+            </div>
+            <div class="col-lg-3">
+                <label class="form-label">Costo total del lote</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    {{ form.costo_lote }}
+                </div>
+            </div>
+        </div>
+
         <!-- ── Flujo identificado ───────────────────────────────── -->
         <div id="detalle-lote-section">
 
@@ -461,14 +476,17 @@ function actualizarCompraSueltaLink() {
 
 function actualizarTipo() {
     const tipo = document.querySelector('[name=tipo]:checked').value;
+    const loteCampos = document.getElementById('lote-cerrado-campos');
     if (tipo === 'lote_cerrado') {
         if (datosGeneralesSec) datosGeneralesSec.style.display = '';
+        if (loteCampos) loteCampos.style.display = 'flex';
         detalleSec.style.display = 'none';
         if (btnSubmitMain) btnSubmitMain.style.display = '';
         btnLabel.textContent = 'Guardar lote cerrado';
         hint.innerHTML = 'Se guardará la caja como pendiente. Después inventarías libro por libro.';
     } else {
-        if (datosGeneralesSec) datosGeneralesSec.style.display = 'none';
+        if (datosGeneralesSec) datosGeneralesSec.style.display = 'none'; /* TODO: Check if this should be visible */
+        if (loteCampos) loteCampos.style.display = 'none';
         detalleSec.style.display = '';
         if (btnSubmitMain) btnSubmitMain.style.display = 'none';
         btnLabel.textContent = 'Guardar adquisición';

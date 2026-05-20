@@ -59,6 +59,9 @@ class Adquisicion(models.Model):
     )
     fecha = models.DateField(default=timezone.localdate)
     observaciones = models.TextField(blank=True)
+    codigo_lote = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="ID único del lote")
+    cantidad_libros_lote = models.PositiveIntegerField(null=True, blank=True, help_text="Cantidad de libros en la caja (opcional)")
+    costo_lote = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Costo de la caja cerrada")
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     creado_por = models.ForeignKey(
         User,
@@ -71,7 +74,15 @@ class Adquisicion(models.Model):
     actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Adquisicion #{self.id} - {self.proveedor.nombre}"
+        return f"Adquisicion {self.codigo_lote or '#'+str(self.id)} - {self.proveedor.nombre}"
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new and not self.codigo_lote:
+            self.codigo_lote = f"LOT-{self.fecha.strftime('%y%m%d')}-{self.id:04d}"
+            kwargs['force_insert'] = False
+            super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Adquisiciones"

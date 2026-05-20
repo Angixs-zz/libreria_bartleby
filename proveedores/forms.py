@@ -21,14 +21,23 @@ class ProveedorForm(forms.ModelForm):
 class AdquisicionForm(forms.ModelForm):
     class Meta:
         model = Adquisicion
-        fields = ['proveedor', 'fecha', 'tipo', 'observaciones']
+        fields = ['proveedor', 'fecha', 'tipo', 'observaciones', 'cantidad_libros_lote', 'costo_lote']
         widgets = {
             'proveedor': forms.Select(attrs={'class': 'form-select'}),
             'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'tipo': forms.Select(attrs={'class': 'form-select'}),
             'observaciones': forms.Textarea(attrs={
                 'class': 'form-control', 'rows': 2,
-                'placeholder': 'Notas del lote: costo total, factura, descripción de la caja, etc.'
+                'placeholder': 'Notas del lote: factura, descripción de la caja, etc.'
+            }),
+            'cantidad_libros_lote': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ej. 50'
+            }),
+            'costo_lote': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01', 
+                'placeholder': '0.00'
             }),
         }
 
