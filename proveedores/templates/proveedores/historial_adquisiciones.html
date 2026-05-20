@@ -159,7 +159,7 @@
                                 <span class="adq-pill" style="{% if adquisicion.estado == 'completado' %}background: rgba(25,135,84,0.12); color: #198754;{% else %}background: rgba(217,119,6,0.13); color: #b45309;{% endif %}">
                                     {{ adquisicion.get_estado_display }}
                                 </span>
-                                <span class="text-xs font-bold" style="color: var(--text-muted);">#{{ adquisicion.id }} · {{ adquisicion.fecha|date:"d/m/Y" }}</span>
+                                <span class="text-xs font-bold" style="color: var(--text-muted);">{% if adquisicion.codigo_lote %}{{ adquisicion.codigo_lote }}{% else %}#{{ adquisicion.id }}{% endif %} · {{ adquisicion.fecha|date:"d/m/Y" }}</span>
                             </div>
                             <h2 class="font-headline italic text-2xl leading-tight" style="color: var(--text);">{{ adquisicion.proveedor.nombre }}</h2>
                             {% if adquisicion.observaciones %}

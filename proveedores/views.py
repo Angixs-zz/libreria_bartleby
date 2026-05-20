@@ -160,6 +160,8 @@ def registrar_adquisicion(request):
                     adquisicion = form.save(commit=False)
                     adquisicion.creado_por = request.user
                     adquisicion.estado = 'por_inventariar'
+                    if adquisicion.costo_lote:
+                        adquisicion.total = adquisicion.costo_lote
                     adquisicion.save()
                     registrar_auditoria(
                         actor=request.user,
