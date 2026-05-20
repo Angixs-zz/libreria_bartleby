@@ -9,7 +9,7 @@ Estructura:
 
 from django.db import models
 from django.db.models import Count, Q, F, Sum
-from utils.helpers import generar_sku_mejorado
+from utils.helpers import aplicar_precio_psicologico, generar_sku_mejorado
 
 
 class Categoria(models.Model):
@@ -137,6 +137,15 @@ class Ejemplar(models.Model):
     def __str__(self):
         estado_nombre = self.estado_fisico.nombre if self.estado_fisico else "Sin estado"
         return f"{self.sku} | {self.libro.titulo} ({estado_nombre}) - ${self.precio_venta}"
+
+    def save(self, *args, **kwargs):
+        precio_ajustado = aplicar_precio_psicologico(self.precio_venta)
+        if precio_ajustado != self.precio_venta:
+            self.precio_venta = precio_ajustado
+            update_fields = kwargs.get('update_fields')
+            if update_fields is not None:
+                kwargs['update_fields'] = set(update_fields) | {'precio_venta'}
+        super().save(*args, **kwargs)
     
     class Meta:
         ordering = ['-creado_en']

@@ -11,7 +11,9 @@
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
             <span style="color: var(--text-muted);">Gestión</span>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text);">Reportes</span>
+            <span style="color: var(--text-muted);">Reportes</span>
+            <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
+            <span style="color: var(--text);">Dashboard</span>
         </nav>
     </div>
 </div>
@@ -206,6 +208,10 @@
                    class="alert-pill text-decoration-none d-inline-flex align-items-center gap-2">
                     <span class="material-symbols-outlined" style="font-size: 1.2rem;">notifications_active</span> Alertas
                 </a>
+                <a href="{% url 'exportar_reporte_pdf' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                   class="filter-pill active-pill text-decoration-none d-inline-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">picture_as_pdf</span> Exportar PDF
+                </a>
 
                 <div class="pill-group d-flex flex-wrap align-items-center">
                     {% for key, label in periodos.items %}
@@ -306,13 +312,84 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4 fade-in-up delay-2">
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="report-card rounded-4 h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="kpi-icon flex-shrink-0" style="background-color: rgba(217, 119, 6, 0.12); color: #d97706; border-radius: 12px; width: 3rem; height: 3rem; font-size: 1.25rem;">
+                            <i class="bi bi-box-seam"></i>
+                        </span>
+                        <div>
+                            <p class="text-uppercase fw-bold mb-1" style="font-size: 0.65rem; letter-spacing: 0.15em; color: var(--text-muted);">Compras</p>
+                            <h2 class="section-title h5 mb-0" style="color: var(--text);">Inversión del periodo</h2>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-2">
+                        <div class="display-5 fw-bold mb-1" style="color: #d97706; letter-spacing: -0.02em;">${{ compras_monto }}</div>
+                        <p class="mb-0" style="font-size: 0.85rem; color: var(--text-muted);">{{ compras_lotes }} lote{{ compras_lotes|pluralize }} · {{ compras_unidades }} unidad{{ compras_unidades|pluralize:"es" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="report-card rounded-4 h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="kpi-icon flex-shrink-0" style="background-color: rgba(13, 110, 253, 0.12); color: #0d6efd; border-radius: 12px; width: 3rem; height: 3rem; font-size: 1.25rem;">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </span>
+                        <div>
+                            <p class="text-uppercase fw-bold mb-1" style="font-size: 0.65rem; letter-spacing: 0.15em; color: var(--text-muted);">Flujo</p>
+                            <h2 class="section-title h5 mb-0" style="color: var(--text);">Ventas menos compras</h2>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-2">
+                        <div class="display-5 fw-bold mb-1" style="color: {% if flujo_neto_negativo %}#dc2626{% else %}var(--primary){% endif %}; letter-spacing: -0.02em;">${{ flujo_neto }}</div>
+                        <p class="mb-0" style="font-size: 0.85rem; color: var(--text-muted);">Pulso operativo de caja del periodo.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="report-card rounded-4 h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="kpi-icon flex-shrink-0" style="background-color: rgba(25, 135, 84, 0.12); color: #198754; border-radius: 12px; width: 3rem; height: 3rem; font-size: 1.25rem;">
+                            <i class="bi bi-percent"></i>
+                        </span>
+                        <div>
+                            <p class="text-uppercase fw-bold mb-1" style="font-size: 0.65rem; letter-spacing: 0.15em; color: var(--text-muted);">Margen</p>
+                            <h2 class="section-title h5 mb-0" style="color: var(--text);">Operativo estimado</h2>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-2">
+                        <div class="display-5 fw-bold mb-1" style="color: #198754; letter-spacing: -0.02em;">{{ margen_operativo }}%</div>
+                        <p class="mb-0" style="font-size: 0.85rem; color: var(--text-muted);">Ganancia neta sobre ingresos.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="report-card rounded-4 h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="kpi-icon flex-shrink-0" style="background-color: rgba(220, 38, 38, 0.1); color: #dc2626; border-radius: 12px; width: 3rem; height: 3rem; font-size: 1.25rem;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </span>
+                        <div>
+                            <p class="text-uppercase fw-bold mb-1" style="font-size: 0.65rem; letter-spacing: 0.15em; color: var(--text-muted);">Pendientes</p>
+                            <h2 class="section-title h5 mb-0" style="color: var(--text);">Lotes por inventariar</h2>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-2">
+                        <div class="display-5 fw-bold mb-1" style="color: #dc2626; letter-spacing: -0.02em;">{{ compras_pendientes }}</div>
+                        <p class="mb-0" style="font-size: 0.85rem; color: var(--text-muted);">Cajas cerradas que aún no entran al inventario.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4 fade-in-up delay-2">
             <div class="col-12 col-xl-8">
                 <div class="report-panel rounded-4 p-4 h-100">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                         <div>
-                            <h2 class="section-title h2 mb-2">Tendencia de ventas</h2>
-                            <p class="mb-0 small" style="color: var(--text-muted);">Evolución diaria de ingresos de los últimos 7 días.</p>
+                            <h2 class="section-title h2 mb-2">Ventas vs compras</h2>
+                            <p class="mb-0 small" style="color: var(--text-muted);">Comparativo del periodo para detectar inversión, recuperación y presión de caja.</p>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             <div class="mini-metric px-3 py-2 small">
@@ -322,6 +399,10 @@
                             <div class="mini-metric px-3 py-2 small">
                                 <div class="fw-bold text-uppercase" style="letter-spacing: 0.15em; color: var(--text-muted);">Top títulos</div>
                                 <div class="fw-semibold" style="color: var(--text);">{{ top_libros|length }}</div>
+                            </div>
+                            <div class="mini-metric px-3 py-2 small">
+                                <div class="fw-bold text-uppercase" style="letter-spacing: 0.15em; color: var(--text-muted);">Proveedores</div>
+                                <div class="fw-semibold" style="color: var(--text);">{{ top_proveedores|length }}</div>
                             </div>
                         </div>
                     </div>
@@ -415,22 +496,85 @@
 
             <div class="col-12 col-xl-4">
                 <div class="report-panel rounded-4 p-4 h-100">
-                    <h2 class="section-title h2 mb-3">Ritmo mensual</h2>
-                    <p class="small mb-4" style="color: var(--text-muted);">Cierre agregado por mes para lectura rápida de tendencia.</p>
+                    <h2 class="section-title h2 mb-3">Top proveedores</h2>
+                    <p class="small mb-4" style="color: var(--text-muted);">Proveedores con mayor gasto registrado en el periodo.</p>
 
                     <div class="d-flex flex-column gap-3">
-                        {% for mes in ventas_mensuales %}
+                        {% for proveedor in top_proveedores %}
                             <div class="mini-metric p-3">
-                                <div class="d-flex justify-content-between align-items-center gap-3">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
                                     <div>
-                                        <div class="fw-semibold" style="color: var(--text);">{{ mes.periodo|date:"F Y" }}</div>
-                                        <div class="small" style="color: var(--text-muted);">{{ mes.tickets }} ticket{{ mes.tickets|pluralize }}</div>
+                                        <div class="fw-semibold" style="color: var(--text);">{{ proveedor.proveedor__nombre }}</div>
+                                        <div class="small" style="color: var(--text-muted);">{{ proveedor.lotes }} lote{{ proveedor.lotes|pluralize }} · {{ proveedor.unidades }} unidad{{ proveedor.unidades|pluralize:"es" }}</div>
                                     </div>
-                                    <div class="fw-semibold" style="color: var(--primary);">${{ mes.total }}</div>
+                                    <div class="fw-semibold text-end" style="color: #d97706;">${{ proveedor.gasto }}</div>
                                 </div>
                             </div>
                         {% empty %}
-                            <div class="alert alert-secondary mb-0">Aún no hay suficientes ventas para construir el resumen mensual.</div>
+                            <div class="alert alert-secondary mb-0">No hay compras registradas en este periodo.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-8">
+                <div class="report-panel rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="section-title h2 mb-2">Compras recientes</h2>
+                            <p class="small mb-0" style="color: var(--text-muted);">Últimos lotes y compras que alimentan el inventario.</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Lote</th>
+                                    <th>Proveedor</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Unidades</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for compra in compras_recientes %}
+                                    <tr>
+                                        <td class="fw-semibold" style="color: var(--text);">{{ compra.codigo_lote|default:compra.id }}</td>
+                                        <td style="color: var(--text-muted);">{{ compra.proveedor.nombre }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-1" style="background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border);">
+                                                {{ compra.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">{{ compra.unidades }}</td>
+                                        <td class="text-end fw-semibold">${{ compra.total }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5" style="color: var(--text-muted);">No hay compras registradas en este periodo.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <div class="report-panel rounded-4 p-4 h-100">
+                    <h2 class="section-title h2 mb-3">Ritmo mensual</h2>
+                    <p class="small mb-4" style="color: var(--text-muted);">Cierre agregado de ventas, compras y flujo.</p>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% for mes in resumen_mensual %}
+                            <div class="mini-metric p-3">
+                                <div class="fw-semibold mb-2" style="color: var(--text);">{{ mes.periodo|date:"F Y" }}</div>
+                                <div class="d-flex justify-content-between small"><span style="color: var(--text-muted);">Ventas</span><strong style="color: var(--primary);">${{ mes.ventas }}</strong></div>
+                                <div class="d-flex justify-content-between small"><span style="color: var(--text-muted);">Compras</span><strong style="color: #d97706;">${{ mes.compras }}</strong></div>
+                                <div class="d-flex justify-content-between small"><span style="color: var(--text-muted);">Flujo</span><strong style="color: {% if mes.flujo_negativo %}#dc2626{% else %}var(--text){% endif %};">${{ mes.flujo }}</strong></div>
+                            </div>
+                        {% empty %}
+                            <div class="alert alert-secondary mb-0">Aún no hay suficientes datos para construir el resumen mensual.</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -476,6 +620,8 @@
 {{ chart_labels|json_script:"chart-labels" }}
 {{ chart_totals|json_script:"chart-totals" }}
 {{ chart_tickets|json_script:"chart-tickets" }}
+{{ chart_compras|json_script:"chart-compras" }}
+{{ chart_lotes|json_script:"chart-lotes" }}
 {% endblock %}
 
 {% block extra_js %}
@@ -485,6 +631,8 @@
     const chartLabels = JSON.parse(document.getElementById('chart-labels').textContent);
     const chartTotals = JSON.parse(document.getElementById('chart-totals').textContent);
     const chartTickets = JSON.parse(document.getElementById('chart-tickets').textContent);
+    const chartCompras = JSON.parse(document.getElementById('chart-compras').textContent);
+    const chartLotes = JSON.parse(document.getElementById('chart-lotes').textContent);
     const axisColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#75796b';
 
     const ctx = document.getElementById('ventasChart');
@@ -496,10 +644,23 @@
                 datasets: [
                     {
                         type: 'line',
-                        label: 'Ingresos',
+                        label: 'Ventas',
                         data: chartTotals,
                         borderColor: '#3e5219',
                         backgroundColor: 'rgba(62, 82, 25, 0.18)',
+                        fill: true,
+                        tension: 0.32,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Compras',
+                        data: chartCompras,
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.12)',
                         fill: true,
                         tension: 0.32,
                         borderWidth: 3,
@@ -513,6 +674,16 @@
                         data: chartTickets,
                         backgroundColor: 'rgba(13, 110, 253, 0.24)',
                         borderColor: '#0d6efd',
+                        borderWidth: 1,
+                        borderRadius: 12,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Lotes',
+                        data: chartLotes,
+                        backgroundColor: 'rgba(217, 119, 6, 0.22)',
+                        borderColor: '#d97706',
                         borderWidth: 1,
                         borderRadius: 12,
                         yAxisID: 'y1'

@@ -4,6 +4,7 @@ Utilidades compartidas del proyecto Bartleby.
 
 import string
 import re
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 from django.utils.crypto import get_random_string
 from django.db.models import Q
 
@@ -60,8 +61,6 @@ def validar_precio(precio_str):
     Raises:
         ValueError: Si el precio no es válido
     """
-    from decimal import Decimal, InvalidOperation
-    
     try:
         precio = Decimal(precio_str)
         
@@ -75,6 +74,33 @@ def validar_precio(precio_str):
     
     except (InvalidOperation, ValueError) as e:
         return None, str(e)
+
+
+def aplicar_precio_psicologico(precio):
+    """
+    Convierte precios enteros a precios psicológicos terminados en .99.
+
+    Ejemplos:
+    - 200 -> 199.99
+    - 150.00 -> 149.99
+    - 199.99 -> 199.99
+    """
+    if precio in (None, ''):
+        return precio
+
+    try:
+        precio_decimal = Decimal(precio).quantize(Decimal('0.01'))
+    except (InvalidOperation, TypeError, ValueError):
+        return precio
+
+    if precio_decimal <= Decimal('0.00'):
+        return precio_decimal
+
+    entero = precio_decimal.to_integral_value(rounding=ROUND_DOWN)
+    if precio_decimal == entero:
+        return (precio_decimal - Decimal('0.01')).quantize(Decimal('0.01'))
+
+    return precio_decimal
 
 
 def validar_isbn(isbn_str):
