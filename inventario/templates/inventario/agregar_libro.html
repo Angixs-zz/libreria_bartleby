@@ -115,7 +115,7 @@
         </h1>
         <p class="mt-2 font-body" style="color: var(--text-muted);">
             {% if modo_compra_suelta %}
-                Registra uno o varios ejemplares sueltos y liga cada entrada al proveedor que los vendió.
+                {% if lote_compra %}Registra ejemplares y añádelos al lote seleccionado.{% else %}Registra uno o varios ejemplares sueltos y liga cada entrada al proveedor que los vendió.{% endif %}
             {% else %}
                 Registra una obra nueva o añade un lote a una existente.
             {% endif %}
@@ -126,17 +126,29 @@
     <section class="entry-purchase-panel mb-8">
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] gap-5 items-end">
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color: var(--primary);">Proveedor de esta compra</p>
-                <p class="text-sm mb-0" style="color: var(--text-muted);">Este dato creará la adquisición y quedará como historial del ejemplar.</p>
+                <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color: var(--primary);">{% if lote_compra %}Inventariar Lote Cerrado{% else %}Proveedor de esta compra{% endif %}</p>
+                <p class="text-sm mb-0" style="color: var(--text-muted);">{% if lote_compra %}Los libros que registres se añadirán al lote cerrado seleccionado.{% else %}Este dato creará la adquisición y quedará como historial del ejemplar.{% endif %}</p>
             </div>
             <div>
-                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Proveedor</label>
+                <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">{% if lote_compra %}Lote / Proveedor{% else %}Proveedor{% endif %}</label>
+                {% if lote_compra %}
+                <div class="p-3 rounded-lg text-sm font-bold border border-[var(--primary)] bg-[#f4f9ee] text-[#3e5219]">
+                    Lote {% if lote_compra.codigo_lote %}{{ lote_compra.codigo_lote }}{% else %}#{{ lote_compra.id }}{% endif %}
+                    <span class="font-normal text-xs block text-gray-600">{{ lote_compra.proveedor.nombre }}</span>
+                </div>
+                <input type="hidden" id="proveedor-compra-select" value="{{ lote_compra.proveedor.id }}">
+                <input type="hidden" id="lote-compra-id" value="{{ lote_compra.id }}">
+                <div class="mt-2 text-right">
+                    <a href="{% url 'inventariar_lote' lote_compra.id %}" class="text-xs text-[var(--primary)] font-bold hover:underline">← Volver al resumen del lote</a>
+                </div>
+                {% else %}
                 <select id="proveedor-compra-select" required class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     <option value="">Selecciona proveedor...</option>
                     {% for proveedor in proveedores %}
                         <option value="{{ proveedor.id }}" {% if proveedor_compra and proveedor_compra.id == proveedor.id %}selected{% endif %}>{{ proveedor.nombre }}</option>
                     {% endfor %}
                 </select>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -198,6 +210,7 @@
                 <input type="hidden" name="accion" value="sumar_stock">
                 {% if modo_compra_suelta %}
                 <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+                <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
                 {% endif %}
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Lote (SKU)</label>
@@ -207,7 +220,7 @@
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cuántos llegan</label>
                     <input type="number" name="cantidad" value="1" min="1" class="w-24 rounded-lg p-2 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                 </div>
-                {% if modo_compra_suelta %}
+                {% if modo_compra_suelta and not lote_compra %}
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo unitario ($)</label>
                     <input type="number" name="precio_compra" step="0.01" min="0.01" required class="w-36 rounded-lg p-2 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
@@ -227,6 +240,7 @@
                 <input type="hidden" name="libro_id" id="libro-id-hidden">
                 {% if modo_compra_suelta %}
                 <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+                <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
                 {% endif %}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -244,10 +258,12 @@
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio venta ($)</label>
                         <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
+                    {% if not lote_compra %}
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio costo ($)</label>
-                        <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
+                    {% endif %}
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad</label>
                         <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
@@ -270,6 +286,7 @@
             <input type="hidden" name="accion" value="crear_todo">
             {% if modo_compra_suelta %}
             <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
+            <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
             {% endif %}
 
             <div class="entry-main-panel">
@@ -338,11 +355,13 @@
                             </select>
                             <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid {% if lote_compra %}grid-cols-1{% else %}grid-cols-2{% endif %} gap-3">
+                            {% if not lote_compra %}
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo ($)</label>
-                                <input type="number" name="precio_compra" step="0.01" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                                <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                             </div>
+                            {% endif %}
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Venta ($)</label>
                                 <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
@@ -386,16 +405,26 @@ const modoCompraSuelta = {{ modo_compra_suelta|yesno:"true,false" }};
 const proveedorCompraSelect = document.getElementById('proveedor-compra-select');
 
 function actualizarProveedorCompra() {
-    if (!modoCompraSuelta || !proveedorCompraSelect) return;
-    document.querySelectorAll('.proveedor-compra-hidden').forEach(input => {
-        input.value = proveedorCompraSelect.value;
-    });
+    if (!modoCompraSuelta) return;
+    const proveedorSelect = document.getElementById('proveedor-compra-select');
+    const loteId = document.getElementById('lote-compra-id');
+    
+    if (proveedorSelect) {
+        document.querySelectorAll('.proveedor-compra-hidden').forEach(input => {
+            input.value = proveedorSelect.value;
+        });
+    }
+    if (loteId) {
+        document.querySelectorAll('.lote-compra-hidden').forEach(input => {
+            input.value = loteId.value;
+        });
+    }
 }
 
 if (proveedorCompraSelect) {
     proveedorCompraSelect.addEventListener('change', actualizarProveedorCompra);
-    actualizarProveedorCompra();
 }
+actualizarProveedorCompra();
 
 document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', function(event) {

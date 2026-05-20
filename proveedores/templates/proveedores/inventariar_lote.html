@@ -115,10 +115,10 @@
                             <option value="{{ ej.id }}">{{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}</option>
                             {% endfor %}
                         </select>
-                        <button type="button" class="btn btn-sm btn-outline-primary w-100" id="btn-abrir-modal-libro">
-                            <span class="material-symbols-outlined align-middle" style="font-size:0.9rem;">auto_fix_high</span>
-                            Crear libro nuevo (no está en el sistema)
-                        </button>
+                        <a href="{% url 'agregar_libro_compra' %}?lote_id={{ adquisicion.id }}" class="btn btn-sm btn-outline-primary w-100">
+                            <span class="material-symbols-outlined align-middle" style="font-size:0.9rem;">open_in_new</span>
+                            Ir a la pestaña completa para registrar libro nuevo
+                        </a>
                     </div>
 
                     <div class="row g-3 mb-4">
