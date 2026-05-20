@@ -169,6 +169,14 @@ ul.errorlist {
     font-weight: bold;
 }
 
+/* ── Backdrop global para ventanas Bootstrap ──────────── */
+.modal-backdrop.show {
+    opacity: 1 !important;
+    background-color: rgba(12, 16, 9, 0.62) !important;
+    backdrop-filter: blur(12px) saturate(115%);
+    -webkit-backdrop-filter: blur(12px) saturate(115%);
+}
+
 /* ── Dark mode toggle button ──────────────────────────── */
 #dark-toggle {
     display: flex;

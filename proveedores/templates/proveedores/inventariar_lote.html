@@ -23,20 +23,248 @@
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <style>
-.inv-shell { --bs-body-bg: transparent; --bs-body-color: var(--text); }
-.surface-card {
+.inv-shell {
+    --bs-body-bg: transparent;
+    --bs-body-color: var(--text);
+}
+.inv-shell .surface-card,
+.lot-modal {
     background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,244,240,0.92));
     border: 1px solid rgba(197,200,184,0.7);
     box-shadow: 0 20px 60px rgba(23,29,15,0.08);
     border-radius: 1rem;
+    color: var(--text);
 }
-.dark .surface-card {
+.dark .inv-shell .surface-card,
+.dark .lot-modal {
     background: linear-gradient(180deg, rgba(39,39,31,0.95), rgba(30,30,24,0.94));
     border-color: rgba(80,85,60,0.6);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.24);
 }
-.badge-estado-ok { background: #d2eca2; color: #2e3d12; }
-.badge-estado-pend { background: #fff3cd; color: #664d03; }
-.book-row-added { border-left: 3px solid var(--primary); }
+.inv-shell .page-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .75rem;
+    width: 100%;
+}
+.inv-shell .page-action-btn,
+.lot-modal .page-action-btn {
+    min-height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    border-radius: .85rem;
+    padding: .8rem 1.05rem;
+    border: 1px solid var(--border);
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.inv-shell .page-action-btn:hover,
+.lot-modal .page-action-btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+.inv-shell .page-action-btn .material-symbols-outlined,
+.lot-modal .page-action-btn .material-symbols-outlined {
+    font-size: 1rem;
+}
+.inv-shell .action-primary,
+.lot-modal .action-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(62,82,25,.24);
+}
+.inv-shell .action-primary:hover,
+.lot-modal .action-primary:hover { color: #fff; }
+.dark .inv-shell .action-primary,
+.dark .lot-modal .action-primary { color: #13180c; }
+.inv-shell .action-secondary,
+.lot-modal .action-secondary {
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    color: var(--text);
+}
+.inv-shell .action-secondary:hover,
+.lot-modal .action-secondary:hover {
+    background: var(--bg-subtle);
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    color: var(--text);
+}
+.inv-shell .lot-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: .75rem;
+}
+.inv-shell .lot-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-subtle);
+    padding: .45rem .75rem;
+    color: var(--text-muted);
+    font-size: .78rem;
+    font-weight: 700;
+}
+.inv-shell .lot-meta-item strong {
+    color: var(--text);
+}
+.badge-estado-ok {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    color: var(--primary);
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+}
+.badge-estado-pend {
+    background: rgba(217,119,6,.12);
+    color: #d97706;
+    border: 1px solid rgba(217,119,6,.2);
+}
+.inv-shell .book-row-added {
+    border-left: 3px solid var(--primary);
+}
+.inv-shell .panel-title {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    color: var(--text);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+}
+.inv-shell .panel-title-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .7rem;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    color: var(--primary);
+}
+.inv-shell .entry-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+.inv-shell .field-card {
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    background: var(--bg);
+    padding: .95rem;
+}
+.inv-shell .form-label {
+    margin-top: 0;
+    margin-bottom: .45rem;
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.inv-shell .form-control,
+.inv-shell .form-select,
+.inv-shell .input-group-text,
+.lot-modal .form-control,
+.lot-modal .form-select,
+.lot-modal .input-group-text {
+    background-color: var(--bg);
+    border-color: var(--border);
+    color: var(--text);
+}
+.inv-shell .form-control::placeholder,
+.lot-modal .form-control::placeholder {
+    color: var(--text-faint);
+}
+.inv-shell .form-control:focus,
+.inv-shell .form-select:focus,
+.lot-modal .form-control:focus,
+.lot-modal .form-select:focus {
+    border-color: var(--primary);
+    background-color: var(--surface);
+    color: var(--text);
+    box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--primary) 18%, transparent);
+}
+.inv-shell .lot-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: .85rem;
+    overflow: hidden;
+    background: var(--bg);
+}
+.inv-shell .lot-table {
+    margin-bottom: 0;
+    color: var(--text);
+}
+.inv-shell .lot-table thead th {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.inv-shell .lot-table tbody td,
+.inv-shell .lot-table tfoot th {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+}
+.inv-shell .lot-total-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+    padding: .55rem .85rem;
+    font-size: .8rem;
+}
+.inv-shell .empty-state {
+    border: 1px dashed var(--border);
+    border-radius: .9rem;
+    background: var(--bg);
+    color: var(--text-faint);
+}
+.lot-modal .modal-header,
+.lot-modal .modal-footer {
+    border-color: var(--border);
+    background: var(--bg-subtle);
+}
+.lot-modal .modal-title {
+    color: var(--primary);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+}
+.lot-modal .btn-close {
+    opacity: .75;
+}
+.dark .lot-modal .btn-close {
+    filter: invert(1) grayscale(100%);
+}
+@media (min-width: 768px) {
+    .inv-shell .entry-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .inv-shell .field-wide {
+        grid-column: 1 / -1;
+    }
+}
+@media (min-width: 1200px) {
+    .inv-shell .page-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        min-width: 32rem;
+        max-width: 38rem;
+    }
+}
 </style>
 {% endblock %}
 
@@ -57,32 +285,32 @@
             <h1 class="display-4 fst-italic mb-2" style="font-family:'Newsreader',serif;color:var(--primary);">
                 Inventariar lote
             </h1>
-            <p class="mb-1" style="color:var(--text-muted);">
-                <strong>Proveedor:</strong> {{ adquisicion.proveedor.nombre }} &nbsp;·&nbsp;
-                <strong>Fecha:</strong> {{ adquisicion.fecha }} &nbsp;·&nbsp;
+            <div class="lot-meta">
+                <span class="lot-meta-item"><strong>Proveedor</strong> {{ adquisicion.proveedor.nombre }}</span>
+                <span class="lot-meta-item"><strong>Fecha</strong> {{ adquisicion.fecha }}</span>
                 {% if adquisicion.cantidad_libros_lote %}
-                <strong>Libros:</strong> {{ adquisicion.cantidad_libros_lote }} aprox &nbsp;·&nbsp;
+                <span class="lot-meta-item"><strong>Libros</strong> {{ adquisicion.cantidad_libros_lote }} aprox</span>
                 {% endif %}
                 <span class="badge {% if adquisicion.estado == 'completado' %}badge-estado-ok{% else %}badge-estado-pend{% endif %} px-3 py-1 rounded-pill">
                     {{ adquisicion.get_estado_display }}
                 </span>
-            </p>
+            </div>
             {% if adquisicion.observaciones %}
-            <p class="small mb-0 fst-italic" style="color:var(--text-muted);">{{ adquisicion.observaciones }}</p>
+            <p class="small mb-0 mt-3 fst-italic" style="color:var(--text-muted);">{{ adquisicion.observaciones }}</p>
             {% endif %}
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'detalle_proveedor' adquisicion.proveedor_id %}" class="btn btn-outline-secondary">
-                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">arrow_back</span>
+        <div class="page-actions">
+            <a href="{% url 'detalle_proveedor' adquisicion.proveedor_id %}" class="page-action-btn action-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
                 Volver al proveedor
             </a>
             {% if adquisicion.estado == 'por_inventariar' %}
-            <form method="post">
+            <form method="post" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="completar">
-                <button type="submit" class="btn btn-success"
+                <button type="submit" class="page-action-btn action-primary w-100"
                         onclick="return confirm('¿Estás seguro de cerrar la caja? Al marcar este lote como completado ya no se podrán registrar más libros en él.')">
-                    <span class="material-symbols-outlined align-middle" style="font-size:1rem;">check_circle</span>
+                    <span class="material-symbols-outlined">check_circle</span>
                     Cerrar caja (Inventario terminado)
                 </button>
             </form>
@@ -96,8 +324,8 @@
         {% if adquisicion.estado == 'por_inventariar' %}
         <div class="col-lg-5">
             <div class="surface-card p-4">
-                <h2 class="h5 fw-semibold mb-4" style="font-family:'Newsreader',serif;">
-                    <span class="material-symbols-outlined align-middle me-1" style="font-size:1.2rem;color:var(--primary);">add_circle</span>
+                <h2 class="panel-title h4 mb-4">
+                    <span class="panel-title-icon material-symbols-outlined">add_circle</span>
                     Agregar libro al lote
                 </h2>
 
@@ -105,29 +333,26 @@
                     {% csrf_token %}
 
                     <!-- Selector de ejemplar existente -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">
-                            Libro / Ejemplar
-                        </label>
-                        <select name="ejemplar_id" id="select-ejemplar" class="form-select mb-2">
-                            <option value="">— Selecciona un ejemplar existente —</option>
-                            {% for ej in ejemplares %}
-                            <option value="{{ ej.id }}">{{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}</option>
-                            {% endfor %}
-                        </select>
-                        <a href="{% url 'agregar_libro_compra' %}?lote_id={{ adquisicion.id }}" class="btn btn-sm btn-outline-primary w-100">
-                            <span class="material-symbols-outlined align-middle" style="font-size:0.9rem;">open_in_new</span>
-                            Ir a la pestaña completa para registrar libro nuevo
-                        </a>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">Cantidad</label>
+                    <div class="entry-form-grid mb-4">
+                        <div class="field-card field-wide">
+                            <label class="form-label">Libro / Ejemplar</label>
+                            <select name="ejemplar_id" id="select-ejemplar" class="form-select mb-2">
+                                <option value="">— Selecciona un ejemplar existente —</option>
+                                {% for ej in ejemplares %}
+                                <option value="{{ ej.id }}">{{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}</option>
+                                {% endfor %}
+                            </select>
+                            <a href="{% url 'agregar_libro_compra' %}?lote_id={{ adquisicion.id }}" class="page-action-btn action-secondary w-100">
+                                <span class="material-symbols-outlined">open_in_new</span>
+                                Registrar libro nuevo
+                            </a>
+                        </div>
+                        <div class="field-card">
+                            <label class="form-label">Cantidad</label>
                             <input type="number" name="cantidad" min="1" value="1" class="form-control">
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">Costo unitario</label>
+                        <div class="field-card">
+                            <label class="form-label">Costo unitario</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" name="costo_unitario" min="0.01" step="0.01" class="form-control" placeholder="0.00">
@@ -135,8 +360,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">
-                        <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">add_shopping_cart</span>
+                    <button type="submit" class="page-action-btn action-primary w-100">
+                        <span class="material-symbols-outlined">add_shopping_cart</span>
                         Agregar al lote
                     </button>
                 </form>
@@ -148,18 +373,19 @@
         <div class="col-lg-{% if adquisicion.estado == 'por_inventariar' %}7{% else %}12{% endif %}">
             <div class="surface-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="h5 fw-semibold mb-0" style="font-family:'Newsreader',serif;">
+                    <h2 class="panel-title h4 mb-0">
+                        <span class="panel-title-icon material-symbols-outlined">library_books</span>
                         Libros registrados en este lote
                     </h2>
-                    <span class="badge rounded-pill px-3 py-2" style="background:rgba(163,196,106,0.15);color:var(--primary);font-size:.85rem;">
+                    <span class="lot-total-pill">
                         Total: <strong>${{ adquisicion.total }}</strong>
                     </span>
                 </div>
 
                 {% if detalles %}
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead class="table-light">
+                <div class="table-responsive lot-table-wrap">
+                    <table class="table align-middle lot-table">
+                        <thead>
                             <tr>
                                 <th>Libro</th>
                                 <th>Estado</th>
@@ -173,9 +399,9 @@
                             <tr class="book-row-added">
                                 <td>
                                     <div class="fw-semibold">{{ d.ejemplar.libro.titulo }}</div>
-                                    <div class="small text-muted">{{ d.ejemplar.libro.autor }} · {{ d.ejemplar.sku }}</div>
+                                    <div class="small" style="color:var(--text-muted);">{{ d.ejemplar.libro.autor }} · {{ d.ejemplar.sku }}</div>
                                 </td>
-                                <td><span class="badge bg-secondary">{{ d.ejemplar.estado_fisico.nombre }}</span></td>
+                                <td><span class="badge rounded-pill px-3 py-1" style="background:var(--bg-subtle);color:var(--text-muted);border:1px solid var(--border);">{{ d.ejemplar.estado_fisico.nombre }}</span></td>
                                 <td class="text-center">{{ d.cantidad }}</td>
                                 <td class="text-end">${{ d.costo_unitario }}</td>
                                 <td class="text-end fw-semibold">${{ d.subtotal }}</td>
@@ -191,7 +417,7 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="text-center py-5" style="color:var(--text-faint);">
+                <div class="empty-state text-center py-5 px-4">
                     <span class="material-symbols-outlined d-block mb-2" style="font-size:3rem;">inventory_2</span>
                     <p class="mb-0">Todavía no hay libros registrados en este lote.</p>
                     <p class="small">Usa el formulario de la izquierda para ir añadiéndolos.</p>
@@ -210,9 +436,9 @@
 <!-- ═══ MODAL: Crear libro nuevo inline ════════════════════════════ -->
 <div class="modal fade" id="modal-libro-rapido" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background:var(--surface);color:var(--text);border:1px solid var(--border);">
-            <div class="modal-header" style="border-color:var(--border);">
-                <h5 class="modal-title fw-bold" style="font-family:'Newsreader',serif;">
+        <div class="modal-content lot-modal rounded-4 overflow-hidden">
+            <div class="modal-header">
+                <h5 class="modal-title fs-2">
                     <span class="material-symbols-outlined align-middle me-2" style="color:var(--primary);">auto_stories</span>
                     Registrar nuevo libro
                 </h5>
@@ -221,14 +447,14 @@
             <div class="modal-body">
 
                 <!-- Búsqueda por ISBN -->
-                <div class="mb-4 p-3 rounded-3" style="background:rgba(163,196,106,0.08);border:1px dashed rgba(163,196,106,0.4);">
+                <div class="mb-4 p-3 rounded-3" style="background:color-mix(in srgb, var(--primary) 9%, transparent);border:1px dashed color-mix(in srgb, var(--primary) 34%, transparent);">
                     <label class="form-label fw-bold small text-uppercase" style="letter-spacing:.08em;color:var(--text-muted);">
                         <span class="material-symbols-outlined align-middle" style="font-size:.9rem;">barcode_scanner</span>
                         Buscar por ISBN (opcional)
                     </label>
                     <div class="input-group">
                         <input type="text" id="input-isbn-buscar" class="form-control" placeholder="9780743273565">
-                        <button type="button" class="btn btn-outline-primary" id="btn-buscar-isbn">
+                        <button type="button" class="page-action-btn action-secondary" id="btn-buscar-isbn">
                             Buscar
                         </button>
                     </div>
@@ -284,10 +510,10 @@
                     <div id="modal-errores" class="mt-3 alert alert-danger d-none"></div>
                 </form>
             </div>
-            <div class="modal-footer" style="border-color:var(--border);">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btn-guardar-libro-rapido">
-                    <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
+            <div class="modal-footer">
+                <button type="button" class="page-action-btn action-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="page-action-btn action-primary" id="btn-guardar-libro-rapido">
+                    <span class="material-symbols-outlined">save</span>
                     Crear y agregar al selector
                 </button>
             </div>
@@ -299,11 +525,15 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const modal = new bootstrap.Modal(document.getElementById('modal-libro-rapido'));
+const modalEl = document.getElementById('modal-libro-rapido');
+const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
 const CSRF  = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 // Abrir modal
-document.getElementById('btn-abrir-modal-libro').addEventListener('click', () => modal.show());
+const btnAbrirModalLibro = document.getElementById('btn-abrir-modal-libro');
+if (btnAbrirModalLibro && modal) {
+    btnAbrirModalLibro.addEventListener('click', () => modal.show());
+}
 
 // ── Búsqueda por ISBN ──────────────────────────────────────────────
 document.getElementById('btn-buscar-isbn').addEventListener('click', async () => {
