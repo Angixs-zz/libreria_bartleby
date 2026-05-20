@@ -77,8 +77,58 @@
         background: var(--surface);
         border: 1px solid var(--border);
         border-left: 4px solid var(--primary);
-        border-radius: 0.85rem;
-        padding: 1.25rem;
+        border-radius: 0.75rem;
+        padding: 1.35rem;
+    }
+
+    .entry-purchase-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .entry-purchase-copy {
+        display: grid;
+        grid-template-columns: 2.6rem minmax(0, 1fr);
+        gap: 0.9rem;
+        align-items: center;
+    }
+
+    .entry-purchase-icon {
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        background: color-mix(in srgb, var(--primary) 13%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    }
+
+    .entry-purchase-control {
+        border: 1px solid var(--border);
+        border-radius: 0.7rem;
+        background-color: var(--bg);
+        padding: 0.95rem;
+    }
+
+    .entry-purchase-control label {
+        margin-top: 0;
+        margin-bottom: 0.45rem;
+    }
+
+    .entry-purchase-control select {
+        min-height: 3rem;
+    }
+
+    .entry-lote-card {
+        border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+        border-radius: 0.65rem;
+        background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+        color: var(--text);
+        padding: 0.8rem 0.9rem;
     }
 
     @media (min-width: 900px) {
@@ -93,6 +143,11 @@
         .entry-side-panel {
             position: sticky;
             top: 6rem;
+        }
+
+        .entry-purchase-layout {
+            grid-template-columns: minmax(360px, 1fr) minmax(300px, 380px);
+            gap: 1.75rem;
         }
     }
 </style>
@@ -124,17 +179,20 @@
 
     {% if modo_compra_suelta %}
     <section class="entry-purchase-panel mb-8">
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] gap-5 items-end">
-            <div>
+        <div class="entry-purchase-layout">
+            <div class="entry-purchase-copy">
+                <span class="entry-purchase-icon material-symbols-outlined" aria-hidden="true">local_shipping</span>
+                <div>
                 <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color: var(--primary);">{% if lote_compra %}Inventariar Lote Cerrado{% else %}Proveedor de esta compra{% endif %}</p>
                 <p class="text-sm mb-0" style="color: var(--text-muted);">{% if lote_compra %}Los libros que registres se añadirán al lote cerrado seleccionado.{% else %}Este dato creará la adquisición y quedará como historial del ejemplar.{% endif %}</p>
+                </div>
             </div>
-            <div>
+            <div class="entry-purchase-control">
                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">{% if lote_compra %}Lote / Proveedor{% else %}Proveedor{% endif %}</label>
                 {% if lote_compra %}
-                <div class="p-3 rounded-lg text-sm font-bold border border-[var(--primary)] bg-[#f4f9ee] text-[#3e5219]">
+                <div class="entry-lote-card text-sm font-bold">
                     Lote {% if lote_compra.codigo_lote %}{{ lote_compra.codigo_lote }}{% else %}#{{ lote_compra.id }}{% endif %}
-                    <span class="font-normal text-xs block text-gray-600">{{ lote_compra.proveedor.nombre }}</span>
+                    <span class="font-normal text-xs block mt-1" style="color: var(--text-muted);">{{ lote_compra.proveedor.nombre }}</span>
                 </div>
                 <input type="hidden" id="proveedor-compra-select" value="{{ lote_compra.proveedor.id }}">
                 <input type="hidden" id="lote-compra-id" value="{{ lote_compra.id }}">
@@ -142,7 +200,7 @@
                     <a href="{% url 'inventariar_lote' lote_compra.id %}" class="text-xs text-[var(--primary)] font-bold hover:underline">← Volver al resumen del lote</a>
                 </div>
                 {% else %}
-                <select id="proveedor-compra-select" required class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                <select id="proveedor-compra-select" required class="w-full rounded-lg px-3 py-2 text-sm font-body" style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text);">
                     <option value="">Selecciona proveedor...</option>
                     {% for proveedor in proveedores %}
                         <option value="{{ proveedor.id }}" {% if proveedor_compra and proveedor_compra.id == proveedor.id %}selected{% endif %}>{{ proveedor.nombre }}</option>
