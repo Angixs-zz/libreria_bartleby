@@ -63,68 +63,234 @@
         color: var(--text);
     }
     
-    .personal-shell .modal-content {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 244, 240, 0.90));
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(197, 200, 184, 0.8);
-        box-shadow: 0 30px 80px rgba(28, 32, 19, 0.15);
-        color: var(--text);
-    }
-
     .dark .personal-shell .table-shell {
         background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
         border-color: rgba(80, 85, 60, 0.6);
         box-shadow: 0 20px 55px rgba(0, 0, 0, 0.24);
     }
-    
-    .dark .personal-shell .modal-content {
-        background: linear-gradient(180deg, rgba(39, 39, 31, 0.85), rgba(30, 30, 24, 0.85));
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border-color: rgba(80, 85, 60, 0.8);
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+
+    .staff-modal {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.94));
+        border: 1px solid rgba(197, 200, 184, 0.82);
+        box-shadow: 0 30px 80px rgba(28, 32, 19, 0.18);
+        color: var(--text);
     }
-    
-    .modal-backdrop.show {
-        opacity: 1 !important;
-        background-color: rgba(22, 26, 17, 0.5) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
+
+    .dark .staff-modal {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.98), rgba(30, 30, 24, 0.98));
+        border-color: rgba(80, 85, 60, 0.78);
+        box-shadow: 0 34px 86px rgba(0, 0, 0, 0.42);
     }
-    
-    .personal-shell .modal-content input[type="text"],
-    .personal-shell .modal-content input[type="email"],
-    .personal-shell .modal-content input[type="password"],
-    .personal-shell .modal-content select {
+
+    .staff-modal .modal-header {
+        padding: 1.5rem 1.75rem 1.15rem;
+        background: linear-gradient(180deg, var(--bg-subtle), var(--surface));
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    .dark .staff-modal .modal-header {
+        background: linear-gradient(180deg, rgba(30, 30, 24, 0.98), rgba(39, 39, 31, 0.98));
+    }
+
+    .staff-modal .modal-body {
+        padding: 1.5rem 1.75rem;
+        background: var(--surface);
+    }
+
+    .dark .staff-modal .modal-body {
+        background: transparent;
+    }
+
+    .staff-modal .modal-footer {
+        padding: 1rem 1.75rem 1.35rem;
+        background: var(--bg-subtle);
+        border-top: 1px solid var(--border) !important;
+    }
+
+    .dark .staff-modal .modal-footer {
+        background: rgba(20, 21, 16, 0.45);
+    }
+
+    .staff-modal-title {
+        display: grid;
+        grid-template-columns: 2.75rem minmax(0, 1fr);
+        gap: 0.9rem;
+        align-items: center;
+    }
+
+    .staff-modal-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+        color: var(--primary);
+    }
+
+    .staff-modal-title h2 {
+        color: var(--primary);
+        font-family: 'Newsreader', serif;
+        font-style: italic;
+        line-height: 1;
+    }
+
+    .staff-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 1.25rem;
+    }
+
+    .staff-field,
+    .staff-permission-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    .staff-field .form-label,
+    .staff-permission-card .form-label {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .staff-modal input[type="text"],
+    .staff-modal input[type="email"],
+    .staff-modal input[type="password"],
+    .staff-modal select {
         width: 100% !important;
-        padding: 0.85rem 1.25rem !important;
-        background-color: rgba(255, 255, 255, 0.4) !important;
-        border: 1px solid rgba(197, 200, 184, 0.8) !important;
-        border-radius: 1rem !important;
+        min-height: 2.85rem;
+        padding: 0.72rem 0.85rem !important;
+        background-color: var(--bg) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 0.65rem !important;
         color: var(--text) !important;
-        font-size: 0.95rem !important;
-        transition: all 0.25s ease !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+        font-size: 0.9rem !important;
+        box-shadow: none !important;
     }
-    .dark .personal-shell .modal-content input[type="text"],
-    .dark .personal-shell .modal-content input[type="email"],
-    .dark .personal-shell .modal-content input[type="password"],
-    .dark .personal-shell .modal-content select {
-        background-color: rgba(0, 0, 0, 0.2) !important;
-        border-color: rgba(80, 85, 60, 0.6) !important;
-        color: #fff !important;
+
+    .staff-modal input::placeholder {
+        color: var(--text-faint) !important;
     }
-    .personal-shell .modal-content input:focus,
-    .personal-shell .modal-content select:focus {
+
+    .staff-modal input:focus,
+    .staff-modal select:focus {
         outline: none !important;
         border-color: var(--primary) !important;
-        box-shadow: 0 0 0 4px rgba(74, 93, 35, 0.15) !important;
-        background-color: #fff !important;
+        background-color: var(--surface) !important;
+        color: var(--text) !important;
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 18%, transparent) !important;
     }
-    .dark .personal-shell .modal-content input:focus,
-    .dark .personal-shell .modal-content select:focus {
-        background-color: rgba(0,0,0,0.4) !important;
+
+    .staff-permissions {
+        grid-column: 1 / -1;
+        margin-top: 0.35rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--border);
+    }
+
+    .staff-permissions-title {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .staff-permissions-title .material-symbols-outlined {
+        width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.65rem;
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+        font-size: 1rem;
+    }
+
+    .staff-permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 1.25rem;
+    }
+
+    .staff-permission-card {
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--bg);
+        padding: 0.95rem;
+    }
+
+    .staff-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .staff-modal-action {
+        min-height: 2.7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border-radius: 0.65rem;
+        padding: 0.72rem 1rem;
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .staff-modal-cancel {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+    }
+
+    .staff-modal-cancel:hover {
+        background: var(--bg-subtle);
+        color: var(--text);
+    }
+
+    .staff-modal-save {
+        background: var(--primary);
+        border: 1px solid var(--primary);
+        color: #fff;
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--primary) 24%, transparent);
+    }
+
+    .dark .staff-modal-save {
+        color: #13180c;
+    }
+
+    .staff-modal-close {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .staff-modal-close:hover {
+        transform: scale(1.06);
+        background: rgba(220, 53, 69, 0.16);
     }
 
     .personal-shell .olive-btn {
@@ -186,6 +352,18 @@
         flex-wrap: wrap;
         justify-content: flex-end;
         gap: 0.5rem;
+    }
+
+    @media (max-width: 767px) {
+        .staff-form-grid,
+        .staff-permissions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .staff-modal-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
     }
 </style>
 {% endblock %}
@@ -411,43 +589,44 @@
     {% if not empleado.is_superuser %}
         <div class="modal fade" id="editarPersonalModal-{{ empleado.id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content rounded-4 overflow-hidden">
+                <div class="modal-content staff-modal rounded-4 overflow-hidden">
                     <form method="post" action="{% url 'editar_personal' empleado.id %}">
                         {% csrf_token %}
-                        <div class="modal-header border-0 pb-0 pt-5 px-5 relative">
-                            <div>
-                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: var(--primary);">
-                                    Editar empleado
-                                </h2>
-                                <p class="small mb-0 mt-1" style="color: var(--text-muted);">
-                                    Ajusta los datos básicos de {{ empleado.get_full_name|default:empleado.username }}.
-                                </p>
+                        <div class="modal-header relative">
+                            <div class="staff-modal-title">
+                                <span class="staff-modal-icon material-symbols-outlined">badge</span>
+                                <div>
+                                    <h2 class="modal-title fs-2 mb-1">Editar empleado</h2>
+                                    <p class="small mb-0" style="color: var(--text-muted);">
+                                        Ajusta los datos básicos de {{ empleado.get_full_name|default:empleado.username }}.
+                                    </p>
+                                </div>
                             </div>
-                            <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                            <button type="button" class="staff-modal-close absolute top-6 right-6" data-bs-dismiss="modal" aria-label="Cerrar">
                                 <span class="material-symbols-outlined text-[20px]">close</span>
                             </button>
                         </div>
 
-                        <div class="modal-body px-4 px-md-5 py-4">
+                        <div class="modal-body">
                             {% with form=editar_forms|get_item:empleado.id %}
-                                <div class="row g-4">
-                                    <div class="col-md-6">
+                                <div class="staff-form-grid">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
                                         {{ form.first_name }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
                                         {{ form.last_name }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
                                         {{ form.username }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
                                         {{ form.email }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Telefono</label>
                                         {{ form.telefono }}
                                     </div>
@@ -455,9 +634,11 @@
                             {% endwith %}
                         </div>
 
-                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
-                            <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Guardar cambios</button>
+                        <div class="modal-footer">
+                            <div class="staff-modal-actions">
+                                <button type="button" class="staff-modal-action staff-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="staff-modal-action staff-modal-save">Guardar cambios</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -466,31 +647,32 @@
 
         <div class="modal fade" id="resetPasswordModal-{{ empleado.id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content rounded-4 overflow-hidden">
+                <div class="modal-content staff-modal rounded-4 overflow-hidden">
                     <form method="post" action="{% url 'resetear_password_personal' empleado.id %}">
                         {% csrf_token %}
-                        <div class="modal-header border-0 pb-0 pt-5 px-5 relative">
-                            <div>
-                                <h2 class="modal-title fs-2 fst-italic" style="font-family: 'Newsreader', serif; color: var(--primary);">
-                                    Resetear contraseña
-                                </h2>
-                                <p class="small mb-0 mt-1" style="color: var(--text-muted);">
-                                    Define una nueva contraseña para {{ empleado.username }}.
-                                </p>
+                        <div class="modal-header relative">
+                            <div class="staff-modal-title">
+                                <span class="staff-modal-icon material-symbols-outlined">lock_reset</span>
+                                <div>
+                                    <h2 class="modal-title fs-2 mb-1">Resetear contraseña</h2>
+                                    <p class="small mb-0" style="color: var(--text-muted);">
+                                        Define una nueva contraseña para {{ empleado.username }}.
+                                    </p>
+                                </div>
                             </div>
-                            <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                            <button type="button" class="staff-modal-close absolute top-6 right-6" data-bs-dismiss="modal" aria-label="Cerrar">
                                 <span class="material-symbols-outlined text-[20px]">close</span>
                             </button>
                         </div>
 
-                        <div class="modal-body px-4 px-md-5 py-4">
+                        <div class="modal-body">
                             {% with form=password_forms|get_item:empleado.id %}
-                                <div class="row g-4">
-                                    <div class="col-md-6">
+                                <div class="staff-form-grid">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nueva contraseña</label>
                                         {{ form.password1 }}
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                                         {{ form.password2 }}
                                     </div>
@@ -498,9 +680,11 @@
                             {% endwith %}
                         </div>
 
-                        <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
-                            <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Actualizar contraseña</button>
+                        <div class="modal-footer">
+                            <div class="staff-modal-actions">
+                                <button type="button" class="staff-modal-action staff-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="staff-modal-action staff-modal-save">Actualizar contraseña</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -511,74 +695,78 @@
 
 <div class="modal fade" id="nuevoStaffModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4 overflow-hidden">
+        <div class="modal-content staff-modal rounded-4 overflow-hidden">
             <form method="post" action="{% url 'crear_staff' %}">
                 {% csrf_token %}
-                <div class="modal-header border-0 pb-0 pt-5 px-5 relative z-10">
-                    <div>
-                        <h2 class="modal-title fs-1 fst-italic mb-2" style="font-family: 'Newsreader', serif; color: var(--primary);">
-                            Nuevo empleado
-                        </h2>
-                        <p class="text-sm mb-0" style="color: var(--text-muted);">
-                            Registra una nueva cuenta asignando un rol específico en el sistema.
-                        </p>
+                <div class="modal-header relative z-10">
+                    <div class="staff-modal-title">
+                        <span class="staff-modal-icon material-symbols-outlined">person_add</span>
+                        <div>
+                            <h2 class="modal-title fs-1 mb-2">Nuevo empleado</h2>
+                            <p class="text-sm mb-0" style="color: var(--text-muted);">
+                                Registra una nueva cuenta asignando un rol específico en el sistema.
+                            </p>
+                        </div>
                     </div>
-                    <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-110" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <button type="button" class="staff-modal-close absolute top-6 right-6" data-bs-dismiss="modal" aria-label="Cerrar">
                         <span class="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
 
-                <div class="modal-body px-4 px-md-5 py-4">
-                    <div class="row g-4">
-                        <div class="col-md-6">
+                <div class="modal-body">
+                    <div class="staff-form-grid">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
                             {{ staff_form.first_name }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
                             {{ staff_form.last_name }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
                             {{ staff_form.username }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
                             {{ staff_form.email }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Contraseña</label>
                             {{ staff_form.password1 }}
                         </div>
-                        <div class="col-md-6">
+                        <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                             {{ staff_form.password2 }}
                         </div>
                         
-                        <div class="col-12 mt-4 pt-4 border-t border-dashed" style="border-color: rgba(197, 200, 184, 0.5);">
-                            <h3 class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest mb-3" style="color: var(--primary);">
-                                <span class="material-symbols-outlined text-[16px] p-1.5 rounded-full" style="background-color: rgba(163,196,106,0.15);">security</span>
+                        <div class="staff-permissions">
+                            <h3 class="staff-permissions-title">
+                                <span class="material-symbols-outlined">security</span>
                                 Seguridad y Permisos
                             </h3>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Rol del empleado</label>
-                            <select name="rol_empleado" class="w-full rounded-2xl px-5 py-[0.85rem] text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50" style="background-color: rgba(255, 255, 255, 0.4); border: 1px solid rgba(197, 200, 184, 0.8); color: var(--text); --tw-ring-color: var(--primary); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234A5D23%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;" required>
-                                <option value="cajero">Cajero / Operativo</option>
-                                <option value="director">Director General (Admin)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Tu contraseña</label>
-                            <input type="password" name="admin_password" class="w-full rounded-2xl px-5 py-[0.85rem] text-sm transition-all focus:outline-none focus:ring-2 focus:ring-opacity-50" style="background-color: rgba(255, 255, 255, 0.4); border: 1px solid rgba(197, 200, 184, 0.8); color: var(--text); --tw-ring-color: var(--primary); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" required placeholder="Autoriza la creación">
+                            <div class="staff-permissions-grid">
+                                <div class="staff-permission-card">
+                                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Rol del empleado</label>
+                                    <select name="rol_empleado" required>
+                                        <option value="cajero">Cajero / Operativo</option>
+                                        <option value="director">Director General (Admin)</option>
+                                    </select>
+                                </div>
+                                <div class="staff-permission-card">
+                                    <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Tu contraseña</label>
+                                    <input type="password" name="admin_password" required placeholder="Autoriza la creación">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 pt-0 px-4 px-md-5 pb-5">
-                    <button type="button" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all hover:bg-black/5" style="border: 1px solid var(--border); color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5" style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">Guardar empleado</button>
+                <div class="modal-footer">
+                    <div class="staff-modal-actions">
+                        <button type="button" class="staff-modal-action staff-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="staff-modal-action staff-modal-save">Guardar empleado</button>
+                    </div>
                 </div>
             </form>
         </div>
