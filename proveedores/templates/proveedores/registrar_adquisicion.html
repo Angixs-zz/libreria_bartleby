@@ -44,15 +44,25 @@
 .dark .adquisiciones-shell .table > :not(caption) > * > * { border-color: rgba(80,85,60,0.45); }
 
 /* Tipo selector pills */
-.tipo-pill { cursor:pointer; }
+.tipo-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: .9rem;
+    max-width: 32rem;
+}
+.tipo-pill { cursor:pointer; min-width: 0; }
 .tipo-pill input[type=radio] { display:none; }
 .tipo-pill .pill-label {
     display:flex; flex-direction:column; align-items:center; gap:.4rem;
-    padding:1rem 1.5rem; border-radius:.75rem;
+    justify-content:center;
+    min-height: 7.25rem;
+    height: 100%;
+    padding:1rem 1.15rem; border-radius:.75rem;
     border: 2px solid rgba(197,200,184,0.5);
     transition: all .2s;
     background: var(--surface);
     color: var(--text-muted);
+    text-align: center;
 }
 .tipo-pill input:checked + .pill-label {
     border-color: var(--primary);
@@ -61,6 +71,115 @@
 }
 .tipo-pill .pill-label .material-symbols-outlined { font-size:2rem; }
 #detalle-lote-section { transition: opacity .3s, max-height .4s; }
+.adquisiciones-shell .page-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .75rem;
+    width: 100%;
+}
+.adquisiciones-shell .page-action-btn {
+    min-height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    border-radius: .85rem;
+    padding: .8rem 1.05rem;
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.adquisiciones-shell .page-action-btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+.adquisiciones-shell .page-action-btn .material-symbols-outlined {
+    font-size: 1rem;
+}
+.adquisiciones-shell .page-action-primary {
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(62,82,25,.24);
+}
+.adquisiciones-shell .page-action-primary:hover {
+    color: #fff;
+    box-shadow: 0 16px 32px rgba(62,82,25,.3);
+}
+.adquisiciones-shell .page-action-secondary {
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+.adquisiciones-shell .page-action-secondary:hover {
+    background: var(--bg-subtle);
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    color: var(--text);
+}
+.dark .adquisiciones-shell .page-action-primary {
+    color: #13180c;
+    box-shadow: 0 12px 28px rgba(163,196,106,.14);
+}
+.dark .adquisiciones-shell .page-action-primary:hover {
+    color: #13180c;
+    box-shadow: 0 16px 32px rgba(163,196,106,.2);
+}
+.dark .adquisiciones-shell .page-action-secondary {
+    background: rgba(255,255,255,.03);
+}
+.adquisiciones-shell .lote-panel {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: .95rem;
+    background: color-mix(in srgb, var(--surface) 86%, var(--bg-subtle));
+    padding: 1.15rem;
+    margin-bottom: 1rem;
+}
+.adquisiciones-shell .lote-panel-header {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    gap: .9rem;
+    align-items: center;
+    margin-bottom: 1.15rem;
+}
+.adquisiciones-shell .lote-panel-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .75rem;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    color: var(--primary);
+}
+.adquisiciones-shell .lote-fields-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+.adquisiciones-shell .lote-field-card {
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    background: var(--bg);
+    padding: .95rem;
+}
+.adquisiciones-shell .lote-field-card .form-label {
+    margin-top: 0;
+    margin-bottom: .45rem;
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.adquisiciones-shell .lote-field-card textarea {
+    min-height: 5.8rem;
+}
 .adquisiciones-shell .decision-panel {
     border: 1px solid var(--border);
     background: var(--bg-subtle);
@@ -73,19 +192,69 @@
     border-radius: .9rem;
     padding: 1.1rem;
 }
+.adquisiciones-shell .identified-flow-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+.adquisiciones-shell .identified-note {
+    border-left: 1px solid var(--border);
+    padding-left: 1rem;
+    display: flex;
+    align-items: center;
+}
 .adquisiciones-shell .advanced-entry {
     border: 1px dashed var(--border);
     border-radius: .9rem;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 82%, var(--bg-subtle));
+    overflow: hidden;
 }
 .adquisiciones-shell .advanced-entry summary {
     cursor: pointer;
     list-style: none;
     padding: 1rem 1.15rem;
+    background: rgba(163,196,106,.06);
+    border-bottom: 1px solid transparent;
+}
+.adquisiciones-shell .advanced-entry[open] summary {
+    border-bottom-color: var(--border);
 }
 .adquisiciones-shell .advanced-entry summary::-webkit-details-marker { display: none; }
 .adquisiciones-shell .advanced-entry-body {
-    padding: 0 1.15rem 1.15rem;
+    padding: 1.15rem;
+}
+.adquisiciones-shell .quick-entry-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+.adquisiciones-shell .quick-entry-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: .8rem;
+    overflow: hidden;
+    background: var(--bg);
+}
+.adquisiciones-shell .quick-entry-table {
+    margin-bottom: 0;
+    color: var(--text);
+}
+.adquisiciones-shell .quick-entry-table thead th {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.adquisiciones-shell .quick-entry-table tbody td,
+.adquisiciones-shell .quick-entry-table tfoot th {
+    background: transparent;
+    color: var(--text);
+}
+.adquisiciones-shell .quick-entry-table tfoot th {
+    border-top: 1px solid var(--border);
 }
 .adquisiciones-shell .section-title { font-family:'Newsreader',serif; font-style:italic; color:var(--primary); }
 .adquisiciones-shell .olive-btn { background:var(--primary); border-color:var(--primary); color:#fff; }
@@ -114,14 +283,56 @@
 .adquisiciones-shell .form-control,
 .adquisiciones-shell .form-select,
 .adquisiciones-shell .input-group-text {
-    background-color: var(--surface);
+    background-color: var(--bg);
     border-color: var(--border);
     color: var(--text);
+}
+.adquisiciones-shell .form-control::placeholder,
+.adquisiciones-shell .form-select::placeholder {
+    color: var(--text-faint);
 }
 .adquisiciones-shell .form-control:focus,
 .adquisiciones-shell .form-select:focus {
     border-color: var(--primary);
+    background-color: var(--surface);
+    color: var(--text);
     box-shadow: 0 0 0 .2rem rgba(74,93,35,.14);
+}
+.adquisiciones-shell .btn-outline-secondary {
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+.adquisiciones-shell .btn-outline-secondary:hover {
+    background-color: var(--bg-subtle);
+    border-color: var(--border);
+    color: var(--text);
+}
+.dark .adquisiciones-shell .olive-btn { color:#13180c; }
+@media (max-width: 767px) {
+    .adquisiciones-shell .identified-note {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 1rem;
+    }
+}
+@media (min-width: 992px) {
+    .adquisiciones-shell .identified-flow-grid {
+        grid-template-columns: minmax(0, 2fr) minmax(16rem, .9fr);
+    }
+    .adquisiciones-shell .lote-fields-grid {
+        grid-template-columns: minmax(14rem, 1fr) minmax(10rem, .7fr) minmax(11rem, .8fr) minmax(11rem, .8fr);
+    }
+    .adquisiciones-shell .lote-field-wide {
+        grid-column: span 2;
+    }
+}
+@media (min-width: 1200px) {
+    .adquisiciones-shell .page-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        min-width: 27rem;
+        max-width: 31rem;
+    }
 }
 </style>
 {% endblock %}
@@ -142,13 +353,13 @@
                 Elige si conoces los libros desde ya, o si llegó una caja cerrada para inventariar después.
             </p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'historial_adquisiciones' %}" class="btn olive-btn btn-lg">
-                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">receipt_long</span>
+        <div class="page-actions">
+            <a href="{% url 'historial_adquisiciones' %}" class="page-action-btn page-action-primary">
+                <span class="material-symbols-outlined">receipt_long</span>
                 Ver adquisiciones
             </a>
-            <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary btn-lg">
-                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">arrow_back</span>
+            <a href="{% url 'directorio_proveedores' %}" class="page-action-btn page-action-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
                 Volver al directorio
             </a>
         </div>
@@ -160,7 +371,7 @@
         <!-- ── Tipo de adquisición ───────────────────────────────── -->
         <div class="mb-5">
             <p class="fw-bold small text-uppercase mb-3" style="letter-spacing:.1em;color:var(--text-muted);">¿Cómo es esta compra?</p>
-            <div class="d-flex gap-3 flex-wrap">
+            <div class="tipo-options">
 
                 <label class="tipo-pill">
                     <input type="radio" name="tipo" value="identificado" checked>
@@ -184,32 +395,38 @@
         </div>
 
         <!-- ── Datos generales ──────────────────────────────────── -->
-        <div class="row g-4 mb-4" id="datos-generales-section">
-            <div class="col-lg-4">
-                <label class="form-label">Proveedor</label>
-                {{ form.proveedor }}
+        <div class="lote-panel" id="datos-generales-section">
+            <div class="lote-panel-header">
+                <span class="lote-panel-icon material-symbols-outlined" aria-hidden="true">inventory_2</span>
+                <div>
+                    <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;color:var(--text);">Datos del lote cerrado</h2>
+                    <p class="mb-0 small" style="color:var(--text-muted);">Guarda la caja como pendiente para inventariarla cuando la abras.</p>
+                </div>
             </div>
-            <div class="col-lg-2">
-                <label class="form-label">Fecha</label>
-                {{ form.fecha }}
-            </div>
-            <div class="col-lg-6">
-                <label class="form-label">Observaciones / Notas</label>
-                {{ form.observaciones }}
-            </div>
-        </div>
-
-        <div class="row g-4 mb-4" id="lote-cerrado-campos" style="display: none;">
-            <div class="col-lg-3">
-                <label class="form-label">Cant. de libros aprox.</label>
-                {{ form.cantidad_libros_lote }}
-                <div class="form-text text-muted" style="font-size: 0.75rem;">Opcional</div>
-            </div>
-            <div class="col-lg-3">
-                <label class="form-label">Costo total del lote</label>
-                <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    {{ form.costo_lote }}
+            <div class="lote-fields-grid">
+                <div class="lote-field-card">
+                    <label class="form-label">Proveedor</label>
+                    {{ form.proveedor }}
+                </div>
+                <div class="lote-field-card">
+                    <label class="form-label">Fecha</label>
+                    {{ form.fecha }}
+                </div>
+                <div class="lote-field-card" id="lote-cantidad-field">
+                    <label class="form-label">Libros aprox.</label>
+                    {{ form.cantidad_libros_lote }}
+                    <div class="form-text" style="font-size: 0.75rem;color:var(--text-muted);">Opcional</div>
+                </div>
+                <div class="lote-field-card" id="lote-costo-field">
+                    <label class="form-label">Costo total</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        {{ form.costo_lote }}
+                    </div>
+                </div>
+                <div class="lote-field-card lote-field-wide">
+                    <label class="form-label">Observaciones / notas</label>
+                    {{ form.observaciones }}
                 </div>
             </div>
         </div>
@@ -218,101 +435,25 @@
         <div id="detalle-lote-section">
 
             <div class="decision-panel mb-4">
-                <div class="row g-3 align-items-center">
-                    <div class="col-lg-8">
-                        <div class="primary-flow">
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                                <div>
-                                    <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;">Libros sueltos identificados</h2>
-                                    <p class="mb-0 small" style="color:var(--text-muted);">Usa esta ruta cuando el proveedor te vendió uno o varios libros y necesitas registrarlos con ISBN, condición, costo y precio.</p>
-                                </div>
-                                <a href="{% url 'agregar_libro_compra' %}" class="btn olive-btn btn-lg" id="btn-compra-suelta">
-                                    <span class="material-symbols-outlined align-middle" style="font-size:1rem;">library_add</span>
-                                    Registrar libros sueltos
-                                </a>
+                <div class="identified-flow-grid">
+                    <div class="primary-flow">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h2 class="h4 fst-italic mb-1" style="font-family:'Newsreader',serif;color:var(--text);">Libros sueltos identificados</h2>
+                                <p class="mb-0 small" style="color:var(--text-muted);">Usa esta ruta cuando el proveedor te vendió uno o varios libros y necesitas registrarlos con ISBN, condición, costo y precio.</p>
                             </div>
+                            <a href="{% url 'agregar_libro_compra' %}" class="btn olive-btn btn-lg" id="btn-compra-suelta">
+                                <span class="material-symbols-outlined align-middle" style="font-size:1rem;">library_add</span>
+                                Registrar libros sueltos
+                            </a>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="identified-note">
                         <p class="mb-0 small" style="color:var(--text-muted);">La relación con proveedor se guarda como historial de adquisición. Si el libro ya existe, podrás sumar a un lote existente o crear otro por estado/precio.</p>
                     </div>
                 </div>
             </div>
 
-            <details class="advanced-entry mb-4" id="entrada-rapida-existente">
-                <summary>
-                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
-                        <div>
-                            <h3 class="h6 fw-bold mb-1">Entrada rápida a lote existente</h3>
-                            <p class="mb-0 small" style="color:var(--text-muted);">Úsalo solo si ya sabes exactamente a qué SKU/lote existente quieres sumar unidades.</p>
-                        </div>
-                        <span class="small fw-bold" style="color:var(--primary);">Mostrar tabla</span>
-                    </div>
-                </summary>
-                <div class="advanced-entry-body">
-                    <div class="d-flex justify-content-end mb-3">
-                        <button type="button" class="btn btn-outline-secondary" id="agregar-renglon">
-                            <span class="material-symbols-outlined align-middle" style="font-size:1rem;">add</span>
-                            Agregar renglón
-                        </button>
-                    </div>
-                    <div class="table-responsive mb-4">
-                        <table class="table align-middle" id="tabla-detalles">
-                            <thead>
-                                <tr>
-                                    <th style="min-width:320px;">Libro / lote</th>
-                                    <th style="width:130px;">Cantidad</th>
-                                    <th style="width:170px;">Costo unitario</th>
-                                    <th style="width:160px;" class="text-end">Subtotal</th>
-                                    <th style="width:70px;" class="text-end">—</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for fila in filas %}
-                                <tr class="detalle-row">
-                                    <td>
-                                        <select name="ejemplar_id" class="form-select">
-                                            <option value="">— Selecciona un libro —</option>
-                                            {% for ej in ejemplares %}
-                                            <option value="{{ ej.id }}" {% if fila.ejemplar_id == ej.id|stringformat:"s" %}selected{% endif %}>
-                                                {{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td><input type="number" min="1" name="cantidad" class="form-control cantidad-input" value="{{ fila.cantidad }}"></td>
-                                    <td>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" min="0.01" step="0.01" name="costo_unitario" class="form-control costo-input" value="{{ fila.costo_unitario }}">
-                                        </div>
-                                    </td>
-                                    <td class="text-end fw-semibold subtotal-cell">$0.00</td>
-                                    <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-danger eliminar-renglon">
-                                            <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="3" class="text-end">Total estimado</th>
-                                    <th class="text-end" id="total-adquisicion">$0.00</th>
-                                    <th></th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn olive-btn">
-                            <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
-                            Guardar entrada rápida
-                        </button>
-                    </div>
-                </div>
-            </details>
         </div><!-- /detalle-lote-section -->
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
@@ -476,21 +617,18 @@ function actualizarCompraSueltaLink() {
 
 function actualizarTipo() {
     const tipo = document.querySelector('[name=tipo]:checked').value;
-    const loteCampos = document.getElementById('lote-cerrado-campos');
     if (tipo === 'lote_cerrado') {
         if (datosGeneralesSec) datosGeneralesSec.style.display = '';
-        if (loteCampos) loteCampos.style.display = 'flex';
         detalleSec.style.display = 'none';
         if (btnSubmitMain) btnSubmitMain.style.display = '';
         btnLabel.textContent = 'Guardar lote cerrado';
         hint.innerHTML = 'Se guardará la caja como pendiente. Después inventarías libro por libro.';
     } else {
-        if (datosGeneralesSec) datosGeneralesSec.style.display = 'none'; /* TODO: Check if this should be visible */
-        if (loteCampos) loteCampos.style.display = 'none';
+        if (datosGeneralesSec) datosGeneralesSec.style.display = 'none';
         detalleSec.style.display = '';
         if (btnSubmitMain) btnSubmitMain.style.display = 'none';
         btnLabel.textContent = 'Guardar adquisición';
-        hint.innerHTML = 'Para compras identificadas usa el botón principal. La entrada rápida queda solo para casos donde ya sabes el SKU exacto.';
+        hint.innerHTML = 'Para compras identificadas usa el botón principal. Ahí podrás registrar libros sueltos y ligarlos al proveedor.';
     }
 }
 document.querySelectorAll('[name=tipo]').forEach(r => r.addEventListener('change', actualizarTipo));
@@ -502,40 +640,6 @@ if (btnCompraSuelta) {
 }
 actualizarTipo();
 actualizarCompraSueltaLink();
-
-// ── Tabla de detalles ───────────────────────────────────────────────────
-function recalcularTotales() {
-    let total = 0;
-    document.querySelectorAll('#tabla-detalles tbody tr').forEach(row => {
-        const cant  = parseFloat(row.querySelector('.cantidad-input')?.value || 0);
-        const costo = parseFloat(row.querySelector('.costo-input')?.value  || 0);
-        const sub   = cant * costo;
-        row.querySelector('.subtotal-cell').textContent = '$' + sub.toFixed(2);
-        total += sub;
-    });
-    document.getElementById('total-adquisicion').textContent = '$' + total.toFixed(2);
-}
-
-function bindRowEvents(row) {
-    row.querySelectorAll('.cantidad-input, .costo-input').forEach(i => i.addEventListener('input', recalcularTotales));
-    row.querySelector('.eliminar-renglon').addEventListener('click', () => {
-        const rows = document.querySelectorAll('#tabla-detalles tbody tr');
-        if (rows.length === 1) row.querySelectorAll('input,select').forEach(f => f.value = '');
-        else row.remove();
-        recalcularTotales();
-    });
-}
-
-document.querySelectorAll('#tabla-detalles tbody tr').forEach(bindRowEvents);
-recalcularTotales();
-
-document.getElementById('agregar-renglon').addEventListener('click', () => {
-    const template = document.getElementById('detalle-row-template');
-    const clone = template.content.firstElementChild.cloneNode(true);
-    document.querySelector('#tabla-detalles tbody').appendChild(clone);
-    bindRowEvents(clone);
-    recalcularTotales();
-});
 
 // ── Modal libro rápido ──────────────────────────────────────────────────
 const modalEl = document.getElementById('modal-libro-rapido');
@@ -634,24 +738,6 @@ document.getElementById('btn-guardar-libro-rapido').addEventListener('click', as
     const data = await res.json();
 
     if (data.ok) {
-        // Agregar opción a TODOS los selects de ejemplar_id de la tabla
-        const opt = new Option(data.label, data.ejemplar_id);
-        document.querySelectorAll('#tabla-detalles [name=ejemplar_id]').forEach(sel => {
-            sel.appendChild(opt.cloneNode(true));
-        });
-        // Si solo hay una fila y está vacía, seleccionarla automáticamente
-        const rows = document.querySelectorAll('#tabla-detalles tbody tr');
-        if (rows.length === 1) {
-            rows[0].querySelector('[name=ejemplar_id]').value = data.ejemplar_id;
-            rows[0].querySelector('[name=cantidad]').value = rows[0].querySelector('[name=cantidad]').value || '1';
-        } else {
-            const ultima = rows[rows.length - 1];
-            if (!ultima.querySelector('[name=ejemplar_id]').value) {
-                ultima.querySelector('[name=ejemplar_id]').value = data.ejemplar_id;
-                ultima.querySelector('[name=cantidad]').value = ultima.querySelector('[name=cantidad]').value || '1';
-            }
-        }
-        recalcularTotales();
         form.reset();
         limpiarPortadaDetectada();
         document.getElementById('isbn-feedback').textContent = '';
@@ -664,30 +750,4 @@ document.getElementById('btn-guardar-libro-rapido').addEventListener('click', as
     }
 });
 </script>
-
-<template id="detalle-row-template">
-<tr class="detalle-row">
-    <td>
-        <select name="ejemplar_id" class="form-select">
-            <option value="">— Selecciona un libro —</option>
-            {% for ej in ejemplares %}
-            <option value="{{ ej.id }}">{{ ej.libro.titulo }} · {{ ej.libro.autor }} · {{ ej.sku }} · Stock: {{ ej.stock }}</option>
-            {% endfor %}
-        </select>
-    </td>
-    <td><input type="number" min="1" name="cantidad" class="form-control cantidad-input"></td>
-    <td>
-        <div class="input-group">
-            <span class="input-group-text">$</span>
-            <input type="number" min="0.01" step="0.01" name="costo_unitario" class="form-control costo-input">
-        </div>
-    </td>
-    <td class="text-end fw-semibold subtotal-cell">$0.00</td>
-    <td class="text-end">
-        <button type="button" class="btn btn-sm btn-outline-danger eliminar-renglon">
-            <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
-        </button>
-    </td>
-</tr>
-</template>
 {% endblock %}
