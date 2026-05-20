@@ -188,6 +188,14 @@
                                     <div class="text-sm font-bold text-right" style="color: var(--primary);">${{ detalle.subtotal }}</div>
                                 </div>
                             {% endfor %}
+                            {% if adquisicion.estado == 'por_inventariar' %}
+                                <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg p-4" style="background: var(--bg-subtle); border: 1px dashed var(--border);">
+                                    <p class="text-sm mb-0" style="color: var(--text-muted);">Inventario en progreso...</p>
+                                    <a href="{% url 'inventariar_lote' adquisicion.id %}" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest" style="background: var(--primary); color: white;">
+                                        Continuar inventariando
+                                    </a>
+                                </div>
+                            {% endif %}
                         {% else %}
                             <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg p-4" style="background: var(--bg-subtle); border: 1px dashed var(--border);">
                                 <p class="text-sm mb-0" style="color: var(--text-muted);">Caja registrada, pendiente de inventariar libro por libro.</p>

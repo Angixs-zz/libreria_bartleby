@@ -176,6 +176,16 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    {% if adquisicion.estado == 'por_inventariar' %}
+                                        <div class="mt-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 rounded-4 p-4" style="background: rgba(163,196,106,0.1); border: 1px dashed rgba(163,196,106,0.5);">
+                                            <p class="small mb-0" style="color: var(--text-muted);">
+                                                {% if adquisicion.detalles.all %}Inventario en progreso...{% else %}Caja registrada, pendiente de inventariar libro por libro.{% endif %}
+                                            </p>
+                                            <a href="{% url 'inventariar_lote' adquisicion.id %}" class="btn btn-success btn-sm px-4">
+                                                {% if adquisicion.detalles.all %}Continuar inventariando{% else %}Inventariar{% endif %}
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
