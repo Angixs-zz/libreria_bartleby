@@ -56,6 +56,88 @@
         font-size: 1.5rem;
     }
 
+    .proveedores-shell .providers-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.75rem;
+        padding: 2.5rem 0;
+        margin-bottom: 2rem;
+        align-items: end;
+    }
+
+    .proveedores-shell .providers-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .proveedores-shell .providers-action-btn {
+        min-height: 3rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        border-radius: 0.85rem;
+        padding: 0.8rem 1.1rem;
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        line-height: 1.1;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .proveedores-shell .providers-action-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .proveedores-shell .providers-action-btn .material-symbols-outlined {
+        font-size: 1.05rem;
+        line-height: 1;
+    }
+
+    .proveedores-shell .providers-action-primary {
+        background-color: var(--primary);
+        color: #ffffff;
+        border: 1px solid var(--primary);
+        box-shadow: 0 12px 28px rgba(62, 82, 25, 0.24);
+    }
+
+    .proveedores-shell .providers-action-primary:hover {
+        color: #ffffff;
+        box-shadow: 0 16px 32px rgba(62, 82, 25, 0.3);
+    }
+
+    .proveedores-shell .providers-action-secondary {
+        background-color: color-mix(in srgb, var(--surface) 78%, transparent);
+        border: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .proveedores-shell .providers-action-secondary:hover {
+        background-color: var(--bg-subtle);
+        border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+        color: var(--text);
+    }
+
+    .dark .proveedores-shell .providers-action-primary {
+        color: #13180c;
+        box-shadow: 0 12px 28px rgba(163, 196, 106, 0.14);
+    }
+
+    .dark .proveedores-shell .providers-action-primary:hover {
+        color: #13180c;
+        box-shadow: 0 16px 32px rgba(163, 196, 106, 0.2);
+    }
+
+    .dark .proveedores-shell .providers-action-secondary {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
     .proveedores-shell .table-shell {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 244, 240, 0.92));
         border: 1px solid rgba(197, 200, 184, 0.7);
@@ -232,6 +314,24 @@
             align-items: stretch;
         }
     }
+
+    @media (min-width: 640px) {
+        .proveedores-shell .providers-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 33rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .proveedores-shell .providers-hero {
+            grid-template-columns: minmax(0, 1fr) minmax(28rem, 33rem);
+            gap: 3rem;
+        }
+
+        .proveedores-shell .providers-actions {
+            justify-self: end;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -242,12 +342,12 @@
   <div class="flex-1 min-w-0">
 <div class="proveedores-shell py-4">
     <div class="container py-2">
-        <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 py-10 mb-8">
+        <section class="providers-hero">
             <div class="flex-1 min-w-0">
                 <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">
                     Staff Area · Compras
                 </p>
-                <h1 class="font-headline italic text-5xl md:text-6xl tracking-tight mb-4" style="color: var(--text);">
+                <h1 class="font-headline italic text-5xl md:text-6xl tracking-tight mb-4" style="color: var(--primary);">
                     Directorio de Proveedores
                 </h1>
                 <p class="text-sm md:text-base max-w-2xl leading-relaxed" style="color: var(--text-muted);">
@@ -255,15 +355,14 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <a href="{% url 'registrar_adquisicion' %}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5"
-                   style="background-color: var(--primary); color: white; box-shadow: 0 4px 14px rgba(62,82,25,0.25);">
-                    <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+            <div class="providers-actions">
+                <a href="{% url 'registrar_adquisicion' %}" class="providers-action-btn providers-action-primary">
+                    <span class="material-symbols-outlined">inventory_2</span>
                     Registrar adquisición
                 </a>
-                <button type="button" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all hover:bg-black/5"
-                        style="background-color: transparent; border: 1px solid var(--border); color: var(--text);" data-bs-toggle="modal" data-bs-target="#nuevoProveedorModal">
-                    <span class="material-symbols-outlined text-[16px]">person_add</span>
+                <button type="button" class="providers-action-btn providers-action-secondary"
+                        data-bs-toggle="modal" data-bs-target="#nuevoProveedorModal">
+                    <span class="material-symbols-outlined">person_add</span>
                     Nuevo proveedor
                 </button>
             </div>
