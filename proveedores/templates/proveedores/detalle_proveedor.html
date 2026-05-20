@@ -11,9 +11,9 @@
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
             <span style="color: var(--text-muted);">Gestión</span>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text-muted);">Proveedores</span>
+            <a href="{% url 'directorio_proveedores' %}" class="transition-opacity hover:opacity-70" style="color: var(--text-muted);">Proveedores</a>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text);">Detalle Proveedor</span>
+            <span style="color: var(--text);">{{ proveedor.nombre }}</span>
         </nav>
     </div>
 </div>
@@ -21,189 +21,429 @@
 
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-    .detalle-proveedor-shell {
-        --bs-body-bg: transparent;
-        --bs-body-color: var(--text);
+    /* ── Lote card ──────────────────────────────────────────────────── */
+    .lote-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease;
+    }
+    .lote-card:hover { box-shadow: 0 8px 32px rgba(23,29,15,0.10); }
+    .dark .lote-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+    .lote-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+    }
+    .lote-header:hover { background: rgba(163,196,106,0.05); }
+
+    .lote-body {
+        display: none;
+        border-top: 1px solid var(--border);
+        padding: 1.25rem 1.5rem;
+    }
+    .lote-body.open { display: block; }
+
+    .lote-chevron {
+        font-size: 1.1rem;
+        transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+    .lote-card.expanded .lote-chevron { transform: rotate(180deg); }
+
+    /* ── Badges ─────────────────────────────────────────────────────── */
+    .badge-tipo {
+        font-size: 0.6rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.22rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(62,82,25,0.1);
+        color: var(--primary);
+        border: 1px solid rgba(62,82,25,0.18);
+    }
+    .badge-estado-ok   { background: rgba(25,135,84,0.1);  color: #198754; border: 1px solid rgba(25,135,84,0.2); }
+    .badge-estado-pend { background: rgba(217,119,6,0.1);  color: #b45309; border: 1px solid rgba(217,119,6,0.2); }
+
+    /* ── Book row ───────────────────────────────────────────────────── */
+    .book-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px dashed var(--border);
+    }
+    .book-row:last-child { border-bottom: none; }
+
+    @media (max-width: 640px) {
+        .book-row { grid-template-columns: 1fr; gap: 0.35rem; }
     }
 
-    .detalle-proveedor-shell .panel-card,
-    .detalle-proveedor-shell .surface-card {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 244, 240, 0.92));
-        border: 1px solid rgba(197, 200, 184, 0.7);
-        box-shadow: 0 20px 60px rgba(23, 29, 15, 0.08);
+    /* ── KPI cards ──────────────────────────────────────────────────── */
+    .kpi-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(23,29,15,0.09); }
+    .dark .kpi-card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 3px;
+        border-radius: 999px 999px 0 0;
+    }
+    .kpi-card.green::before  { background: var(--primary); }
+    .kpi-card.amber::before  { background: #d97706; }
+    .kpi-card.blue::before   { background: #0d6efd; }
+
+    /* ── Empty state ────────────────────────────────────────────────── */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+        gap: 0.75rem;
     }
 
-    .dark .detalle-proveedor-shell .panel-card,
-    .dark .detalle-proveedor-shell .surface-card {
-        background: linear-gradient(180deg, rgba(39, 39, 31, 0.95), rgba(30, 30, 24, 0.94));
-        border-color: rgba(80, 85, 60, 0.6);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    /* ── Pending inventory banner ───────────────────────────────────── */
+    .inv-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 0.9rem 1.1rem;
+        border-radius: 0.75rem;
+        background: rgba(163,196,106,0.08);
+        border: 1px dashed rgba(163,196,106,0.45);
     }
 
-    .detalle-proveedor-shell .accordion-item,
-    .detalle-proveedor-shell .accordion-button {
-        background-color: transparent;
-        color: var(--text);
-        border-color: rgba(197, 200, 184, 0.45);
+    /* ── Lote cost box ──────────────────────────────────────────────── */
+    .lote-meta-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+    }
+    .lote-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(62,82,25,0.07);
+        border: 1px solid rgba(62,82,25,0.14);
+        color: var(--text-muted);
+    }
+    .dark .lote-meta-chip {
+        background: rgba(163,196,106,0.08);
+        border-color: rgba(163,196,106,0.18);
     }
 
-    .dark .detalle-proveedor-shell .accordion-item,
-    .dark .detalle-proveedor-shell .accordion-button {
-        border-color: rgba(80, 85, 60, 0.45);
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
+    .lote-body.open { animation: slideDown 0.22s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="pt-16 pb-8 px-4 sm:px-8" style="background: var(--bg); min-height: calc(100vh - 5rem);">
+<div class="pt-16 pb-12 px-4 sm:px-8" style="background: var(--bg); min-height: calc(100vh - 5rem);">
 <div class="max-w-[1400px] mx-auto flex gap-6 items-start">
   {% include 'partials/admin_sidebar.html' with request=request user=user only %}
-  <div class="flex-1 min-w-0">
-<div class="detalle-proveedor-shell py-4">
-    <div class="container py-2">
-        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4 mb-4">
+  <main class="flex-1 min-w-0" style="color: var(--text);">
+
+    <!-- ── Header ───────────────────────────────────────────────── -->
+    <section class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
+        <div>
+            <p class="text-[10px] uppercase tracking-[0.25em] font-bold mb-3" style="color: var(--text-muted);">
+                Proveedor · Historial de compras
+            </p>
+            <h1 class="font-headline italic leading-tight mb-2" style="font-size: clamp(2.5rem,6vw,4.5rem); color: var(--primary);">
+                {{ proveedor.nombre }}
+            </h1>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm" style="color: var(--text-muted);">
+                {% if proveedor.contacto %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                        {{ proveedor.contacto }}
+                    </span>
+                {% endif %}
+                {% if proveedor.telefono %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">phone</span>
+                        {{ proveedor.telefono }}
+                    </span>
+                {% endif %}
+                {% if proveedor.email %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">mail</span>
+                        {{ proveedor.email }}
+                    </span>
+                {% endif %}
+                {% if proveedor.direccion %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        {{ proveedor.direccion }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest"
+               style="background: var(--primary); color: white;">
+                <span class="material-symbols-outlined text-base">add</span>
+                Nuevo lote
+            </a>
+            <a href="{% url 'directorio_proveedores' %}"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest"
+               style="border: 1px solid var(--border); color: var(--text);">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                Volver
+            </a>
+        </div>
+    </section>
+
+    <!-- ── KPI row ──────────────────────────────────────────────── -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="kpi-card green">
+            <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Lotes registrados</p>
+            <p class="font-headline text-4xl font-bold" style="color: var(--primary);">{{ total_lotes }}</p>
+            <p class="text-xs" style="color: var(--text-muted);">adquisiciones con este proveedor</p>
+        </div>
+        <div class="kpi-card amber">
+            <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Gasto acumulado</p>
+            <p class="font-headline text-4xl font-bold" style="color: #d97706;">${{ gasto_total }}</p>
+            <p class="text-xs" style="color: var(--text-muted);">invertido con este proveedor</p>
+        </div>
+        <div class="kpi-card blue">
+            <p class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted);">Unidades</p>
+            <p class="font-headline text-4xl font-bold" style="color: #0d6efd;">{{ unidades_adquiridas }}</p>
+            <p class="text-xs" style="color: var(--text-muted);">libros ingresados al inventario</p>
+        </div>
+    </section>
+
+    <!-- ── Lot timeline ──────────────────────────────────────────── -->
+    <section>
+        <div class="flex items-center justify-between mb-5">
             <div>
-                <p class="text-uppercase fw-bold small mb-2" style="letter-spacing: 0.25em; color: var(--text-muted);">
-                    Proveedor · Historial de compras
+                <h2 class="font-headline italic text-3xl mb-1" style="color: var(--text);">Historial de lotes</h2>
+                <p class="text-sm" style="color: var(--text-muted);">
+                    Cada lote muestra el tipo de compra, su estado y los libros que contiene.
                 </p>
-                <h1 class="display-4 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: var(--primary);">
-                    {{ proveedor.nombre }}
-                </h1>
-                <p class="mb-1" style="color: var(--text-muted);">{{ proveedor.contacto|default:"Sin contacto principal" }}</p>
-                <p class="mb-0" style="color: var(--text-muted);">
-                    {{ proveedor.telefono|default:"Sin telefono" }} · {{ proveedor.email|default:"Sin email" }}
-                </p>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="btn btn-success btn-lg">
-                    <i class="bi bi-plus-circle me-2"></i>Nuevo lote
-                </a>
-                <a href="{% url 'directorio_proveedores' %}" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-arrow-left me-2"></i>Volver
-                </a>
             </div>
         </div>
 
-        <div class="row g-4 mb-4">
-            <div class="col-12 col-md-4">
-                <div class="panel-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Lotes</div>
-                    <div class="display-6 fw-semibold" style="color: var(--primary);">{{ total_lotes }}</div>
-                    <div class="small" style="color: var(--text-muted);">adquisiciones registradas</div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="panel-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Gasto acumulado</div>
-                    <div class="display-6 fw-semibold text-warning">${{ gasto_total }}</div>
-                    <div class="small" style="color: var(--text-muted);">invertido con este proveedor</div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="panel-card rounded-4 p-4 h-100">
-                    <div class="small text-uppercase fw-bold mb-2" style="letter-spacing: 0.2em; color: var(--text-muted);">Unidades</div>
-                    <div class="display-6 fw-semibold text-primary">{{ unidades_adquiridas }}</div>
-                    <div class="small" style="color: var(--text-muted);">libros ingresados al inventario</div>
-                </div>
-            </div>
-        </div>
+        {% if adquisiciones %}
+        <div class="flex flex-col gap-4">
+            {% for adquisicion in adquisiciones %}
+            <article class="lote-card" id="lote-wrap-{{ adquisicion.id }}">
 
-        <div class="surface-card rounded-4 p-4">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-                <div>
-                    <h2 class="h3 fst-italic mb-1" style="font-family: 'Newsreader', serif;">Historial por proveedor</h2>
-                    <p class="mb-0 small" style="color: var(--text-muted);">Despliega cada lote para revisar los libros adquiridos y su costo.</p>
-                </div>
-                <div class="small" style="color: var(--text-muted);">
-                    {{ proveedor.direccion|default:"Sin direccion registrada" }}
-                </div>
-            </div>
+                <!-- Clickable header -->
+                <div class="lote-header" onclick="toggleLote({{ adquisicion.id }})">
+                    <div class="flex flex-col gap-2 min-w-0">
+                        <!-- Top row: badges + code -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="badge-tipo">{{ adquisicion.get_tipo_display }}</span>
+                            <span class="badge-tipo {% if adquisicion.estado == 'completado' %}badge-estado-ok{% else %}badge-estado-pend{% endif %}">
+                                {{ adquisicion.get_estado_display }}
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-faint);">
+                                {% if adquisicion.codigo_lote %}{{ adquisicion.codigo_lote }}{% else %}#{{ adquisicion.id }}{% endif %}
+                            </span>
+                        </div>
+                        <!-- Subtitle -->
+                        <p class="text-xs mb-0" style="color: var(--text-muted);">
+                            <span class="material-symbols-outlined text-[0.75rem] align-[-2px]">calendar_today</span>
+                            {{ adquisicion.fecha|date:"d/m/Y" }}
+                            {% if adquisicion.creado_por %}
+                            &nbsp;·&nbsp;
+                            <span class="material-symbols-outlined text-[0.75rem] align-[-2px]">person</span>
+                            {{ adquisicion.creado_por.username }}
+                            {% endif %}
+                            {% if adquisicion.cantidad_libros_lote %}
+                            &nbsp;·&nbsp;
+                            <span class="material-symbols-outlined text-[0.75rem] align-[-2px]">auto_stories</span>
+                            ~{{ adquisicion.cantidad_libros_lote }} libros estimados
+                            {% endif %}
+                        </p>
+                    </div>
 
-            {% if adquisiciones %}
-                <div class="accordion" id="acordeon-adquisiciones">
-                    {% for adquisicion in adquisiciones %}
-                        <div class="accordion-item rounded-4 overflow-hidden mb-3">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#adquisicion-{{ adquisicion.id }}">
-                                    <div class="w-100 d-flex flex-column flex-lg-row justify-content-between gap-2 pe-3">
-                                        <div>
-                                            <div class="fw-semibold">Lote #{{ adquisicion.id }}</div>
-                                            <div class="small" style="color: var(--text-muted);">
-                                                {{ adquisicion.fecha|date:"d/m/Y" }}
-                                                {% if adquisicion.creado_por %}· Registrado por {{ adquisicion.creado_por.username }}{% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="text-lg-end">
-                                            <div class="fw-semibold" style="color: var(--primary);">${{ adquisicion.total }}</div>
-                                            <div class="small" style="color: var(--text-muted);">{{ adquisicion.detalles.count }} renglon{{ adquisicion.detalles.count|pluralize:"es" }}</div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </h2>
-                            <div id="adquisicion-{{ adquisicion.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#acordeon-adquisiciones">
-                                <div class="accordion-body">
-                                    {% if adquisicion.observaciones %}
-                                        <div class="alert alert-secondary mb-4">{{ adquisicion.observaciones }}</div>
-                                    {% endif %}
+                    <!-- Right: total + chevron -->
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="text-right hidden sm:block">
+                            <p class="font-headline text-2xl font-bold mb-0" style="color: var(--primary);">${{ adquisicion.total }}</p>
+                            <p class="text-xs mb-0" style="color: var(--text-muted);">
+                                {{ adquisicion.detalles.count }} título{{ adquisicion.detalles.count|pluralize }}
+                            </p>
+                        </div>
+                        <span class="material-symbols-outlined lote-chevron">expand_more</span>
+                    </div>
+                </div>
 
-                                    <div class="table-responsive">
-                                        <table class="table align-middle mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Libro</th>
-                                                    <th>SKU</th>
-                                                    <th class="text-end">Cantidad</th>
-                                                    <th class="text-end">Costo unitario</th>
-                                                    <th class="text-end">Subtotal</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for detalle in adquisicion.detalles.all %}
-                                                    <tr>
-                                                        <td>
-                                                            <div class="fw-semibold">{{ detalle.ejemplar.libro.titulo }}</div>
-                                                            <div class="small" style="color: var(--text-muted);">{{ detalle.ejemplar.libro.autor }}</div>
-                                                        </td>
-                                                        <td>{{ detalle.ejemplar.sku }}</td>
-                                                        <td class="text-end">{{ detalle.cantidad }}</td>
-                                                        <td class="text-end">${{ detalle.costo_unitario }}</td>
-                                                        <td class="text-end fw-semibold">${{ detalle.subtotal }}</td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {% if adquisicion.estado == 'por_inventariar' %}
-                                        <div class="mt-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 rounded-4 p-4" style="background: rgba(163,196,106,0.1); border: 1px dashed rgba(163,196,106,0.5);">
-                                            <p class="small mb-0" style="color: var(--text-muted);">
-                                                {% if adquisicion.detalles.all %}Inventario en progreso...{% else %}Caja registrada, pendiente de inventariar libro por libro.{% endif %}
-                                            </p>
-                                            <a href="{% url 'inventariar_lote' adquisicion.id %}" class="btn btn-success btn-sm px-4">
-                                                {% if adquisicion.detalles.all %}Continuar inventariando{% else %}Inventariar{% endif %}
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                </div>
+                <!-- Expandable body -->
+                <div class="lote-body {% if forloop.first %}open{% endif %}" id="lote-body-{{ adquisicion.id }}">
+
+                    <!-- Meta chips -->
+                    <div class="lote-meta-grid">
+                        {% if adquisicion.costo_lote %}
+                        <span class="lote-meta-chip">
+                            <span class="material-symbols-outlined text-[0.75rem]">receipt</span>
+                            Caja comprada en ${{ adquisicion.costo_lote }}
+                        </span>
+                        {% endif %}
+                        {% if adquisicion.observaciones %}
+                        <span class="lote-meta-chip">
+                            <span class="material-symbols-outlined text-[0.75rem]">sticky_note_2</span>
+                            {{ adquisicion.observaciones }}
+                        </span>
+                        {% endif %}
+                        <span class="lote-meta-chip">
+                            <span class="material-symbols-outlined text-[0.75rem]">shopping_bag</span>
+                            Total registrado: ${{ adquisicion.total }}
+                        </span>
+                    </div>
+
+                    <!-- Books list -->
+                    {% if adquisicion.detalles.all %}
+                    <div class="rounded-xl overflow-hidden" style="border: 1px solid var(--border);">
+                        <!-- Table header -->
+                        <div style="background: rgba(163,196,106,0.06); border-bottom: 1px solid var(--border); padding: 0.6rem 1rem;">
+                            <div class="book-row" style="padding: 0; border: none;">
+                                <p class="text-[10px] font-bold uppercase tracking-widest mb-0" style="color: var(--text-muted);">Libro / Ejemplar</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest mb-0 text-right hidden sm:block" style="color: var(--text-muted);">Cant.</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest mb-0 text-right hidden sm:block" style="color: var(--text-muted);">Costo unit.</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest mb-0 text-right hidden sm:block" style="color: var(--text-muted);">Subtotal</p>
                             </div>
                         </div>
-                    {% endfor %}
+                        <!-- Rows -->
+                        <div style="padding: 0 1rem;">
+                            {% for detalle in adquisicion.detalles.all %}
+                            <div class="book-row">
+                                <div class="min-w-0">
+                                    <p class="font-bold text-sm mb-0 truncate" style="color: var(--text);">{{ detalle.ejemplar.libro.titulo }}</p>
+                                    <p class="text-xs mb-0" style="color: var(--text-muted);">
+                                        {{ detalle.ejemplar.libro.autor }}
+                                        &nbsp;·&nbsp;
+                                        <span class="font-mono">{{ detalle.ejemplar.sku }}</span>
+                                        {% if detalle.ejemplar.estado_fisico %}
+                                        &nbsp;·&nbsp; {{ detalle.ejemplar.estado_fisico.nombre }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <p class="text-sm font-bold mb-0 text-right" style="color: var(--text);">{{ detalle.cantidad }}</p>
+                                <p class="text-sm mb-0 text-right font-mono" style="color: var(--text-muted);">
+                                    {% if detalle.costo_unitario > 0 %}${{ detalle.costo_unitario }}{% else %}—{% endif %}
+                                </p>
+                                <p class="text-sm font-bold mb-0 text-right" style="color: var(--primary);">
+                                    {% if detalle.subtotal > 0 %}${{ detalle.subtotal }}{% else %}—{% endif %}
+                                </p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Footer total -->
+                        <div style="background: rgba(163,196,106,0.06); border-top: 1px solid var(--border); padding: 0.6rem 1rem;">
+                            <div class="flex justify-end items-center gap-3">
+                                <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-muted);">Total del lote</span>
+                                <span class="font-headline text-lg font-bold" style="color: var(--primary);">${{ adquisicion.total }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- No books yet -->
+                    <div class="empty-state" style="padding: 2rem;">
+                        <span class="material-symbols-outlined text-4xl" style="color: rgba(163,196,106,0.4); font-variation-settings:'wght' 200;">inventory_2</span>
+                        <p class="font-bold text-sm mb-0" style="color: var(--text);">Sin libros registrados aún</p>
+                        <p class="text-xs mb-0" style="color: var(--text-muted);">Esta caja está esperando ser inventariada.</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Pending inventory banner -->
+                    {% if adquisicion.estado == 'por_inventariar' %}
+                    <div class="inv-banner">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base" style="color: var(--primary);">pending_actions</span>
+                            <p class="text-xs font-bold mb-0" style="color: var(--text-muted);">
+                                {% if adquisicion.detalles.all %}Inventario en progreso...{% else %}Caja pendiente de inventariar libro por libro.{% endif %}
+                            </p>
+                        </div>
+                        <a href="{% url 'inventariar_lote' adquisicion.id %}"
+                           class="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shrink-0"
+                           style="background: var(--primary); color: white;">
+                            <span class="material-symbols-outlined text-sm">{% if adquisicion.detalles.all %}play_circle{% else %}inventory{% endif %}</span>
+                            {% if adquisicion.detalles.all %}Continuar{% else %}Inventariar{% endif %}
+                        </a>
+                    </div>
+                    {% endif %}
+
                 </div>
-            {% else %}
-                <div class="text-center py-5" style="color: var(--text-muted);">
-                    Todavia no hay compras registradas para este proveedor.
-                </div>
-            {% endif %}
+            </article>
+            {% endfor %}
         </div>
-    </div>
-</div>
-  </div>
+        {% else %}
+        <div class="empty-state" style="background: var(--surface); border: 1px solid var(--border); border-radius: 1rem;">
+            <span class="material-symbols-outlined text-5xl" style="color: rgba(163,196,106,0.35); font-variation-settings:'wght' 200;">local_shipping</span>
+            <p class="font-bold text-lg mb-0" style="color: var(--text);">Sin compras registradas</p>
+            <p class="text-sm mb-0" style="color: var(--text-muted);">Aún no hay adquisiciones con este proveedor.</p>
+            <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest mt-2"
+               style="background: var(--primary); color: white;">
+                <span class="material-symbols-outlined text-base">add</span>
+                Registrar primer lote
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+  </main>
 </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleLote(id) {
+    const wrap = document.getElementById('lote-wrap-' + id);
+    const body = document.getElementById('lote-body-' + id);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    wrap.classList.toggle('expanded', !isOpen);
+}
+
+// Init: mark first card as expanded
+document.addEventListener('DOMContentLoaded', () => {
+    const first = document.querySelector('.lote-body.open');
+    if (first) {
+        const id = first.id.replace('lote-body-', '');
+        document.getElementById('lote-wrap-' + id)?.classList.add('expanded');
+    }
+});
+</script>
 {% endblock %}
