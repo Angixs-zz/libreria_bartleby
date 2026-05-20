@@ -81,9 +81,9 @@
                 {% csrf_token %}
                 <input type="hidden" name="accion" value="completar">
                 <button type="submit" class="btn btn-success"
-                        onclick="return confirm('¿Marcar este lote como completado? Ya no se podrán agregar más libros.')">
+                        onclick="return confirm('¿Estás seguro de cerrar la caja? Al marcar este lote como completado ya no se podrán registrar más libros en él.')">
                     <span class="material-symbols-outlined align-middle" style="font-size:1rem;">check_circle</span>
-                    Lote completo ✓
+                    Cerrar caja (Inventario terminado)
                 </button>
             </form>
             {% endif %}
