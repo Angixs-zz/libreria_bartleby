@@ -156,7 +156,8 @@
         box-shadow: 0 0 0 0.2rem rgba(74, 93, 35, 0.14);
     }
 
-    .proveedores-shell .modal-content {
+    .proveedores-shell .modal-content,
+    .provider-modal {
         background: var(--surface);
         color: var(--text);
         border: 1px solid rgba(197, 200, 184, 0.85);
@@ -164,73 +165,99 @@
         overflow: hidden;
     }
 
-    .dark .proveedores-shell .modal-content {
-        background: var(--surface);
+    .dark .proveedores-shell .modal-content,
+    .dark .provider-modal {
+        background: linear-gradient(180deg, rgba(39, 39, 31, 0.98), rgba(30, 30, 24, 0.98));
         border-color: rgba(80, 85, 60, 0.72);
         box-shadow: 0 26px 72px rgba(0, 0, 0, 0.36);
     }
 
     .proveedores-shell .modal-header,
-    .proveedores-shell .modal-footer {
+    .proveedores-shell .modal-footer,
+    .provider-modal .modal-header,
+    .provider-modal .modal-footer {
         border-color: rgba(197, 200, 184, 0.35);
     }
 
     .dark .proveedores-shell .modal-header,
-    .dark .proveedores-shell .modal-footer {
+    .dark .proveedores-shell .modal-footer,
+    .dark .provider-modal .modal-header,
+    .dark .provider-modal .modal-footer {
         border-color: rgba(80, 85, 60, 0.4);
     }
 
-    .proveedores-shell .provider-modal .modal-header {
-        padding: 1.35rem 1.5rem 1rem;
-        background: var(--bg-subtle);
+    .provider-modal .modal-header {
+        padding: 1.35rem 1.5rem 1.1rem;
+        background: linear-gradient(180deg, var(--bg-subtle), var(--surface));
         border-bottom: 1px solid var(--border) !important;
     }
 
-    .proveedores-shell .provider-modal .modal-body {
-        padding: 1.5rem;
+    .dark .provider-modal .modal-header {
+        background: linear-gradient(180deg, rgba(30, 30, 24, 0.98), rgba(39, 39, 31, 0.98));
     }
 
-    .proveedores-shell .provider-modal .modal-footer {
+    .provider-modal .modal-body {
+        padding: 1.5rem;
+        background: var(--surface);
+    }
+
+    .dark .provider-modal .modal-body {
+        background: transparent;
+    }
+
+    .provider-modal .modal-footer {
         padding: 1rem 1.5rem 1.25rem;
         background: var(--bg-subtle);
         border-top: 1px solid var(--border) !important;
     }
 
-    .proveedores-shell .provider-modal-title {
+    .dark .provider-modal .modal-footer {
+        background: rgba(20, 21, 16, 0.45);
+    }
+
+    .provider-modal-title {
         display: flex;
         align-items: center;
         gap: 0.9rem;
     }
 
-    .proveedores-shell .provider-modal-icon {
+    .provider-modal-title h2 {
+        color: var(--primary);
+        font-family: 'Newsreader', serif;
+        font-style: italic;
+        line-height: 1;
+    }
+
+    .provider-modal-icon {
         width: 2.75rem;
         height: 2.75rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         border-radius: 0.75rem;
-        background: rgba(62, 82, 25, 0.12);
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
         color: var(--primary);
         flex: 0 0 auto;
     }
 
-    .proveedores-shell .provider-form-grid {
+    .provider-form-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1rem 1.25rem;
     }
 
-    .proveedores-shell .provider-field {
+    .provider-field {
         display: flex;
         flex-direction: column;
         gap: 0.45rem;
     }
 
-    .proveedores-shell .provider-field-wide {
+    .provider-field-wide {
         grid-column: 1 / -1;
     }
 
-    .proveedores-shell .provider-field .form-label {
+    .provider-field .form-label {
         margin: 0;
         color: var(--text-muted);
         font-size: 0.68rem;
@@ -239,8 +266,8 @@
         text-transform: uppercase;
     }
 
-    .proveedores-shell .provider-field .form-control,
-    .proveedores-shell .provider-field textarea {
+    .provider-field .form-control,
+    .provider-field textarea {
         min-height: 2.85rem;
         border-radius: 0.65rem;
         border: 1px solid var(--border);
@@ -249,12 +276,25 @@
         color: var(--text);
     }
 
-    .proveedores-shell .provider-field textarea {
+    .provider-field .form-control:focus,
+    .provider-field textarea:focus {
+        border-color: var(--primary);
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 18%, transparent);
+    }
+
+    .provider-field .form-control::placeholder,
+    .provider-field textarea::placeholder {
+        color: var(--text-faint);
+    }
+
+    .provider-field textarea {
         min-height: 5rem;
         resize: vertical;
     }
 
-    .proveedores-shell .provider-status {
+    .provider-status {
         display: flex;
         align-items: center;
         gap: 0.7rem;
@@ -264,14 +304,19 @@
         background: var(--bg-subtle);
     }
 
-    .proveedores-shell .provider-status .form-check-input {
+    .provider-status .form-check-input {
         width: 1.05rem;
         height: 1.05rem;
         margin: 0;
         border-color: var(--border);
     }
 
-    .proveedores-shell .provider-status .form-check-label {
+    .provider-status .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .provider-status .form-check-label {
         margin: 0;
         font-size: 0.76rem;
         font-weight: 800;
@@ -280,7 +325,7 @@
         color: var(--text);
     }
 
-    .proveedores-shell .provider-actions {
+    .provider-actions {
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -288,28 +333,61 @@
         width: 100%;
     }
 
-    .proveedores-shell .provider-actions .btn {
+    .provider-actions .btn {
         border-radius: 0.65rem;
-        padding: 0.68rem 1rem;
+        padding: 0.72rem 1rem;
         font-size: 0.72rem;
         font-weight: 800;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 
-    .proveedores-shell .provider-modal .btn-close {
-        opacity: 0.65;
+    .provider-actions .btn-outline-secondary {
+        background: transparent;
+        border-color: var(--border);
+        color: var(--text-muted);
     }
 
-    .proveedores-shell .provider-modal .btn-close:hover {
+    .provider-actions .btn-outline-secondary:hover {
+        background: var(--bg-subtle);
+        border-color: var(--border);
+        color: var(--text);
+    }
+
+    .provider-actions .olive-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--primary) 24%, transparent);
+    }
+
+    .dark .provider-actions .olive-btn {
+        color: #13180c;
+    }
+
+    .provider-modal .btn-close {
+        opacity: 0.7;
+        filter: none;
+    }
+
+    .dark .provider-modal .btn-close {
+        filter: invert(1) grayscale(100%);
+    }
+
+    .provider-modal .btn-close:hover {
         opacity: 1;
     }
 
     @media (max-width: 767px) {
-        .proveedores-shell .provider-form-grid {
+        .provider-form-grid {
             grid-template-columns: 1fr;
         }
 
-        .proveedores-shell .provider-actions {
+        .provider-actions {
             flex-direction: column-reverse;
             align-items: stretch;
         }
