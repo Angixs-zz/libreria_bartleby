@@ -77,13 +77,13 @@ Uso: include 'partials/admin_sidebar.html'
     <a href="{% url 'gestion_inventario' %}" class="adm-chip {% if request.resolver_match.url_name == 'gestion_inventario' %}active{% endif %}">
       <span class="material-symbols-outlined">inventory_2</span> Inventario
     </a>
-    <a href="{% url 'agregar_libro' %}" class="adm-chip {% if request.resolver_match.url_name == 'agregar_libro' %}active{% endif %}">
+    <a href="{% url 'agregar_libro_compra' %}" class="adm-chip {% if request.resolver_match.url_name == 'agregar_libro' or request.resolver_match.url_name == 'agregar_libro_compra' %}active{% endif %}">
       <span class="material-symbols-outlined">add_box</span> Agregar Libro
     </a>
     <a href="{% url 'directorio_proveedores' %}" class="adm-chip {% if request.resolver_match.url_name == 'directorio_proveedores' %}active{% endif %}">
       <span class="material-symbols-outlined">local_shipping</span> Proveedores
     </a>
-    <a href="{% url 'historial_adquisiciones' %}" class="adm-chip {% if request.resolver_match.url_name == 'historial_adquisiciones' or request.resolver_match.url_name == 'registrar_adquisicion' or request.resolver_match.url_name == 'inventariar_lote' or request.resolver_match.url_name == 'agregar_libro_compra' %}active{% endif %}">
+    <a href="{% url 'historial_adquisiciones' %}" class="adm-chip {% if request.resolver_match.url_name == 'historial_adquisiciones' or request.resolver_match.url_name == 'registrar_adquisicion' or request.resolver_match.url_name == 'inventariar_lote' %}active{% endif %}">
       <span class="material-symbols-outlined">receipt_long</span> Adquisiciones
     </a>
     <a href="{% url 'dashboard_reportes' %}" class="adm-chip {% if request.resolver_match.url_name == 'dashboard_reportes' %}active{% endif %}">
