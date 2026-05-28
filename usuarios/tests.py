@@ -1,6 +1,5 @@
 from decimal import Decimal
 from datetime import timedelta
-from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -498,8 +497,7 @@ class DocumentosLegalesYRegistroTests(TestCase):
         self.assertContains(response, 'Debes aceptar el Aviso de Privacidad')
         self.assertFalse(User.objects.filter(username='sinaviso').exists())
 
-    @patch('usuarios.views.enviar_codigo_verificacion_email')
-    def test_registro_con_aceptacion_crea_usuario_inactivo(self, mock_enviar_codigo):
+    def test_registro_con_aceptacion_crea_usuario_activo(self):
         response = self.client.post(
             reverse('registrar'),
             self._payload_registro(
@@ -510,63 +508,27 @@ class DocumentosLegalesYRegistroTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('verificar_codigo'))
+        self.assertRedirects(response, reverse('login'))
         usuario = User.objects.get(username='conaviso')
-        self.assertFalse(usuario.is_active)
+        self.assertTrue(usuario.is_active)
         self.assertEqual(usuario.email, 'conaviso@example.com')
         self.assertEqual(usuario.first_name, 'Luis')
         self.assertEqual(usuario.perfil.telefono, '5512345678')
-        self.assertTrue(usuario.perfil.codigo_verificacion)
-        mock_enviar_codigo.assert_called_once()
-
-    @patch('usuarios.views.enviar_codigo_verificacion_email')
-    def test_verificar_codigo_activa_usuario(self, mock_enviar_codigo):
-        self.client.post(
-            reverse('registrar'),
-            self._payload_registro(
-                username='verificable',
-                email='verificable@example.com',
-                acepta_privacidad='on',
-            ),
-        )
-        usuario = User.objects.get(username='verificable')
-        codigo = usuario.perfil.codigo_verificacion
-
-        response = self.client.post(
-            reverse('verificar_codigo'),
-            {'codigo': codigo},
-            follow=True,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        usuario.refresh_from_db()
-        usuario.perfil.refresh_from_db()
-        self.assertTrue(usuario.is_active)
         self.assertIsNone(usuario.perfil.codigo_verificacion)
 
-    @patch('usuarios.views.enviar_codigo_verificacion_email')
-    def test_reenviar_codigo_generar_nuevo_valor(self, mock_enviar_codigo):
-        self.client.post(
+    def test_registro_rechaza_correo_con_formato_invalido(self):
+        response = self.client.post(
             reverse('registrar'),
             self._payload_registro(
-                username='reenvio',
-                email='reenvio@example.com',
+                username='correo_invalido',
+                email='correo-invalido',
                 acepta_privacidad='on',
-            ),
-        )
-        usuario = User.objects.get(username='reenvio')
-        codigo_inicial = usuario.perfil.codigo_verificacion
-
-        response = self.client.post(
-            reverse('verificar_codigo'),
-            {'reenviar_codigo': '1'},
-            follow=True,
+            )
         )
 
         self.assertEqual(response.status_code, 200)
-        usuario.perfil.refresh_from_db()
-        self.assertNotEqual(usuario.perfil.codigo_verificacion, codigo_inicial)
-        self.assertEqual(mock_enviar_codigo.call_count, 2)
+        self.assertContains(response, 'Ingresa un correo electronico valido.')
+        self.assertFalse(User.objects.filter(username='correo_invalido').exists())
 
 
 class PanelAuditoriaTests(TestCase):
