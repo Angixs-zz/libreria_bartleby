@@ -11,10 +11,9 @@ from .models import Proveedor, Adquisicion, DetalleAdquisicion
 
 class ProveedoresModuleTests(TestCase):
     def setUp(self):
-        self.admin = User.objects.create_user(
+        self.admin = User.objects.create_superuser(
             username='compras_admin',
             password='testpass123',
-            is_staff=True,
         )
         self.cliente = User.objects.create_user(
             username='cliente_normal',
@@ -150,6 +149,6 @@ class ProveedoresModuleTests(TestCase):
         response = self.client.get(reverse('detalle_proveedor', args=[self.proveedor.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Historial por proveedor')
+        self.assertContains(response, 'Historial de compras')
         self.assertEqual(response.context['gasto_total'], Decimal('200.00'))
         self.assertEqual(response.context['unidades_adquiridas'], 2)

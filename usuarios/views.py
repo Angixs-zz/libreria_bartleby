@@ -28,7 +28,7 @@ from django.views.decorators.http import require_http_methods
 from inventario.models import Libro
 from reservas.models import Reserva
 from ventas.models import Venta, DetalleVenta
-from decorators import admin_required, director_required
+from decorators import admin_required, director_required, cajero_required
 from .forms import (
     RegistroClienteForm,
     StaffCreationForm,
@@ -94,6 +94,8 @@ def obtener_limite_auditoria(valor):
 
 
 def registrar(request):
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
     if request.method == 'POST':
         if request.POST.get('acepta_privacidad') != 'on':
             form = RegistroClienteForm(request.POST)
@@ -127,6 +129,8 @@ def registrar(request):
     return render(request, 'usuarios/registrar.html', {'form': form})
 
 def verificar_codigo(request):
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
     user_id = request.session.get('user_id_verificar')
     if not user_id:
         return redirect('registrar')
@@ -171,6 +175,8 @@ def login_con_codigo(request):
     """
     Vista para solicitar código de login por email.
     """
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         if not email:
@@ -208,6 +214,8 @@ def verificar_codigo_login(request):
     """
     Vista para verificar el código de login.
     """
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
     email = request.session.get('email_login')
     if not email:
         return redirect('login_con_codigo')
@@ -638,7 +646,7 @@ def resetear_password_personal(request, user_id):
 
 
 @login_required
-@admin_required
+@cajero_required
 @require_http_methods(["GET"])
 def panel_clientes(request):
     """
@@ -791,7 +799,7 @@ def panel_clientes(request):
 
 
 @login_required
-@admin_required
+@cajero_required
 @require_http_methods(["GET", "POST"])
 def detalle_cliente(request, user_id):
     cliente = get_object_or_404(
