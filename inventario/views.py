@@ -763,11 +763,7 @@ def detalle_ejemplar(request, ejemplar_id):
                     cambios.append('precio venta actualizado')
                     ejemplar.precio_venta = precio_venta
 
-            if precio_compra_str:
-                precio_compra, error = validar_precio(precio_compra_str)
-                if not error and precio_compra != ejemplar.precio_compra:
-                    cambios.append('precio compra actualizado')
-                    ejemplar.precio_compra = precio_compra
+            # El precio de compra no se permite modificar una vez registrado en el inventario
 
             if stock_str:
                 stock, error = validar_cantidad(stock_str)

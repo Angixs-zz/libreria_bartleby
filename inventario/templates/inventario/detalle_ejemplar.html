@@ -355,9 +355,16 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                     </div>
 
                     <div class="field-group">
-                        <label class="field-label" for="precio_compra">Precio de Compra ($)</label>
-                        <input type="number" id="precio_compra" name="precio_compra" class="field-input"
-                               value="{{ ejemplar.precio_compra }}" step="0.01" min="0">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="field-label" for="precio_compra" style="margin-bottom: 0;">Precio de Compra ($)</label>
+                            <span class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-muted);">
+                                <span class="material-symbols-outlined text-[12px]">lock</span>
+                                Registrado
+                            </span>
+                        </div>
+                        <input type="number" id="precio_compra" name="precio_compra" class="field-input font-mono"
+                               value="{{ ejemplar.precio_compra }}" step="0.01" min="0" readonly
+                               style="background-color: var(--bg); cursor: not-allowed; color: var(--text-faint); border-color: var(--border);">
                     </div>
 
                     <!-- Fechas (solo lectura) -->

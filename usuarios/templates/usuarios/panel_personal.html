@@ -677,6 +677,12 @@
                                         {{ form.password2 }}
                                     </div>
                                 </div>
+                                <div class="flex items-center gap-2 mt-3 pl-1">
+                                    <input type="checkbox" id="show-pass-reset-{{ empleado.id }}" class="toggle-password-visibility rounded border-gray-300 text-olive-600 focus:ring-olive-500" style="cursor: pointer;">
+                                    <label for="show-pass-reset-{{ empleado.id }}" class="text-[10px] font-extrabold uppercase tracking-widest" style="color: var(--text-muted); cursor: pointer; user-select: none;">
+                                        Mostrar contraseñas
+                                    </label>
+                                </div>
                             {% endwith %}
                         </div>
 
@@ -739,6 +745,14 @@
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                             {{ staff_form.password2 }}
                         </div>
+                        <div class="staff-field" style="grid-column: 1 / -1; margin-top: -0.25rem;">
+                            <div class="flex items-center gap-2 pl-1">
+                                <input type="checkbox" id="show-pass-new" class="toggle-password-visibility rounded border-gray-300 text-olive-600 focus:ring-olive-500" style="cursor: pointer;">
+                                <label for="show-pass-new" class="text-[10px] font-extrabold uppercase tracking-widest" style="color: var(--text-muted); cursor: pointer; user-select: none;">
+                                    Mostrar contraseñas
+                                </label>
+                            </div>
+                        </div>
                         
                         <div class="staff-permissions">
                             <h3 class="staff-permissions-title">
@@ -776,4 +790,15 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.querySelectorAll('.toggle-password-visibility').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const modal = this.closest('.modal');
+        const targets = modal.querySelectorAll('input[name="password1"], input[name="password2"]');
+        targets.forEach(input => {
+            input.type = this.checked ? 'text' : 'password';
+        });
+    });
+});
+</script>
 {% endblock %}
