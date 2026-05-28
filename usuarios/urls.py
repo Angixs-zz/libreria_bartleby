@@ -24,4 +24,5 @@ urlpatterns = [
     path('personal/<int:user_id>/resetear-password/', views.resetear_password_personal, name='resetear_password_personal'),
     path('clientes/', views.panel_clientes, name='panel_clientes'),
     path('clientes/<int:user_id>/', views.detalle_cliente, name='detalle_cliente'),
+    path('clientes/<int:user_id>/resetear-password/', views.resetear_password_cliente, name='resetear_password_cliente'),
 ]

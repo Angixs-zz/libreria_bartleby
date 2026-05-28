@@ -912,3 +912,42 @@ def detalle_cliente(request, user_id):
         'valor_reservado': sum((reserva.total for reserva in reservas_activas), Decimal('0.00')),
     }
     return render(request, 'usuarios/detalle_cliente.html', context)
+
+
+@login_required
+@cajero_required
+@require_http_methods(["POST"])
+def resetear_password_cliente(request, user_id):
+    """
+    Permite al staff/administrador restablecer la contraseña de un cliente.
+    """
+    cliente = get_object_or_404(User, pk=user_id, is_staff=False)
+    
+    password1 = request.POST.get('password1')
+    password2 = request.POST.get('password2')
+    
+    if not password1 or not password2:
+        messages.error(request, 'Por favor completa ambos campos de contraseña.')
+        return redirect('detalle_cliente', user_id=cliente.id)
+        
+    if password1 != password2:
+        messages.error(request, 'Las contraseñas no coinciden.')
+        return redirect('detalle_cliente', user_id=cliente.id)
+        
+    cliente.set_password(password1)
+    cliente.save(update_fields=['password'])
+    
+    # Registrar auditoría
+    registrar_auditoria(
+        actor=request.user,
+        accion='seguridad',
+        modulo='clientes',
+        entidad_tipo='usuario_cliente',
+        entidad_id=cliente.id,
+        entidad_nombre=cliente.username,
+        descripcion=f'El administrador reseteó la contraseña del cliente "{cliente.username}".',
+    )
+    
+    messages.success(request, f'La contraseña de {cliente.get_full_name() or cliente.username} ha sido actualizada con éxito.')
+    return redirect('detalle_cliente', user_id=cliente.id)
+
