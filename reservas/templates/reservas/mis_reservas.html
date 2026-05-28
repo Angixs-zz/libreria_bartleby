@@ -9,7 +9,7 @@
                 Inicio
             </a>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
-            <span style="color: var(--text-muted);">Mi Perfil</span>
+            <a href="{% url 'mi_perfil' %}" class="transition-opacity hover:opacity-70" style="color: var(--text-muted);">Mi Perfil</a>
             <span class="material-symbols-outlined text-sm" style="color: var(--border);">chevron_right</span>
             <span style="color: var(--text);">Mis Reservas</span>
         </nav>
@@ -87,8 +87,8 @@
                 <!-- Portada del primer libro -->
                 <div class="hidden md:flex w-32 h-44 rounded-sm overflow-hidden shrink-0 items-center justify-center"
                      style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
-                    {% if reserva.libros.first.portada %}
-                        <img src="{{ reserva.libros.first.portada.url }}" alt="Portada" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
+                    {% if reserva.ejemplares.first.libro.portada %}
+                        <img src="{{ reserva.ejemplares.first.libro.portada.url }}" alt="Portada" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
                     {% else %}
                         <span class="material-symbols-outlined text-4xl" style="color: var(--text-faint);">auto_stories</span>
                     {% endif %}

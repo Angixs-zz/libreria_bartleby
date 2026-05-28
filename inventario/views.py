@@ -238,6 +238,10 @@ def agregar_libro(request):
                         return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                     precio_compra = Decimal('0.00')
 
+                if precio_venta < precio_compra:
+                    messages.error(request, '❌ El precio de venta no puede ser menor que el precio de compra.')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+
                 # Validar stock
                 stock, error = validar_cantidad(stock_str)
                 if error:
@@ -359,6 +363,10 @@ def agregar_libro(request):
                         return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                     precio_compra = Decimal('0.00')
 
+                if precio_venta < precio_compra:
+                    messages.error(request, '❌ El precio de venta no puede ser menor que el precio de compra.')
+                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+
                 stock, error = validar_cantidad(stock_str)
                 if error:
                     messages.error(request, f'❌ Stock: {error}')
@@ -432,6 +440,10 @@ def agregar_libro(request):
                             return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                         else:
                             precio_compra = Decimal('0.00')
+                    
+                    if ejemplar.precio_venta < precio_compra:
+                        messages.error(request, f'❌ El costo de adquisición (${precio_compra}) no puede ser mayor que el precio de venta actual (${ejemplar.precio_venta}).')
+                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                     adquisicion = _registrar_detalle_compra_suelta(
                         request,
                         proveedor_compra,
@@ -760,6 +772,9 @@ def detalle_ejemplar(request, ejemplar_id):
                     messages.error(request, '❌ Precio venta: ' + error)
                     return redirect('detalle_ejemplar', ejemplar_id=ejemplar_id)
                 if precio_venta != ejemplar.precio_venta:
+                    if precio_venta < ejemplar.precio_compra:
+                        messages.error(request, '❌ El precio de venta no puede ser menor que el precio de compra.')
+                        return redirect('detalle_ejemplar', ejemplar_id=ejemplar_id)
                     cambios.append('precio venta actualizado')
                     ejemplar.precio_venta = precio_venta
 
@@ -770,6 +785,17 @@ def detalle_ejemplar(request, ejemplar_id):
                 if error:
                     messages.error(request, '❌ Stock: ' + error)
                     return redirect('detalle_ejemplar', ejemplar_id=ejemplar_id)
+                
+                # Validar que el nuevo stock no sea menor que las reservas activas
+                from reservas.models import Reserva
+                reservas_activas = Reserva.objects.filter(
+                    ejemplares=ejemplar,
+                    estado='pendiente'
+                ).count()
+                if stock < reservas_activas:
+                    messages.error(request, f'❌ El stock ({stock}) no puede ser menor que el número de reservas pendientes ({reservas_activas}).')
+                    return redirect('detalle_ejemplar', ejemplar_id=ejemplar_id)
+
                 if stock != ejemplar.stock:
                     cambios.append('stock actualizado')
                     ejemplar.stock = stock
@@ -865,6 +891,17 @@ def eliminar_ejemplar(request, ejemplar_id):
     sku = ejemplar.sku
     titulo = ejemplar.libro.titulo
     entidad_id = ejemplar.id
+
+    # Verificar si el ejemplar tiene reservas pendientes
+    reservas_activas = ejemplar.reservas_activas.filter(estado='pendiente')
+    if reservas_activas.exists():
+        messages.error(
+            request,
+            f'❌ No se puede eliminar el ejemplar {sku} porque tiene '
+            f'reservas pendientes de recolección. '
+            f'Libera las reservas antes de eliminarlo.'
+        )
+        return redirect('gestion_inventario')
 
     try:
         libro = ejemplar.libro

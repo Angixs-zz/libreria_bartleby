@@ -14,10 +14,9 @@ from ventas.models import Venta, DetalleVenta
 
 class DashboardReportesTests(TestCase):
     def setUp(self):
-        self.admin = User.objects.create_user(
+        self.admin = User.objects.create_superuser(
             username='director',
             password='testpass123',
-            is_staff=True,
         )
         self.cliente = User.objects.create_user(
             username='cliente1',
@@ -41,7 +40,7 @@ class DashboardReportesTests(TestCase):
             estado_fisico=EstadoFisico.objects.get_or_create(nombre='bueno')[0],
             precio_compra=Decimal('80.00'),
             precio_venta=Decimal('120.00'),
-            stock=2,
+            stock=0,
         )
 
         self.venta_hoy = Venta.objects.create(
@@ -175,13 +174,13 @@ class DashboardReportesTests(TestCase):
         response = self.client.get(self.url, {'periodo': 'today'})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Dashboard Ejecutivo')
+        self.assertContains(response, 'Reportes')
         self.assertEqual(response.context['periodo'], 'today')
         self.assertEqual(response.context['ventas_tickets'], 2)
         self.assertEqual(response.context['ventas_monto'], Decimal('480'))
         self.assertEqual(response.context['ganancia_neta'], Decimal('200'))
         self.assertEqual(response.context['apartados_activos'], 1)
-        self.assertEqual(len(response.context['chart_labels']), 7)
+        self.assertEqual(len(response.context['chart_labels']), timezone.now().hour + 1)
 
     def test_dashboard_top_libros_y_stock_bajo(self):
         self.client.force_login(self.admin)
