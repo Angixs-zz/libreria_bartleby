@@ -23,6 +23,7 @@ class RegistroClienteForm(UserCreationForm):
     )
     email = forms.EmailField(
         required=True,
+        error_messages={'invalid': 'Ingresa un correo electronico valido.'},
         widget=forms.EmailInput(attrs={'placeholder': 'correo@ejemplo.com'}),
     )
     telefono = forms.CharField(

@@ -105,30 +105,22 @@ def registrar(request):
 
         form = RegistroClienteForm(request.POST)
         if form.is_valid():
-            try:
-                with transaction.atomic():
-                    codigo = str(random.randint(100000, 999999))
-                    user = form.save(commit=False)
-                    user.is_active = False
-                    user.first_name = form.cleaned_data['first_name']
-                    user.last_name = form.cleaned_data['last_name']
-                    user.email = form.cleaned_data['email']
-                    user.save()
+            with transaction.atomic():
+                user = form.save(commit=False)
+                user.is_active = True
+                user.first_name = form.cleaned_data['first_name']
+                user.last_name = form.cleaned_data['last_name']
+                user.email = form.cleaned_data['email']
+                user.save()
 
-                    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
-                    perfil.telefono = form.cleaned_data['telefono']
-                    perfil.direccion = form.cleaned_data.get('direccion', '')
-                    perfil.codigo_verificacion = codigo
-                    perfil.save()
+                perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
+                perfil.telefono = form.cleaned_data['telefono']
+                perfil.direccion = form.cleaned_data.get('direccion', '')
+                perfil.codigo_verificacion = None
+                perfil.save()
 
-                    enviar_codigo_verificacion_email(user, codigo)
-            except Exception as exc:
-                messages.error(request, f'No se pudo enviar el código de verificación: {exc}')
-                return render(request, 'usuarios/registrar.html', {'form': form})
-
-            request.session['user_id_verificar'] = user.id
-            messages.success(request, 'Te enviamos un código de verificación a tu correo.')
-            return redirect('verificar_codigo')
+            messages.success(request, 'Cuenta creada con éxito. Ya puedes entrar.')
+            return redirect('login')
     else:
         form = RegistroClienteForm()
         
