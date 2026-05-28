@@ -156,6 +156,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Fallback local cuando Resend no está configurado
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', cast=int, default=587)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=True)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@bartleby.dev')
 
 # REDIRECCIONES DE AUTENTICACIÓN
 LOGIN_URL = 'login'

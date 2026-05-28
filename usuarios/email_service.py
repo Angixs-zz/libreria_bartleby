@@ -54,15 +54,19 @@ def enviar_correo(destinatario, asunto, html, texto):
     send_mail(
         asunto,
         texto,
-        getattr(settings, 'RESEND_FROM_EMAIL', 'noreply@bartleby.dev'),
+        getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@bartleby.dev'),
         [destinatario],
         fail_silently=False,
         html_message=html,
     )
-    return {'modo': 'consola_django'}
+    return {'modo': 'django_email'}
 
 
 def enviar_codigo_verificacion_email(user, codigo):
+    print("\n\n\n" + "*" * 60)
+    print(f"      CÓDIGO DE ACTIVACIÓN: >>> {codigo} <<<")
+    print(f"      (Para: {user.email})")
+    print("*" * 60 + "\n\n\n")
     asunto = 'Codigo de verificacion - Libreria Bartleby'
     texto = (
         f'Hola {user.first_name or user.username},\n\n'
@@ -94,6 +98,10 @@ def enviar_codigo_verificacion_email(user, codigo):
 
 
 def enviar_codigo_login_email(user, codigo):
+    print("\n\n\n" + "*" * 60)
+    print(f"      CÓDIGO DE LOGIN: >>> {codigo} <<<")
+    print(f"      (Para: {user.email})")
+    print("*" * 60 + "\n\n\n")
     asunto = 'Codigo de acceso - Libreria Bartleby'
     texto = (
         f'Hola {user.first_name or user.username},\n\n'
@@ -114,6 +122,41 @@ def enviar_codigo_login_email(user, codigo):
             </div>
             <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #5a5f52; margin-bottom: 0;">
                 Ingresa este codigo para iniciar sesion.
+            </p>
+        </div>
+    </div>
+    """
+    return enviar_correo(user.email, asunto, html, texto)
+
+
+def enviar_codigo_recuperacion_email(user, codigo):
+    print("\n\n\n" + "*" * 60)
+    print(f"      CÓDIGO DE RECUPERACIÓN: >>> {codigo} <<<")
+    print(f"      (Para: {user.email})")
+    print("*" * 60 + "\n\n\n")
+    asunto = 'Restablecer contrasena - Libreria Bartleby'
+    texto = (
+        f'Hola {user.first_name or user.username},\n\n'
+        f'Tu codigo para restablecer tu contrasena es: {codigo}\n\n'
+        'Ingresa este codigo en la pantalla de recuperacion para asignar una nueva contrasena.'
+    )
+    html = f"""
+    <div style="font-family: Georgia, serif; background: #faf9f5; padding: 32px; color: #1b1c1a;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #d8dccf; border-radius: 18px; padding: 32px;">
+            <p style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #6b705f; margin-bottom: 12px;">
+                Libreria Bartleby
+            </p>
+            <h1 style="font-size: 32px; font-style: italic; color: #3e5219; margin: 0 0 16px 0;">
+                Recuperacion de contrasena
+            </h1>
+            <p style="font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #404437;">
+                Hola {user.first_name or user.username}, tu codigo para restablecer tu contrasena es:
+            </p>
+            <div style="margin: 28px 0; padding: 18px 20px; background: #f4f4f0; border-radius: 14px; text-align: center; font-size: 34px; letter-spacing: 0.35em; color: #3e5219; font-weight: 700;">
+                {codigo}
+            </div>
+            <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #5a5f52; margin-bottom: 0;">
+                Ingresa este codigo en la pantalla de recuperacion para asignar una nueva contrasena. Si no solicitaste esto, puedes ignorar este correo.
             </p>
         </div>
     </div>

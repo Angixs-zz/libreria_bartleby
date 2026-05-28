@@ -11,6 +11,10 @@ urlpatterns = [
     path('login-codigo/', views.login_con_codigo, name='login_con_codigo'),
     path('verificar-codigo-login/', views.verificar_codigo_login, name='verificar_codigo_login'),
     
+    # Recuperación de contraseña con código de email
+    path('recuperar-password/', views.recuperar_password_solicitar, name='recuperar_password_solicitar'),
+    path('recuperar-password/verificar/', views.recuperar_password_verificar, name='recuperar_password_verificar'),
+    
     # Registro (vista personalizada que haremos ahora)
     path('registrar/', views.registrar, name='registrar'),
     path('verificar/', views.verificar_codigo, name='verificar_codigo'), # <-- Nueva

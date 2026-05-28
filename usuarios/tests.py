@@ -507,13 +507,13 @@ class DocumentosLegalesYRegistroTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verificar_codigo'))
         usuario = User.objects.get(username='conaviso')
-        self.assertTrue(usuario.is_active)
+        self.assertFalse(usuario.is_active)
         self.assertEqual(usuario.email, 'conaviso@example.com')
         self.assertEqual(usuario.first_name, 'Luis')
         self.assertEqual(usuario.perfil.telefono, '5512345678')
-        self.assertIsNone(usuario.perfil.codigo_verificacion)
+        self.assertIsNotNone(usuario.perfil.codigo_verificacion)
 
     def test_registro_rechaza_correo_con_formato_invalido(self):
         response = self.client.post(

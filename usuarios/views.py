@@ -109,20 +109,27 @@ def registrar(request):
         if form.is_valid():
             with transaction.atomic():
                 user = form.save(commit=False)
-                user.is_active = True
+                user.is_active = False  # Requiere verificación por código
                 user.first_name = form.cleaned_data['first_name']
                 user.last_name = form.cleaned_data['last_name']
                 user.email = form.cleaned_data['email']
                 user.save()
 
+                codigo = str(random.randint(100000, 999999))
                 perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
                 perfil.telefono = form.cleaned_data['telefono']
                 perfil.direccion = form.cleaned_data.get('direccion', '')
-                perfil.codigo_verificacion = None
+                perfil.codigo_verificacion = codigo
                 perfil.save()
 
-            messages.success(request, 'Cuenta creada con éxito. Ya puedes entrar.')
-            return redirect('login')
+            try:
+                enviar_codigo_verificacion_email(user, codigo)
+                messages.success(request, 'Te hemos enviado un código de verificación a tu correo para activar tu cuenta.')
+            except Exception as exc:
+                messages.warning(request, f'Se creó tu cuenta, pero no se pudo enviar el correo de verificación: {exc}')
+
+            request.session['user_id_verificar'] = user.id
+            return redirect('verificar_codigo')
     else:
         form = RegistroClienteForm()
         
@@ -950,4 +957,108 @@ def resetear_password_cliente(request, user_id):
     
     messages.success(request, f'La contraseña de {cliente.get_full_name() or cliente.username} ha sido actualizada con éxito.')
     return redirect('detalle_cliente', user_id=cliente.id)
+
+
+def recuperar_password_solicitar(request):
+    """
+    Paso 1: Solicitar recuperación de contraseña por código enviado al email.
+    """
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
+        
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        if not email:
+            messages.error(request, 'Por favor ingresa tu correo electrónico.')
+            return render(request, 'usuarios/recuperar_solicitar.html')
+            
+        try:
+            user = User.objects.get(email=email, is_active=True)
+        except User.DoesNotExist:
+            messages.error(request, 'No encontramos ninguna cuenta activa con ese correo electrónico.')
+            return render(request, 'usuarios/recuperar_solicitar.html')
+            
+        # Generar código de 6 dígitos
+        codigo = str(random.randint(100000, 999999))
+        
+        # Guardar en perfil
+        perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
+        perfil.codigo_verificacion = codigo
+        perfil.save()
+        
+        try:
+            from .email_service import enviar_codigo_recuperacion_email
+            enviar_codigo_recuperacion_email(user, codigo)
+            messages.success(request, 'Te hemos enviado un código de recuperación a tu correo.')
+        except Exception as exc:
+            messages.error(request, f'No se pudo enviar el correo de recuperación: {exc}')
+            return render(request, 'usuarios/recuperar_solicitar.html')
+            
+        request.session['email_recuperacion'] = email
+        return redirect('recuperar_password_verificar')
+        
+    return render(request, 'usuarios/recuperar_solicitar.html')
+
+
+def recuperar_password_verificar(request):
+    """
+    Paso 2: Verificar el código e ingresar la nueva contraseña.
+    """
+    if request.user.is_authenticated:
+        return redirect('lista_libros')
+        
+    email = request.session.get('email_recuperacion')
+    if not email:
+        return redirect('recuperar_password_solicitar')
+        
+    if request.method == 'POST':
+        codigo_ingresado = request.POST.get('codigo', '').strip()
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
+        
+        if not codigo_ingresado or not password1 or not password2:
+            messages.error(request, 'Por favor completa todos los campos.')
+            return render(request, 'usuarios/recuperar_verificar.html', {'email': email})
+            
+        if password1 != password2:
+            messages.error(request, 'Las contraseñas no coinciden.')
+            return render(request, 'usuarios/recuperar_verificar.html', {'email': email})
+            
+        try:
+            user = User.objects.get(email=email, is_active=True)
+            perfil = PerfilUsuario.objects.get(usuario=user)
+            
+            if perfil.codigo_verificacion == codigo_ingresado:
+                # Actualizar contraseña
+                user.set_password(password1)
+                user.save(update_fields=['password'])
+                
+                # Limpiar código
+                perfil.codigo_verificacion = None
+                perfil.save()
+                
+                # Limpiar sesión
+                request.session.pop('email_recuperacion', None)
+                
+                # Registrar auditoría
+                registrar_auditoria(
+                    actor=None,
+                    accion='seguridad',
+                    modulo='usuarios',
+                    entidad_tipo='usuario_cliente',
+                    entidad_id=user.id,
+                    entidad_nombre=user.username,
+                    descripcion=f'El usuario "{user.username}" restableció su contraseña mediante código de email.',
+                )
+                
+                messages.success(request, '¡Contraseña restablecida con éxito! Ya puedes iniciar sesión.')
+                return redirect('login')
+            else:
+                messages.error(request, 'El código ingresado es incorrecto.')
+        except User.DoesNotExist:
+            messages.error(request, 'Error al recuperar la cuenta.')
+            return redirect('recuperar_password_solicitar')
+            
+    return render(request, 'usuarios/recuperar_verificar.html', {'email': email})
+
 
