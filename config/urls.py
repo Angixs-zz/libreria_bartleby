@@ -19,6 +19,7 @@ urlpatterns = [
         {'slug': 'terminos-condiciones'},
         name='terminos_condiciones'
     ),
+    path('', include('catalogo.urls')),
     path('catalogo/', include('catalogo.urls')),
     path('usuarios/', include('usuarios.urls')),
     path('reservas/', include('reservas.urls')),
