@@ -730,6 +730,218 @@ def gestion_inventario(request):
 
 
 @director_required
+@require_http_methods(["GET"])
+def exportar_inventario(request):
+    """
+    Exporta todo el inventario (libros + ejemplares) a un archivo JSON.
+    """
+    from django.http import HttpResponse
+    import json
+    from django.utils.timezone import now
+    
+    ejemplares = Ejemplar.objects.select_related('libro', 'libro__categoria', 'estado_fisico').all()
+    
+    export_data = {
+        'version': '1.0',
+        'exportado_en': now().isoformat(),
+        'libreria': 'Librería Bartleby',
+        'inventario': []
+    }
+    
+    for e in ejemplares:
+        item = {
+            'sku': e.sku,
+            'estado_fisico': e.estado_fisico.nombre if e.estado_fisico else 'Nuevo',
+            'descripcion_estado': e.descripcion_estado or '',
+            'precio_compra': str(e.precio_compra),
+            'precio_venta': str(e.precio_venta),
+            'stock': e.stock,
+            'libro': {
+                'titulo': e.libro.titulo,
+                'autor': e.libro.autor,
+                'isbn': e.libro.isbn or '',
+                'editorial': e.libro.editorial or '',
+                'anio_publicacion': e.libro.anio_publicacion,
+                'categoria': e.libro.categoria.nombre if e.libro.categoria else '',
+                'descripcion': e.libro.descripcion or ''
+            }
+        }
+        export_data['inventario'].append(item)
+        
+    response = HttpResponse(
+        json.dumps(export_data, indent=4, ensure_ascii=False),
+        content_type='application/json; charset=utf-8'
+    )
+    filename = f"inventario_bartleby_{now().strftime('%Y%m%d_%H%M%S')}.json"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    registrar_auditoria(
+        actor=request.user,
+        accion='exportar',
+        modulo='inventario',
+        entidad_tipo='inventario',
+        entidad_id=0,
+        entidad_nombre='Copia de Seguridad de Inventario',
+        descripcion=f'Se exportó el inventario completo ({len(export_data["inventario"])} registros).',
+    )
+    return response
+
+
+@director_required
+@require_http_methods(["POST"])
+def importar_inventario(request):
+    """
+    Importa libros y ejemplares desde un archivo JSON.
+    Soporta inserción de nuevos registros e incremento/actualización de existentes.
+    """
+    import json
+    
+    archivo = request.FILES.get('archivo_importar')
+    if not archivo:
+        messages.error(request, '❌ Por favor, selecciona un archivo JSON para importar.')
+        return redirect('gestion_inventario')
+        
+    try:
+        data = json.load(archivo)
+    except Exception as e:
+        messages.error(request, f'❌ Error al leer el archivo JSON: {str(e)}')
+        return redirect('gestion_inventario')
+        
+    inventario_items = data.get('inventario')
+    if not isinstance(inventario_items, list):
+        messages.error(request, '❌ El archivo JSON no tiene un formato válido de inventario.')
+        return redirect('gestion_inventario')
+        
+    libros_creados = 0
+    libros_usados = 0
+    ejemplares_creados = 0
+    ejemplares_actualizados = 0
+    
+    try:
+        with transaction.atomic():
+            for item in inventario_items:
+                libro_data = item.get('libro')
+                if not libro_data or not libro_data.get('titulo') or not libro_data.get('autor'):
+                    continue
+                    
+                titulo = libro_data['titulo'].strip()
+                autor = libro_data['autor'].strip()
+                isbn = libro_data.get('isbn', '').strip() or None
+                editorial = libro_data.get('editorial', '').strip() or None
+                anio = libro_data.get('anio_publicacion')
+                categoria_nombre = libro_data.get('categoria', '').strip()
+                descripcion = libro_data.get('descripcion', '').strip() or None
+                
+                # Obtener o crear Categoria
+                categoria_obj = None
+                if categoria_nombre:
+                    categoria_obj, _ = Categoria.objects.get_or_create(
+                        nombre=categoria_nombre.capitalize()
+                    )
+                    
+                # Buscar Libro existente
+                libro_obj = None
+                if isbn:
+                    libro_obj = Libro.objects.filter(isbn=isbn).first()
+                if not libro_obj:
+                    libro_obj = Libro.objects.filter(titulo__iexact=titulo, autor__iexact=autor).first()
+                    
+                if not libro_obj:
+                    libro_obj = Libro.objects.create(
+                        titulo=titulo,
+                        autor=autor,
+                        isbn=isbn,
+                        editorial=editorial,
+                        anio_publicacion=anio,
+                        categoria=categoria_obj,
+                        descripcion=descripcion
+                    )
+                    libros_creados += 1
+                else:
+                    libros_usados += 1
+                    # Opcionalmente rellenar campos vacíos del libro existente
+                    actualizado = False
+                    if not libro_obj.isbn and isbn:
+                        libro_obj.isbn = isbn
+                        actualizado = True
+                    if not libro_obj.editorial and editorial:
+                        libro_obj.editorial = editorial
+                        actualizado = True
+                    if not libro_obj.descripcion and descripcion:
+                        libro_obj.descripcion = descripcion
+                        actualizado = True
+                    if not libro_obj.categoria and categoria_obj:
+                        libro_obj.categoria = categoria_obj
+                        actualizado = True
+                    if actualizado:
+                        libro_obj.save()
+                        
+                # Obtener o crear Estado Fisico
+                estado_nombre = item.get('estado_fisico', '').strip() or 'Nuevo'
+                estado_fisico_obj, _ = EstadoFisico.objects.get_or_create(
+                    nombre=estado_nombre.capitalize()
+                )
+                
+                sku = item.get('sku', '').strip()
+                stock = int(item.get('stock', 1))
+                precio_compra = Decimal(str(item.get('precio_compra', '0.00')))
+                precio_venta = Decimal(str(item.get('precio_venta', '0.00')))
+                descripcion_estado = item.get('descripcion_estado', '').strip() or None
+                
+                # Buscar Ejemplar por SKU
+                ejemplar_obj = None
+                if sku:
+                    ejemplar_obj = Ejemplar.objects.filter(sku=sku).first()
+                    
+                if ejemplar_obj:
+                    # Actualizar stock
+                    ejemplar_obj.stock = stock
+                    ejemplar_obj.precio_compra = precio_compra
+                    ejemplar_obj.precio_venta = precio_venta
+                    ejemplar_obj.estado_fisico = estado_fisico_obj
+                    if descripcion_estado:
+                        ejemplar_obj.descripcion_estado = descripcion_estado
+                    ejemplar_obj.save()
+                    ejemplares_actualizados += 1
+                else:
+                    # Crear nuevo ejemplar
+                    kwargs = {
+                        'libro': libro_obj,
+                        'estado_fisico': estado_fisico_obj,
+                        'precio_compra': precio_compra,
+                        'precio_venta': precio_venta,
+                        'stock': stock,
+                        'descripcion_estado': descripcion_estado
+                    }
+                    if sku:
+                        kwargs['sku'] = sku
+                    Ejemplar.objects.create(**kwargs)
+                    ejemplares_creados += 1
+                    
+        messages.success(
+            request,
+            f'✅ Importación finalizada con éxito. '
+            f'Libros: {libros_creados} creados / {libros_usados} asociados. '
+            f'Ejemplares (lotes): {ejemplares_creados} creados / {ejemplares_actualizados} sincronizados.'
+        )
+        
+        registrar_auditoria(
+            actor=request.user,
+            accion='importar',
+            modulo='inventario',
+            entidad_tipo='inventario',
+            entidad_id=0,
+            entidad_nombre='Importador de Inventario',
+            descripcion=f'Se importó un archivo JSON de inventario. Libros creados: {libros_creados}, ejemplares creados: {ejemplares_creados}, ejemplares actualizados: {ejemplares_actualizados}.',
+        )
+        
+    except Exception as e:
+        messages.error(request, f'❌ Error durante la importación (Transacción revertida): {str(e)}')
+        
+    return redirect('gestion_inventario')
+
+
+@director_required
 @require_http_methods(["GET", "POST"])
 def detalle_ejemplar(request, ejemplar_id):
     """

@@ -153,12 +153,30 @@
         Administra el catálogo, revisa el stock y registra nuevos ejemplares.
       </p>
     </div>
-    <a href="{% url 'agregar_libro' %}"
-       class="qnav-chip primary flex-shrink-0 btn-shine ripple-origin"
-       style="font-size:0.78rem; padding: 0.75rem 1.4rem;">
-      <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
-      Agregar Libro
-    </a>
+    <div class="flex flex-wrap gap-2 items-center">
+      <!-- Import button opens modal -->
+      <button type="button" onclick="openImportModal()"
+         class="qnav-chip flex-shrink-0 ripple-origin cursor-pointer"
+         style="font-size:0.78rem; padding: 0.75rem 1.1rem; background: var(--surface);">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">upload</span>
+        Importar
+      </button>
+      
+      <!-- Export button triggers file download -->
+      <a href="{% url 'exportar_inventario' %}"
+         class="qnav-chip flex-shrink-0 ripple-origin"
+         style="font-size:0.78rem; padding: 0.75rem 1.1rem; background: var(--surface);">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">download</span>
+        Exportar
+      </a>
+
+      <a href="{% url 'agregar_libro' %}"
+         class="qnav-chip primary flex-shrink-0 btn-shine ripple-origin"
+         style="font-size:0.78rem; padding: 0.75rem 1.4rem;">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
+        Agregar Libro
+      </a>
+    </div>
   </header>
 
   <!-- ── MAIN LAYOUT: sidebar + content ─── -->
@@ -484,5 +502,77 @@ document.getElementById('confirm-delete-btn').addEventListener('click', () => {
 document.getElementById('delete-modal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
+
+/* ── Import modal ── */
+function openImportModal() {
+  const modal = document.getElementById('import-modal');
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  setTimeout(() => {
+    modal.classList.remove('opacity-0');
+    document.getElementById('import-modal-content').classList.remove('scale-95');
+  }, 10);
+}
+
+function closeImportModal() {
+  const modal = document.getElementById('import-modal');
+  modal.classList.add('opacity-0');
+  document.getElementById('import-modal-content').classList.add('scale-95');
+  setTimeout(() => {
+    modal.classList.add('hidden'); modal.classList.remove('flex');
+    document.getElementById('archivo_importar').value = '';
+    document.getElementById('file-label-text').innerText = 'Selecciona tu archivo JSON';
+  }, 300);
+}
+
+function handleFileSelected(input) {
+  if (input.files && input.files.length > 0) {
+    const filename = input.files[0].name;
+    document.getElementById('file-label-text').innerText = filename;
+  }
+}
 </script>
+
+<!-- ── IMPORT MODAL ── -->
+<div id="import-modal"
+     class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+  <div id="import-modal-content"
+       class="w-full max-w-md p-8 rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300"
+       style="background:var(--surface); border:1px solid var(--border);">
+    <div class="flex items-center gap-4 mb-5">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+           style="background:rgba(163,196,106,.15); color:var(--primary);">
+        <span class="material-symbols-outlined">upload_file</span>
+      </div>
+      <h3 class="font-headline italic text-2xl" style="color:var(--text);">Importar Inventario (JSON)</h3>
+    </div>
+    
+    <p class="text-sm mb-6" style="color:var(--text-muted);">
+      Sube una copia de seguridad en formato JSON. Los libros y ejemplares se sincronizarán en la base de datos de manera atómica y segura.
+    </p>
+
+    <form method="POST" action="{% url 'importar_inventario' %}" enctype="multipart/form-data" id="form-importar" class="space-y-6">
+      {% csrf_token %}
+      <div class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+           style="border-color: var(--border);"
+           onclick="document.getElementById('archivo_importar').click()">
+        <span class="material-symbols-outlined text-3xl mb-2" style="color: var(--text-faint);">cloud_upload</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-center px-4" style="color: var(--text-muted);" id="file-label-text">Selecciona tu archivo JSON</span>
+        <input type="file" id="archivo_importar" name="archivo_importar" accept=".json" class="hidden" required onchange="handleFileSelected(this)">
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4" style="border-top: 1px solid var(--border);">
+        <button onclick="closeImportModal()" type="button"
+                class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+                style="border:1px solid var(--border); color:var(--text-muted);">
+          Cancelar
+        </button>
+        <button type="submit"
+                class="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-all text-white"
+                style="background:var(--primary);">
+          Comenzar Importación
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

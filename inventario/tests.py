@@ -332,3 +332,97 @@ class CancelacionReservaTestCase(TransactionTestCase):
         self.assertEqual(count, 1)
         reserva.refresh_from_db()
         self.assertEqual(reserva.estado, 'expirada')
+
+
+class ImportExportTestCase(TestCase):
+    """Tests para exportación e importación de base de datos de inventario en JSON."""
+    
+    def setUp(self):
+        self.director = User.objects.create_superuser(
+            username='director',
+            email='director@example.com',
+            password='pass123'
+        )
+        
+        self.categoria = Categoria.objects.create(nombre='Historia')
+        self.libro = Libro.objects.create(
+            titulo='Bartleby el escribiente',
+            autor='Herman Melville',
+            isbn='9788420650951',
+            categoria=self.categoria
+        )
+        self.ejemplar = Ejemplar.objects.create(
+            libro=self.libro,
+            estado_fisico=EstadoFisico.objects.get_or_create(nombre='Nuevo')[0],
+            precio_compra=Decimal('5.00'),
+            precio_venta=Decimal('10.00'),
+            stock=12
+        )
+        
+    def test_exportar_inventario(self):
+        """La exportación debe retornar un archivo JSON con la estructura correcta."""
+        self.client.login(username='director', password='pass123')
+        response = self.client.get('/inventario/exportar/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json; charset=utf-8')
+        self.assertTrue('attachment; filename=' in response['Content-Disposition'])
+        
+        import json
+        data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(data['version'], '1.0')
+        self.assertEqual(data['libreria'], 'Librería Bartleby')
+        self.assertEqual(len(data['inventario']), 1)
+        
+        item = data['inventario'][0]
+        self.assertEqual(item['sku'], self.ejemplar.sku)
+        self.assertEqual(item['stock'], 12)
+        self.assertEqual(item['libro']['titulo'], 'Bartleby el escribiente')
+        
+    def test_importar_inventario_valido(self):
+        """La importación de un JSON válido debe registrar libros y ejemplares correctamente."""
+        self.client.login(username='director', password='pass123')
+        
+        import json
+        import io
+        
+        json_data = {
+            'version': '1.0',
+            'libreria': 'Librería Bartleby',
+            'inventario': [
+                {
+                    'sku': 'BRT-IMPT',
+                    'estado_fisico': 'Excelente',
+                    'descripcion_estado': 'Impecable',
+                    'precio_compra': '6.50',
+                    'precio_venta': '12.00',
+                    'stock': 8,
+                    'libro': {
+                        'titulo': 'Moby Dick',
+                        'autor': 'Herman Melville',
+                        'isbn': '9788497940177',
+                        'editorial': 'Editorial Alfa',
+                        'anio_publicacion': 1851,
+                        'categoria': 'Aventura',
+                        'descripcion': 'La gran novela marina.'
+                    }
+                }
+            ]
+        }
+        
+        archivo_temp = io.BytesIO(json.dumps(json_data).encode('utf-8'))
+        archivo_temp.name = 'test_importar.json'
+        
+        response = self.client.post('/inventario/importar/', {'archivo_importar': archivo_temp})
+        self.assertEqual(response.status_code, 302)  # Redirecciona a gestion_inventario
+        
+        # Verificar que se creó el nuevo libro y ejemplar
+        nuevo_libro = Libro.objects.filter(isbn='9788497940177').first()
+        self.assertIsNotNone(nuevo_libro)
+        self.assertEqual(nuevo_libro.titulo, 'Moby Dick')
+        self.assertEqual(nuevo_libro.categoria.nombre, 'Aventura')
+        
+        nuevo_ejemplar = Ejemplar.objects.filter(sku='BRT-IMPT').first()
+        self.assertIsNotNone(nuevo_ejemplar)
+        self.assertEqual(nuevo_ejemplar.stock, 8)
+        self.assertEqual(nuevo_ejemplar.precio_venta, Decimal('11.99'))
+        self.assertEqual(nuevo_ejemplar.estado_fisico.nombre, 'Excelente')
