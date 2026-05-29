@@ -9,7 +9,7 @@
 #     3. Descomenta RESEND_API_KEY y RESEND_FROM_EMAIL en el archivo .env
 # ──────────────────────────────────────────────────────────────────────────────
 
-# import requests                          # ← necesario para Resend
+import requests
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -47,14 +47,45 @@ from django.core.mail import send_mail
 def enviar_correo(destinatario, asunto, html, texto):
     """
     Envía un correo usando el EMAIL_BACKEND configurado en settings.
-
-    En desarrollo (EMAIL_BACKEND = console.EmailBackend) el correo
-    se imprime en la terminal — NO se envía ningún correo real.
+    En producción en Render (Free Tier), si se configuran credenciales de Brevo,
+    se enviará automáticamente usando la API HTTP de Brevo en el puerto 443 (HTTPS)
+    para evitar el bloqueo que hace Render en el puerto SMTP 587.
     """
+    api_key = getattr(settings, 'EMAIL_HOST_PASSWORD', '')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@bartleby.dev')
+    email_host = getattr(settings, 'EMAIL_HOST', '')
+    email_backend = getattr(settings, 'EMAIL_BACKEND', '')
+
+    # Si detectamos Brevo y no estamos usando la consola de desarrollo, intentamos enviar vía API HTTPS (puerto 443)
+    if api_key and ('xsmtpsib-' in api_key or 'smtp-relay.brevo.com' in email_host) and 'console.EmailBackend' not in email_backend:
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": api_key,
+            "content-type": "application/json"
+        }
+        payload = {
+            "sender": {"email": from_email, "name": "Libreria Bartleby"},
+            "to": [{"email": destinatario}],
+            "subject": asunto,
+            "htmlContent": html,
+            "textContent": texto
+        }
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=5)
+            if response.status_code in [200, 201, 202]:
+                return {'modo': 'brevo_api_http', 'status': 'success'}
+            else:
+                # Si la API da error, hacemos fallback al envío SMTP tradicional
+                print(f"[Brevo API Error]: HTTP {response.status_code} - {response.text}")
+        except Exception as err:
+            print(f"[Brevo API Connection Error]: {err}")
+
+    # Fallback o envío predeterminado (SMTP o Consola)
     send_mail(
         asunto,
         texto,
-        getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@bartleby.dev'),
+        from_email,
         [destinatario],
         fail_silently=False,
         html_message=html,
