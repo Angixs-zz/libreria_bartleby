@@ -613,22 +613,37 @@
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
                                         {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.first_name.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
                                         {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.last_name.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
                                         {{ form.username }}
+                                        {% if form.username.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.username.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
                                         {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.email.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Telefono</label>
                                         {{ form.telefono }}
+                                        {% if form.telefono.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.telefono.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             {% endwith %}
@@ -671,12 +686,23 @@
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nueva contraseña</label>
                                         {{ form.password1 }}
+                                        {% if form.password1.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.password1.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="staff-field">
                                         <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                                         {{ form.password2 }}
+                                        {% if form.password2.errors %}
+                                            <div class="text-danger text-[11px] font-bold mt-1">{{ form.password2.errors.0 }}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger py-2 px-3 rounded-3 text-xs mt-3 mb-0">
+                                        {{ form.non_field_errors.0 }}
+                                    </div>
+                                {% endif %}
                                 <div class="flex items-center gap-2 mt-3 pl-1">
                                     <input type="checkbox" id="show-pass-reset-{{ empleado.id }}" class="toggle-password-visibility rounded border-gray-300 text-olive-600 focus:ring-olive-500" style="cursor: pointer;">
                                     <label for="show-pass-reset-{{ empleado.id }}" class="text-[10px] font-extrabold uppercase tracking-widest" style="color: var(--text-muted); cursor: pointer; user-select: none;">
@@ -724,26 +750,44 @@
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Nombre</label>
                             {{ staff_form.first_name }}
+                            {% if staff_form.first_name.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.first_name.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Apellido</label>
                             {{ staff_form.last_name }}
+                            {% if staff_form.last_name.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.last_name.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Usuario</label>
                             {{ staff_form.username }}
+                            {% if staff_form.username.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.username.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Correo</label>
                             {{ staff_form.email }}
+                            {% if staff_form.email.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.email.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Contraseña</label>
                             {{ staff_form.password1 }}
+                            {% if staff_form.password1.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.password1.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field">
                             <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Confirmar contraseña</label>
                             {{ staff_form.password2 }}
+                            {% if staff_form.password2.errors %}
+                                <div class="text-danger text-[11px] font-bold mt-1">{{ staff_form.password2.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="staff-field" style="grid-column: 1 / -1; margin-top: -0.25rem;">
                             <div class="flex items-center gap-2 pl-1">
@@ -763,13 +807,16 @@
                                 <div class="staff-permission-card">
                                     <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Rol del empleado</label>
                                     <select name="rol_empleado" required>
-                                        <option value="cajero">Cajero / Operativo</option>
-                                        <option value="director">Director General (Admin)</option>
+                                        <option value="cajero" {% if request.POST.rol_empleado == 'cajero' %}selected{% endif %}>Cajero / Operativo</option>
+                                        <option value="director" {% if request.POST.rol_empleado == 'director' %}selected{% endif %}>Director General (Admin)</option>
                                     </select>
                                 </div>
                                 <div class="staff-permission-card">
                                     <label class="form-label text-uppercase fw-bold small" style="letter-spacing: 0.12em; color: var(--text-muted);">Tu contraseña</label>
                                     <input type="password" name="admin_password" required placeholder="Autoriza la creación">
+                                    {% if admin_password_error %}
+                                        <div class="text-danger text-[11px] font-bold mt-1">{{ admin_password_error }}</div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -799,6 +846,23 @@ document.querySelectorAll('.toggle-password-visibility').forEach(checkbox => {
             input.type = this.checked ? 'text' : 'password';
         });
     });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    {% if show_nuevo_staff_modal %}
+        var nuevoModal = new bootstrap.Modal(document.getElementById('nuevoStaffModal'));
+        nuevoModal.show();
+    {% endif %}
+
+    {% if show_editar_staff_modal_id %}
+        var editarModal = new bootstrap.Modal(document.getElementById('editarPersonalModal-{{ show_editar_staff_modal_id }}'));
+        editarModal.show();
+    {% endif %}
+
+    {% if show_reset_password_modal_id %}
+        var resetModal = new bootstrap.Modal(document.getElementById('resetPasswordModal-{{ show_reset_password_modal_id }}'));
+        resetModal.show();
+    {% endif %}
 });
 </script>
 {% endblock %}

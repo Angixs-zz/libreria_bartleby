@@ -191,9 +191,10 @@ def agregar_libro(request):
 
     if request.method == 'POST':
         accion = request.POST.get('accion', '').strip()
+        sin_proveedor = request.POST.get('sin_proveedor') == 'true'
 
         try:
-            if modo_compra_suelta and not proveedor_compra and not lote_compra:
+            if modo_compra_suelta and not sin_proveedor and not proveedor_compra and not lote_compra:
                 messages.error(request, 'Selecciona el proveedor o lote.')
                 return _redirect_ingreso_ejemplar(modo_compra_suelta)
 
@@ -233,7 +234,7 @@ def agregar_libro(request):
 
                 precio_compra, error = validar_precio(precio_compra_str)
                 if error:
-                    if modo_compra_suelta and not lote_compra:
+                    if modo_compra_suelta and not lote_compra and not sin_proveedor:
                         messages.error(request, f'❌ Precio costo: {error}')
                         return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                     precio_compra = Decimal('0.00')
@@ -306,9 +307,9 @@ def agregar_libro(request):
                     estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
-                    stock=0 if modo_compra_suelta else stock
+                    stock=0 if (modo_compra_suelta and not sin_proveedor) else stock
                 )
-                if modo_compra_suelta:
+                if modo_compra_suelta and not sin_proveedor:
                     adquisicion = _registrar_detalle_compra_suelta(
                         request,
                         proveedor_compra,
@@ -358,7 +359,7 @@ def agregar_libro(request):
 
                 precio_compra, error = validar_precio(precio_compra_str)
                 if not precio_compra:
-                    if modo_compra_suelta and not lote_compra:
+                    if modo_compra_suelta and not lote_compra and not sin_proveedor:
                         messages.error(request, f'❌ Precio costo: {error or "El precio debe ser mayor a 0"}')
                         return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
                     precio_compra = Decimal('0.00')
@@ -382,9 +383,9 @@ def agregar_libro(request):
                     estado_fisico=estado_fisico_obj,
                     precio_compra=precio_compra,
                     precio_venta=precio_venta,
-                    stock=0 if modo_compra_suelta else stock
+                    stock=0 if (modo_compra_suelta and not sin_proveedor) else stock
                 )
-                if modo_compra_suelta:
+                if modo_compra_suelta and not sin_proveedor:
                     adquisicion = _registrar_detalle_compra_suelta(
                         request,
                         proveedor_compra,
@@ -432,7 +433,7 @@ def agregar_libro(request):
                     messages.error(request, f'❌ Cantidad: {error}')
                     return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
 
-                if modo_compra_suelta:
+                if modo_compra_suelta and not sin_proveedor:
                     precio_compra, error = validar_precio(precio_compra_str)
                     if error:
                         if not lote_compra:

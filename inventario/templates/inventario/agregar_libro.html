@@ -179,15 +179,33 @@
 
     {% if modo_compra_suelta %}
     <section class="entry-purchase-panel mb-8">
-        <div class="entry-purchase-layout">
+        {% if not lote_compra %}
+        <!-- Premium Segmented Control to Toggle Provider Option -->
+        <div class="flex border-b pb-4 mb-4 gap-4 flex-wrap items-center justify-between" style="border-color: var(--border);">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-widest mb-0.5" style="color: var(--primary);">Origen del ejemplar</p>
+                <p class="text-xs mb-0" style="color: var(--text-muted);">Elige si este libro proviene de una compra a proveedor o si ya existía en la librería (donado/propio).</p>
+            </div>
+            <div class="flex bg-[var(--bg)] p-1 rounded-xl border" style="border-color: var(--border);">
+                <button type="button" id="toggle-con-proveedor" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 bg-[#3e5219] text-white shadow-sm" onclick="setOriginMode('con_proveedor')">
+                    Con Proveedor
+                </button>
+                <button type="button" id="toggle-sin-proveedor" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text)]" onclick="setOriginMode('sin_proveedor')">
+                    Sin Proveedor
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="entry-purchase-layout" id="provider-layout-section">
             <div class="entry-purchase-copy">
-                <span class="entry-purchase-icon material-symbols-outlined" aria-hidden="true">local_shipping</span>
+                <span class="entry-purchase-icon material-symbols-outlined" aria-hidden="true" id="purchase-icon-symbol">local_shipping</span>
                 <div>
-                <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color: var(--primary);">{% if lote_compra %}Inventariar Lote Cerrado{% else %}Proveedor de esta compra{% endif %}</p>
-                <p class="text-sm mb-0" style="color: var(--text-muted);">{% if lote_compra %}Los libros que registres se añadirán al lote cerrado seleccionado.{% else %}Este dato creará la adquisición y quedará como historial del ejemplar.{% endif %}</p>
+                <p class="text-xs font-bold uppercase tracking-widest mb-1" id="purchase-panel-title" style="color: var(--primary);">{% if lote_compra %}Inventariar Lote Cerrado{% else %}Proveedor de esta compra{% endif %}</p>
+                <p class="text-sm mb-0" id="purchase-panel-desc" style="color: var(--text-muted);">{% if lote_compra %}Los libros que registres se añadirán al lote cerrado seleccionado.{% else %}Este dato creará la adquisición y quedará como historial del ejemplar.{% endif %}</p>
                 </div>
             </div>
-            <div class="entry-purchase-control">
+            <div class="entry-purchase-control" id="provider-dropdown-container">
                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">{% if lote_compra %}Lote / Proveedor{% else %}Proveedor{% endif %}</label>
                 {% if lote_compra %}
                 <div class="entry-lote-card text-sm font-bold">
@@ -269,6 +287,7 @@
                 {% if modo_compra_suelta %}
                 <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
                 <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
+                <input type="hidden" name="sin_proveedor" class="sin-proveedor-hidden" value="false">
                 {% endif %}
                 <div>
                     <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Lote (SKU)</label>
@@ -299,6 +318,7 @@
                 {% if modo_compra_suelta %}
                 <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
                 <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
+                <input type="hidden" name="sin_proveedor" class="sin-proveedor-hidden" value="false">
                 {% endif %}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -345,6 +365,7 @@
             {% if modo_compra_suelta %}
             <input type="hidden" name="proveedor_compra" class="proveedor-compra-hidden" value="{% if proveedor_compra %}{{ proveedor_compra.id }}{% endif %}">
             <input type="hidden" name="lote_compra" class="lote-compra-hidden" value="{% if lote_compra %}{{ lote_compra.id }}{% endif %}">
+            <input type="hidden" name="sin_proveedor" class="sin-proveedor-hidden" value="false">
             {% endif %}
 
             <div class="entry-main-panel">
@@ -461,6 +482,69 @@
 let debounceTimer = null;
 const modoCompraSuelta = {{ modo_compra_suelta|yesno:"true,false" }};
 const proveedorCompraSelect = document.getElementById('proveedor-compra-select');
+let currentOriginMode = 'con_proveedor';
+
+function setOriginMode(mode) {
+    if (!modoCompraSuelta) return;
+    currentOriginMode = mode;
+    
+    const btnCon = document.getElementById('toggle-con-proveedor');
+    const btnSin = document.getElementById('toggle-sin-proveedor');
+    const provSelect = document.getElementById('proveedor-compra-select');
+    
+    if (mode === 'sin_proveedor') {
+        if (btnCon) btnCon.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text)]";
+        if (btnSin) btnSin.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 bg-[#3e5219] text-white shadow-sm";
+        
+        document.getElementById('purchase-icon-symbol').textContent = 'inventory';
+        document.getElementById('purchase-panel-title').textContent = 'Ingreso Directo a Inventario';
+        document.getElementById('purchase-panel-desc').textContent = 'Los libros se añadirán directamente a las existencias sin registrar ninguna compra o proveedor.';
+        
+        const container = document.getElementById('provider-dropdown-container');
+        if (container) container.style.display = 'none';
+        if (provSelect) {
+            provSelect.required = false;
+            provSelect.value = '';
+        }
+        
+        document.querySelectorAll('.sin-proveedor-hidden').forEach(input => {
+            input.value = 'true';
+        });
+        
+        document.querySelectorAll('input[name="precio_compra"]').forEach(input => {
+            input.required = false;
+            const label = input.previousElementSibling;
+            if (label && !label.textContent.includes('(opcional)')) {
+                label.textContent = label.textContent.replace(' ($)', '') + ' (opcional) ($)';
+            }
+        });
+    } else {
+        if (btnCon) btnCon.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 bg-[#3e5219] text-white shadow-sm";
+        if (btnSin) btnSin.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text)]";
+        
+        document.getElementById('purchase-icon-symbol').textContent = 'local_shipping';
+        document.getElementById('purchase-panel-title').textContent = 'Proveedor de esta compra';
+        document.getElementById('purchase-panel-desc').textContent = 'Este dato creará la adquisición y quedará como historial del ejemplar.';
+        
+        const container = document.getElementById('provider-dropdown-container');
+        if (container) container.style.display = 'block';
+        if (provSelect) {
+            provSelect.required = true;
+        }
+        
+        document.querySelectorAll('.sin-proveedor-hidden').forEach(input => {
+            input.value = 'false';
+        });
+        
+        document.querySelectorAll('input[name="precio_compra"]').forEach(input => {
+            input.required = true;
+            const label = input.previousElementSibling;
+            if (label && label.textContent.includes('(opcional)')) {
+                label.textContent = label.textContent.replace(' (opcional) ($)', ' ($)');
+            }
+        });
+    }
+}
 
 function actualizarProveedorCompra() {
     if (!modoCompraSuelta) return;
@@ -486,7 +570,7 @@ actualizarProveedorCompra();
 
 document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', function(event) {
-        if (modoCompraSuelta && proveedorCompraSelect && !proveedorCompraSelect.value) {
+        if (modoCompraSuelta && currentOriginMode === 'con_proveedor' && proveedorCompraSelect && !proveedorCompraSelect.value) {
             event.preventDefault();
             alert('Selecciona el proveedor antes de registrar la compra.');
         }

@@ -378,13 +378,7 @@ def mi_perfil_actividad(request):
     return render(request, 'usuarios/mi_perfil.html', context)
 
 
-@login_required
-@director_required
-@require_http_methods(["GET"])
-def panel_personal(request):
-    """
-    Vista del Director General para gestionar cuentas de staff.
-    """
+def _obtener_contexto_panel_personal(request, staff_form=None, editar_form_bound=None, password_form_bound=None, usuario_id=None):
     query = request.GET.get('q', '').strip()
 
     personal = User.objects.filter(
@@ -403,19 +397,30 @@ def panel_personal(request):
         empleado.rol_panel = 'Director General' if empleado.is_superuser else 'Cajero / Staff'
         empleado.badge_clase = 'director' if empleado.is_superuser else 'staff'
 
-    editar_forms = {
-        empleado.id: StaffUpdateForm(instance=empleado.perfil, user=empleado, prefix=f'editar-{empleado.id}')
-        for empleado in personal if not empleado.is_superuser
-    }
-    password_forms = {
-        empleado.id: StaffPasswordResetForm(prefix=f'password-{empleado.id}')
-        for empleado in personal if not empleado.is_superuser
-    }
+    editar_forms = {}
+    for empleado in personal:
+        if not empleado.is_superuser:
+            if usuario_id and empleado.id == usuario_id and editar_form_bound:
+                editar_forms[empleado.id] = editar_form_bound
+            else:
+                editar_forms[empleado.id] = StaffUpdateForm(
+                    instance=empleado.perfil,
+                    user=empleado,
+                    prefix=f'editar-{empleado.id}'
+                )
 
-    context = {
+    password_forms = {}
+    for empleado in personal:
+        if not empleado.is_superuser:
+            if usuario_id and empleado.id == usuario_id and password_form_bound:
+                password_forms[empleado.id] = password_form_bound
+            else:
+                password_forms[empleado.id] = StaffPasswordResetForm(prefix=f'password-{empleado.id}')
+
+    return {
         'personal': personal,
         'query': query,
-        'staff_form': StaffCreationForm(),
+        'staff_form': staff_form or StaffCreationForm(),
         'editar_forms': editar_forms,
         'password_forms': password_forms,
         'total_personal': User.objects.filter(Q(is_staff=True) | Q(is_superuser=True)).count(),
@@ -426,6 +431,16 @@ def panel_personal(request):
             is_active=False
         ).count(),
     }
+
+
+@login_required
+@director_required
+@require_http_methods(["GET"])
+def panel_personal(request):
+    """
+    Vista del Director General para gestionar cuentas de staff.
+    """
+    context = _obtener_contexto_panel_personal(request)
     return render(request, 'usuarios/panel_personal.html', context)
 
 
@@ -482,11 +497,15 @@ def panel_auditoria(request):
 @require_http_methods(["POST"])
 def crear_staff(request):
     admin_password = request.POST.get('admin_password', '')
-    if not request.user.check_password(admin_password):
-        messages.error(request, 'La contraseña de autorización es incorrecta. No se pudo registrar al empleado.')
-        return redirect('panel_personal')
-
     form = StaffCreationForm(request.POST)
+
+    if not request.user.check_password(admin_password):
+        context = _obtener_contexto_panel_personal(request, staff_form=form)
+        context['admin_password_error'] = 'La contraseña de autorización es incorrecta.'
+        context['show_nuevo_staff_modal'] = True
+        messages.error(request, 'La contraseña de autorización es incorrecta. No se pudo registrar al empleado.')
+        return render(request, 'usuarios/panel_personal.html', context)
+
     if form.is_valid():
         rol_seleccionado = request.POST.get('rol_empleado', 'cajero')
         
@@ -514,12 +533,15 @@ def crear_staff(request):
         )
 
         messages.success(request, f'La cuenta de {rol_seleccionado} para "{user.username}" fue creada correctamente.')
+        return redirect('panel_personal')
     else:
+        context = _obtener_contexto_panel_personal(request, staff_form=form)
+        context['show_nuevo_staff_modal'] = True
         errores = []
         for field_errors in form.errors.values():
             errores.extend(field_errors)
         messages.error(request, 'No se pudo crear la cuenta: ' + ' '.join(errores))
-    return redirect('panel_personal')
+        return render(request, 'usuarios/panel_personal.html', context)
 
 
 @login_required
@@ -612,12 +634,19 @@ def editar_personal(request, user_id):
             },
         )
         messages.success(request, f'Se actualizaron los datos de "{usuario.username}".')
+        return redirect('panel_personal')
     else:
+        context = _obtener_contexto_panel_personal(
+            request,
+            editar_form_bound=form,
+            usuario_id=usuario.id
+        )
+        context['show_editar_staff_modal_id'] = usuario.id
         errores = []
         for field_errors in form.errors.values():
             errores.extend(field_errors)
         messages.error(request, 'No se pudo actualizar el empleado: ' + ' '.join(errores))
-    return redirect('panel_personal')
+        return render(request, 'usuarios/panel_personal.html', context)
 
 
 @login_required
@@ -644,12 +673,19 @@ def resetear_password_personal(request, user_id):
             descripcion=f'Se reseteó la contraseña de "{usuario.username}".',
         )
         messages.success(request, f'Se actualizo la contrasena de "{usuario.username}".')
+        return redirect('panel_personal')
     else:
+        context = _obtener_contexto_panel_personal(
+            request,
+            password_form_bound=form,
+            usuario_id=usuario.id
+        )
+        context['show_reset_password_modal_id'] = usuario.id
         errores = []
         for field_errors in form.errors.values():
             errores.extend(field_errors)
         messages.error(request, 'No se pudo resetear la contrasena: ' + ' '.join(errores))
-    return redirect('panel_personal')
+        return render(request, 'usuarios/panel_personal.html', context)
 
 
 @login_required
