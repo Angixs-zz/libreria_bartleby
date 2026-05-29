@@ -57,7 +57,7 @@ def enviar_correo(destinatario, asunto, html, texto):
     email_backend = getattr(settings, 'EMAIL_BACKEND', '')
 
     # Si detectamos Brevo y no estamos usando la consola de desarrollo, intentamos enviar vía API HTTPS (puerto 443)
-    if api_key and ('xsmtpsib-' in api_key or 'smtp-relay.brevo.com' in email_host) and 'console.EmailBackend' not in email_backend:
+    if api_key and ('xsmtpsib-' in api_key or 'xkeysib-' in api_key or 'smtp-relay.brevo.com' in email_host) and 'console.EmailBackend' not in email_backend:
         url = "https://api.brevo.com/v3/smtp/email"
         headers = {
             "accept": "application/json",
