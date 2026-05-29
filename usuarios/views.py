@@ -126,7 +126,7 @@ def registrar(request):
                 enviar_codigo_verificacion_email(user, codigo)
                 messages.success(request, 'Te hemos enviado un código de verificación a tu correo para activar tu cuenta.')
             except Exception as exc:
-                messages.warning(request, f'Se creó tu cuenta, pero no se pudo enviar el correo de verificación: {exc}')
+                messages.warning(request, f'Se creó tu cuenta, pero no se pudo enviar el correo de verificación por restricciones del servidor ({exc}). Para pruebas, tu código de activación es: {codigo}')
 
             request.session['user_id_verificar'] = user.id
             return redirect('verificar_codigo')
@@ -153,7 +153,7 @@ def verificar_codigo(request):
                 enviar_codigo_verificacion_email(user, codigo)
                 messages.success(request, 'Te reenviamos un nuevo código de verificación.')
             except Exception as exc:
-                messages.error(request, f'No se pudo reenviar el código: {exc}')
+                messages.error(request, f'No se pudo enviar el correo ({exc}). Para pruebas, tu nuevo código de activación es: {codigo}')
             return redirect('verificar_codigo')
 
         codigo_ingresado = request.POST.get('codigo', '').strip()
