@@ -76,12 +76,12 @@ def enviar_correo(destinatario, asunto, html, texto):
             if response.status_code in [200, 201, 202]:
                 return {'modo': 'brevo_api_http', 'status': 'success'}
             else:
-                # Si la API da error, hacemos fallback al envío SMTP tradicional
-                print(f"[Brevo API Error]: HTTP {response.status_code} - {response.text}")
+                # Si la API de Brevo da error, lanzamos un error explícito con el detalle para ver la causa exacta en la pantalla
+                raise RuntimeError(f"Error de Brevo API ({response.status_code}): {response.text}")
         except Exception as err:
-            print(f"[Brevo API Connection Error]: {err}")
+            raise RuntimeError(f"Error de conexión con la API de Brevo: {err}")
 
-    # Fallback o envío predeterminado (SMTP o Consola)
+    # Fallback o envío predeterminado (SMTP o Consola) para otros casos
     send_mail(
         asunto,
         texto,
