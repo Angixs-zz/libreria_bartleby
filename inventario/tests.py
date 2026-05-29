@@ -360,7 +360,12 @@ class ImportExportTestCase(TestCase):
         )
         
     def test_exportar_inventario(self):
-        """La exportación debe retornar un archivo JSON con la estructura correcta."""
+        """La exportación debe retornar un archivo JSON con la estructura correcta, incluyendo portada en Base64."""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        gif_content = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+        self.libro.portada = SimpleUploadedFile('cover_test.gif', gif_content, content_type='image/gif')
+        self.libro.save()
+
         self.client.login(username='director', password='pass123')
         response = self.client.get('/inventario/exportar/')
         self.assertEqual(response.status_code, 200)
@@ -377,13 +382,17 @@ class ImportExportTestCase(TestCase):
         self.assertEqual(item['sku'], self.ejemplar.sku)
         self.assertEqual(item['stock'], 12)
         self.assertEqual(item['libro']['titulo'], 'Bartleby el escribiente')
+        self.assertEqual(item['libro']['portada_nombre'], 'cover_test.gif')
+        self.assertTrue(len(item['libro']['portada_base64']) > 0)
         
     def test_importar_inventario_valido(self):
-        """La importación de un JSON válido debe registrar libros y ejemplares correctamente."""
+        """La importación de un JSON válido debe registrar libros, portadas y ejemplares correctamente."""
         self.client.login(username='director', password='pass123')
         
         import json
         import io
+        
+        gif_base64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
         
         json_data = {
             'version': '1.0',
@@ -403,7 +412,9 @@ class ImportExportTestCase(TestCase):
                         'editorial': 'Editorial Alfa',
                         'anio_publicacion': 1851,
                         'categoria': 'Aventura',
-                        'descripcion': 'La gran novela marina.'
+                        'descripcion': 'La gran novela marina.',
+                        'portada_nombre': 'portada_moby.gif',
+                        'portada_base64': gif_base64
                     }
                 }
             ]
@@ -415,11 +426,12 @@ class ImportExportTestCase(TestCase):
         response = self.client.post('/inventario/importar/', {'archivo_importar': archivo_temp})
         self.assertEqual(response.status_code, 302)  # Redirecciona a gestion_inventario
         
-        # Verificar que se creó el nuevo libro y ejemplar
+        # Verificar que se creó el nuevo libro, portada y ejemplar
         nuevo_libro = Libro.objects.filter(isbn='9788497940177').first()
         self.assertIsNotNone(nuevo_libro)
         self.assertEqual(nuevo_libro.titulo, 'Moby Dick')
         self.assertEqual(nuevo_libro.categoria.nombre, 'Aventura')
+        self.assertTrue(nuevo_libro.portada.name.endswith('portada_moby.gif'))
         
         nuevo_ejemplar = Ejemplar.objects.filter(sku='BRT-IMPT').first()
         self.assertIsNotNone(nuevo_ejemplar)

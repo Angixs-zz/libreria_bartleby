@@ -748,7 +748,18 @@ def exportar_inventario(request):
         'inventario': []
     }
     
+    import base64
     for e in ejemplares:
+        portada_base64 = ''
+        portada_nombre = ''
+        if e.libro.portada:
+            try:
+                with e.libro.portada.open('rb') as f:
+                    portada_base64 = base64.b64encode(f.read()).decode('utf-8')
+                portada_nombre = e.libro.portada.name.split('/')[-1]
+            except Exception:
+                pass
+
         item = {
             'sku': e.sku,
             'estado_fisico': e.estado_fisico.nombre if e.estado_fisico else 'Nuevo',
@@ -763,7 +774,9 @@ def exportar_inventario(request):
                 'editorial': e.libro.editorial or '',
                 'anio_publicacion': e.libro.anio_publicacion,
                 'categoria': e.libro.categoria.nombre if e.libro.categoria else '',
-                'descripcion': e.libro.descripcion or ''
+                'descripcion': e.libro.descripcion or '',
+                'portada_nombre': portada_nombre,
+                'portada_base64': portada_base64
             }
         }
         export_data['inventario'].append(item)
@@ -875,6 +888,23 @@ def importar_inventario(request):
                         actualizado = True
                     if actualizado:
                         libro_obj.save()
+
+                # Sincronizar portada si el libro no tiene una aún
+                portada_nombre = libro_data.get('portada_nombre', '')
+                portada_base64 = libro_data.get('portada_base64', '')
+                if portada_nombre and portada_base64 and not libro_obj.portada:
+                    try:
+                        from django.core.files.base import ContentFile
+                        import base64
+                        
+                        raw_data = portada_base64
+                        if ';base64,' in raw_data:
+                            _, raw_data = raw_data.split(';base64,', 1)
+                        
+                        decoded_file = base64.b64decode(raw_data)
+                        libro_obj.portada.save(portada_nombre, ContentFile(decoded_file), save=True)
+                    except Exception:
+                        pass
                         
                 # Obtener o crear Estado Fisico
                 estado_nombre = item.get('estado_fisico', '').strip() or 'Nuevo'
