@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from .models import PerfilUsuario
 from .models import NotaClienteInterna
+from utils.helpers import validar_nombre_humano, validar_telefono_mexico, validar_email_robusto
 
 
 class RegistroClienteForm(UserCreationForm):
@@ -48,11 +49,35 @@ class RegistroClienteForm(UserCreationForm):
         model = User
         fields = ('first_name', 'last_name', 'username', 'email', 'telefono', 'direccion', 'password1', 'password2')
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        valido, err = validar_nombre_humano(first_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        valido, err = validar_nombre_humano(last_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return last_name
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        valido, resultado = validar_telefono_mexico(telefono)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        return resultado
+
     def clean_email(self):
-        email = self.cleaned_data['email'].strip().lower()
-        if User.objects.filter(email__iexact=email).exists():
+        email = self.cleaned_data.get('email')
+        valido, resultado = validar_email_robusto(email)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        if User.objects.filter(email__iexact=resultado).exists():
             raise forms.ValidationError('Ya existe una cuenta con ese correo.')
-        return email
+        return resultado
 
 
 class StaffCreationForm(UserCreationForm):
@@ -86,6 +111,31 @@ class StaffCreationForm(UserCreationForm):
         model = User
         fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        valido, err = validar_nombre_humano(first_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        valido, err = validar_nombre_humano(last_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return last_name
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            return email
+        valido, resultado = validar_email_robusto(email)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        if User.objects.filter(email__iexact=resultado).exists():
+            raise forms.ValidationError('Ya existe una cuenta con ese correo.')
+        return resultado
+
 
 class ProfileUpdateForm(forms.ModelForm):
     first_name = forms.CharField(
@@ -115,6 +165,43 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = PerfilUsuario
         fields = ('telefono', 'direccion')
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        valido, err = validar_nombre_humano(first_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        valido, err = validar_nombre_humano(last_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return last_name
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            return email
+        valido, resultado = validar_email_robusto(email)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        qs = User.objects.filter(email__iexact=resultado)
+        if self.user:
+            qs = qs.exclude(pk=self.user.pk)
+        if qs.exists():
+            raise forms.ValidationError('Ya existe una cuenta con ese correo.')
+        return resultado
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono:
+            return telefono
+        valido, resultado = validar_telefono_mexico(telefono)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        return resultado
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -184,16 +271,42 @@ class StaffUpdateForm(forms.ModelForm):
             raise forms.ValidationError('Ya existe un usuario con ese nombre.')
         return username
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        valido, err = validar_nombre_humano(first_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        valido, err = validar_nombre_humano(last_name)
+        if not valido:
+            raise forms.ValidationError(err)
+        return last_name
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono:
+            return telefono
+        valido, resultado = validar_telefono_mexico(telefono)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        return resultado
+
     def clean_email(self):
         email = self.cleaned_data.get('email', '')
         if not email:
             return email
-        qs = User.objects.filter(email=email)
+        valido, resultado = validar_email_robusto(email)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        qs = User.objects.filter(email=resultado)
         if self.user:
             qs = qs.exclude(pk=self.user.pk)
         if qs.exists():
             raise forms.ValidationError('Ya existe un usuario con ese correo.')
-        return email
+        return resultado
 
     def save(self, commit=True):
         perfil = super().save(commit=False)

@@ -419,7 +419,6 @@ En el costado de la bolsa aparece el resumen:
 
 - Subtotal.
 - Numero de unidades.
-- Gestion de curaduria, cuando aplique.
 - Total.
 - Nota de pago contra entrega.
 

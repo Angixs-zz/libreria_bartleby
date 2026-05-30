@@ -95,8 +95,8 @@
                         <!-- Quitar del carrito -->
                         <form method="POST" action="{% url 'quitar_del_carrito' item.ejemplar.id %}" class="m-0">
                             {% csrf_token %}
-                            <button type="submit" class="flex items-center gap-2 text-sm font-label uppercase tracking-widest transition-colors duration-300 hover:text-red-500"
-                                    style="color: var(--text-muted);">
+                            <button type="submit" class="flex items-center gap-2 text-sm font-label uppercase tracking-widest transition-colors duration-300 hover:opacity-80"
+                                    style="color: #dc2626; font-weight: 700;">
                                 <span class="material-symbols-outlined text-lg">delete</span> Quitar
                             </button>
                         </form>
@@ -116,10 +116,7 @@
                         <span>Subtotal ({{ total_unidades }} unidad{% if total_unidades != 1 %}es{% endif %})</span>
                         <span>${{ total }}</span>
                     </div>
-                    <div class="flex justify-between text-sm font-label" style="color: var(--text-muted);">
-                        <span>Gestión de Curaduría</span>
-                        <span>$0.00</span>
-                    </div>
+
 
                     <div class="pt-6 flex justify-between items-baseline" style="border-top: 1px solid var(--border);">
                         <span class="font-headline text-lg italic" style="color: var(--text);">Total</span>

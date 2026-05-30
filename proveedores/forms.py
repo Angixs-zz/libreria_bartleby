@@ -2,6 +2,7 @@ from django import forms
 
 from inventario.models import Libro, Ejemplar, Categoria
 from .models import Proveedor, Adquisicion
+from utils.helpers import validar_nombre_humano, validar_telefono_mexico, validar_email_robusto
 
 
 class ProveedorForm(forms.ModelForm):
@@ -16,6 +17,27 @@ class ProveedorForm(forms.ModelForm):
             'direccion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Dirección o referencias'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+    def clean_contacto(self):
+        contacto = self.cleaned_data.get('contacto')
+        valido, err = validar_nombre_humano(contacto)
+        if not valido:
+            raise forms.ValidationError(err)
+        return contacto
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        valido, resultado = validar_telefono_mexico(telefono)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        return resultado
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        valido, resultado = validar_email_robusto(email)
+        if not valido:
+            raise forms.ValidationError(resultado)
+        return resultado
 
 
 class AdquisicionForm(forms.ModelForm):
@@ -84,6 +106,14 @@ class LibroRapidoForm(forms.ModelForm):
             }),
             'portada': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_isbn(self):
+        isbn = self.cleaned_data.get('isbn')
+        if isbn:
+            from utils.helpers import validar_isbn
+            if not validar_isbn(isbn):
+                raise forms.ValidationError('El ISBN no es válido. Debe tener 10 o 13 caracteres numéricos (el último de 10 dígitos puede ser X).')
+        return isbn
 
 
 class EjemplarRapidoForm(forms.ModelForm):

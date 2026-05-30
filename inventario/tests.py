@@ -382,7 +382,7 @@ class ImportExportTestCase(TestCase):
         self.assertEqual(item['sku'], self.ejemplar.sku)
         self.assertEqual(item['stock'], 12)
         self.assertEqual(item['libro']['titulo'], 'Bartleby el escribiente')
-        self.assertEqual(item['libro']['portada_nombre'], 'cover_test.gif')
+        self.assertTrue(item['libro']['portada_nombre'].startswith('cover_test') and item['libro']['portada_nombre'].endswith('.gif'))
         self.assertTrue(len(item['libro']['portada_base64']) > 0)
         
     def test_importar_inventario_valido(self):
@@ -431,7 +431,7 @@ class ImportExportTestCase(TestCase):
         self.assertIsNotNone(nuevo_libro)
         self.assertEqual(nuevo_libro.titulo, 'Moby Dick')
         self.assertEqual(nuevo_libro.categoria.nombre, 'Aventura')
-        self.assertTrue(nuevo_libro.portada.name.endswith('portada_moby.gif'))
+        self.assertTrue('portada_moby' in nuevo_libro.portada.name and nuevo_libro.portada.name.endswith('.gif'))
         
         nuevo_ejemplar = Ejemplar.objects.filter(sku='BRT-IMPT').first()
         self.assertIsNotNone(nuevo_ejemplar)

@@ -156,3 +156,113 @@ def validar_cantidad(cantidad_str, stock_disponible=None):
     
     except (ValueError, TypeError) as e:
         return None, str(e)
+
+
+def validar_nombre_humano(nombre):
+    """
+    Valida que un nombre o apellido humano no contenga números ni caracteres extraños.
+    Permite letras (incluyendo acentuadas y eñes), espacios, guiones y apóstrofes.
+    
+    Args:
+        nombre (str): Nombre o apellido a validar
+        
+    Returns:
+        tuple: (bool, error_message o None)
+    """
+    if not nombre:
+        return True, None
+    
+    nombre_str = str(nombre).strip()
+    
+    if not nombre_str:
+        return True, None
+        
+    # Verificar si contiene dígitos
+    if any(char.isdigit() for char in nombre_str):
+        return False, "El nombre o apellido no puede contener números."
+        
+    # Expresión regular que permite letras de español, acentos, espacios, guiones y apóstrofes
+    patron = r"^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]+$"
+    if not re.match(patron, nombre_str):
+        return False, "El nombre o apellido contiene caracteres no válidos (solo se permiten letras, espacios, guiones y apóstrofes)."
+        
+    return True, None
+
+
+def validar_telefono_mexico(telefono):
+    """
+    Valida y normaliza un número de teléfono de México a 10 dígitos.
+    Debe contener exactamente 10 dígitos (o 12 si incluye la clave de país 52).
+    
+    Args:
+        telefono (str): Teléfono a validar
+        
+    Returns:
+        tuple: (bool, valor_limpio o error_message)
+    """
+    if not telefono:
+        return True, ""
+        
+    telefono_str = str(telefono).strip()
+    if not telefono_str:
+        return True, ""
+        
+    # Eliminar caracteres no numéricos
+    digitos = re.sub(r'\D', '', telefono_str)
+    
+    # Manejar prefijo de país 52
+    if len(digitos) == 12 and digitos.startswith('52'):
+        digitos = digitos[2:]
+        
+    if len(digitos) != 10:
+        return False, "El número de teléfono debe tener exactamente 10 dígitos (formato de México, ej: 5512345678)."
+        
+    if len(set(digitos)) == 1:
+        return False, "El número de teléfono no es válido (todos los dígitos son iguales)."
+        
+    return True, digitos
+
+
+def validar_email_robusto(email):
+    """
+    Valida de forma robusta un formato de correo electrónico.
+    Debe incluir un '@', un dominio con un punto, y un TLD válido (como .com, .edu, .mx, etc.).
+    
+    Args:
+        email (str): Correo a validar
+        
+    Returns:
+        tuple: (bool, valor_limpio o error_message)
+    """
+    if not email:
+        return True, ""
+        
+    email_limpio = str(email).strip().lower()
+    if not email_limpio:
+        return True, ""
+        
+    # Expresión regular estándar y estricta para correos
+    patron = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    if not re.match(patron, email_limpio):
+        return False, "El formato de correo no es válido. Debe tener una estructura como usuario@dominio.com."
+        
+    if email_limpio.count('@') != 1:
+        return False, "El correo debe contener exactamente un símbolo '@'."
+        
+    partes = email_limpio.split('@')
+    usuario = partes[0]
+    dominio = partes[1]
+    
+    if not usuario or not dominio:
+        return False, "El correo no puede tener el usuario o el dominio vacíos."
+        
+    if '.' not in dominio:
+        return False, "El dominio del correo debe contener al menos un punto (ej: dominio.com)."
+        
+    partes_dominio = dominio.split('.')
+    tld = partes_dominio[-1]
+    
+    if len(tld) < 2 or not tld.isalpha():
+        return False, "El correo debe terminar en un dominio válido de al menos 2 letras (ej: .com, .edu, .mx)."
+        
+    return True, email_limpio

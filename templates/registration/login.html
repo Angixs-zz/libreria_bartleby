@@ -62,7 +62,8 @@
                         <input name="username" type="text" required
                                class="w-full bg-transparent border-none focus:ring-0 font-body p-0 text-sm md:text-base"
                                style="color: var(--text);"
-                               placeholder="Tu nombre de usuario"/>
+                               placeholder="Tu nombre de usuario"
+                               value="{{ form.username.value|default:"" }}"/>
                     </div>
                 </div>
 

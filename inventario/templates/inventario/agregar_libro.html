@@ -272,7 +272,7 @@
         </div>
     </div>
 
-    <div id="resultado-encontrado" class="hidden mb-8">
+    <div id="resultado-encontrado" class="{% if not mostrar_encontrado %}hidden{% endif %} mb-8">
         <div class="p-6 rounded-xl mb-4" style="background-color: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);">
             <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1">Obra encontrada en el sistema</p>
             <p id="libro-encontrado-nombre" class="text-xl font-headline italic" style="color: var(--primary);"></p>
@@ -325,26 +325,26 @@
                         <label class="block text-xs font-bold text-[#3e5219] mb-1 uppercase">Condición Física</label>
                         <select name="estado_fisico_select" class="w-full rounded-lg p-2 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                             {% for estado in estados_fisicos %}
-                                <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
+                                <option value="{{ estado.nombre }}" {% if form_data.estado_fisico_select == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
                             {% endfor %}
-                            <option value="__nuevo__" class="font-bold" style="color: var(--primary);">+ Crear nueva condición...</option>
+                            <option value="__nuevo__" class="font-bold" style="color: var(--primary);" {% if form_data.estado_fisico_select == '__nuevo__' %}selected{% endif %}>+ Crear nueva condición...</option>
                         </select>
-                        <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-2 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
+                        <input type="text" name="estado_fisico_texto" class="{% if form_data.estado_fisico_select != '__nuevo__' %}hidden{% endif %} mt-2 w-full rounded-lg p-2 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado..." value="{{ form_data.estado_fisico_texto|default:"" }}">
                         <p class="text-[10px] text-gray-400 mt-1 italic">Elige uno o añade a la lista.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio venta ($)</label>
-                        <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" value="{{ form_data.precio_venta|default:"" }}">
                     </div>
                     {% if not lote_compra %}
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Precio costo ($)</label>
-                        <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" value="{{ form_data.precio_compra|default:"" }}">
                     </div>
                     {% endif %}
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad</label>
-                        <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        <input type="number" name="stock" value="{{ form_data.stock|default:"1" }}" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Portada (opcional)</label>
@@ -358,7 +358,7 @@
         </div>
     </div>
 
-    <div id="resultado-nuevo" class="hidden">
+    <div id="resultado-nuevo" class="{% if not mostrar_nuevo %}hidden{% endif %}">
         <form method="POST" enctype="multipart/form-data" class="entry-two-column">
             {% csrf_token %}
             <input type="hidden" name="accion" value="crear_todo">
@@ -380,30 +380,30 @@
                 <div class="entry-field-grid">
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Título</label>
-                        <input type="text" name="titulo" id="nuevo-titulo" required class="w-full border-0 py-2.5 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                        <input type="text" name="titulo" id="nuevo-titulo" required class="w-full border-0 py-2.5 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" value="{{ form_data.titulo|default:"" }}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Autor</label>
-                        <input type="text" name="autor" id="nuevo-autor" required class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                        <input type="text" name="autor" id="nuevo-autor" required class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" value="{{ form_data.autor|default:"" }}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">ISBN</label>
-                        <input type="text" name="isbn" id="nuevo-isbn" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="978-x-xxx...">
+                        <input type="text" name="isbn" id="nuevo-isbn" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="978-x-xxx..." value="{{ form_data.isbn|default:"" }}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Editorial</label>
-                        <input type="text" name="editorial" id="nuevo-editorial" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);">
+                        <input type="text" name="editorial" id="nuevo-editorial" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" value="{{ form_data.editorial|default:"" }}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Año de publicación</label>
-                        <input type="number" name="anio_publicacion" id="nuevo-anio" min="1000" max="2099" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="Ej. 2023">
+                        <input type="number" name="anio_publicacion" id="nuevo-anio" min="1000" max="2099" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);" placeholder="Ej. 2023" value="{{ form_data.anio_publicacion|default:"" }}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Categoría / Género</label>
                         <input type="text" name="categoria_texto" id="nuevo-categoria" list="categorias_list"
                                class="w-full border-0 py-2.5 focus:ring-0 bg-transparent"
                                style="border-bottom: 1px solid var(--border); color: var(--text);"
-                               placeholder="Escribe o crea una nueva">
+                               placeholder="Escribe o crea una nueva" value="{{ form_data.categoria_texto|default:"" }}">
                         <datalist id="categorias_list">
                             {% for cat in categorias %}
                                 <option value="{{ cat.nombre }}">
@@ -415,7 +415,7 @@
                         <textarea name="descripcion" id="nuevo-descripcion" rows="3"
                                   class="w-full rounded-lg p-3 text-sm font-body resize-none"
                                   style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
-                                  placeholder="Se autocompleta al buscar por ISBN…"></textarea>
+                                  placeholder="Se autocompleta al buscar por ISBN…">{{ form_data.descripcion|default:"" }}</textarea>
                     </div>
                 </div>
             </div>
@@ -428,27 +428,27 @@
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Condición Física</label>
                             <select name="estado_fisico_select" class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" onchange="if(this.value==='__nuevo__'){this.nextElementSibling.classList.remove('hidden');this.nextElementSibling.focus();this.nextElementSibling.required=true;}else{this.nextElementSibling.classList.add('hidden');this.nextElementSibling.required=false;this.nextElementSibling.value='';}">
                                 {% for estado in estados_fisicos %}
-                                    <option value="{{ estado.nombre }}">{{ estado.nombre }}</option>
+                                    <option value="{{ estado.nombre }}" {% if form_data.estado_fisico_select == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
                                 {% endfor %}
-                                <option value="__nuevo__" class="font-bold" style="color: var(--primary);">+ Crear nueva condición...</option>
+                                <option value="__nuevo__" class="font-bold" style="color: var(--primary);" {% if form_data.estado_fisico_select == '__nuevo__' %}selected{% endif %}>+ Crear nueva condición...</option>
                             </select>
-                            <input type="text" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado...">
+                            <input type="text" name="estado_fisico_texto" class="{% if form_data.estado_fisico_select != '__nuevo__' %}hidden{% endif %} mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed" style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);" placeholder="Escribe aquí el nuevo estado..." value="{{ form_data.estado_fisico_texto|default:"" }}">
                         </div>
                         <div class="grid {% if lote_compra %}grid-cols-1{% else %}grid-cols-2{% endif %} gap-3">
                             {% if not lote_compra %}
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Costo ($)</label>
-                                <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                                <input type="number" name="precio_compra" step="0.01" {% if modo_compra_suelta %}required{% endif %} class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" value="{{ form_data.precio_compra|default:"" }}">
                             </div>
                             {% endif %}
                             <div>
                                 <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Venta ($)</label>
-                                <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                                <input type="number" name="precio_venta" step="0.01" required class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" value="{{ form_data.precio_venta|default:"" }}">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">Cantidad inicial</label>
-                            <input type="number" name="stock" value="1" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                            <input type="number" name="stock" value="{{ form_data.stock|default:"1" }}" min="1" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
                         </div>
                     </div>
                 </div>
@@ -756,5 +756,47 @@ async function buscarPorISBN() {
 document.getElementById('input-isbn-api').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); buscarPorISBN(); }
 });
+
+{% if libro_seleccionado_json %}
+document.addEventListener("DOMContentLoaded", function() {
+    const libroSeleccionado = {{ libro_seleccionado_json|safe }};
+    mostrarLibroEncontrado(libroSeleccionado);
+    
+    {% if accion == 'nuevo_ejemplar' %}
+        // set the fields under Opción B
+        const formObjB = document.querySelector('form input[name="accion"][value="nuevo_ejemplar"]').form;
+        if (formObjB) {
+            const setInputVal = (name, val) => {
+                const el = formObjB.querySelector(`[name="${name}"]`);
+                if (el && val) {
+                    el.value = val;
+                    if (el.tagName === 'SELECT') {
+                        el.dispatchEvent(new Event('change'));
+                    }
+                }
+            };
+            setInputVal('estado_fisico_select', '{{ form_data.estado_fisico_select|escapejs }}');
+            setInputVal('estado_fisico_texto', '{{ form_data.estado_fisico_texto|escapejs }}');
+            setInputVal('precio_venta', '{{ form_data.precio_venta|escapejs }}');
+            setInputVal('precio_compra', '{{ form_data.precio_compra|escapejs }}');
+            setInputVal('stock', '{{ form_data.stock|escapejs }}');
+        }
+    {% elif accion == 'sumar_stock' %}
+        // set the fields under Opción A
+        const formObjA = document.querySelector('form input[name="accion"][value="sumar_stock"]').form;
+        if (formObjA) {
+            const setInputVal = (name, val) => {
+                const el = formObjA.querySelector(`[name="${name}"]`);
+                if (el && val) el.value = val;
+            };
+            setTimeout(() => {
+                setInputVal('ejemplar_id', '{{ form_data.ejemplar_id|escapejs }}');
+                setInputVal('cantidad', '{{ form_data.cantidad|escapejs }}');
+                setInputVal('precio_compra', '{{ form_data.precio_compra|escapejs }}');
+            }, 100);
+        }
+    {% endif %}
+});
+{% endif %}
 </script>
 {% endblock %}

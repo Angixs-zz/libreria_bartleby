@@ -186,6 +186,22 @@ def agregar_libro(request):
     lote_compra = _get_lote_compra(request)
     proveedor_compra = lote_compra.proveedor if lote_compra else _get_proveedor_compra(request)
 
+    categorias = Categoria.objects.all()
+    estados_fisicos = EstadoFisico.objects.all()
+    proveedores = []
+    if modo_compra_suelta:
+        from proveedores.models import Proveedor
+        proveedores = Proveedor.objects.filter(activo=True).order_by('nombre')
+
+    context = {
+        'categorias': categorias,
+        'estados_fisicos': estados_fisicos,
+        'modo_compra_suelta': modo_compra_suelta,
+        'proveedores': proveedores,
+        'proveedor_compra': proveedor_compra,
+        'lote_compra': lote_compra,
+    }
+
     if modo_compra_suelta and request.method == 'GET' and request.GET.get('nueva_compra') == '1':
         request.session.pop('compra_suelta_adquisicion_id', None)
 
@@ -196,7 +212,10 @@ def agregar_libro(request):
         try:
             if modo_compra_suelta and not sin_proveedor and not proveedor_compra and not lote_compra:
                 messages.error(request, 'Selecciona el proveedor o lote.')
-                return _redirect_ingreso_ejemplar(modo_compra_suelta)
+                context.update({
+                    'form_data': request.POST,
+                })
+                return render(request, 'inventario/agregar_libro.html', context)
 
             # ─── ACCIÓN: Crear libro + ejemplar nuevo ───────────────────────
             if accion == 'crear_todo':
@@ -219,35 +238,59 @@ def agregar_libro(request):
                 # Validaciones
                 if not titulo or not autor:
                     messages.error(request, '❌ Título y autor son requeridos.')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_nuevo': True,
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 # Validar ISBN si se proporciona
                 if isbn and not validar_isbn(isbn):
                     messages.error(request, '❌ Formato ISBN inválido.')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_nuevo': True,
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 # Validar precios
                 precio_venta, error = validar_precio(precio_venta_str)
                 if error:
                     messages.error(request, f'❌ Precio venta: {error}')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_nuevo': True,
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 precio_compra, error = validar_precio(precio_compra_str)
                 if error:
                     if modo_compra_suelta and not lote_compra and not sin_proveedor:
                         messages.error(request, f'❌ Precio costo: {error}')
-                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                        context.update({
+                            'form_data': request.POST,
+                            'mostrar_nuevo': True,
+                        })
+                        return render(request, 'inventario/agregar_libro.html', context)
                     precio_compra = Decimal('0.00')
 
                 if precio_venta < precio_compra:
                     messages.error(request, '❌ El precio de venta no puede ser menor que el precio de compra.')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_nuevo': True,
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 # Validar stock
                 stock, error = validar_cantidad(stock_str)
                 if error:
                     messages.error(request, f'❌ Stock: {error}')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_nuevo': True,
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 # Crear categoría si no existe
                 categoria_obj = None
@@ -355,23 +398,51 @@ def agregar_libro(request):
                 precio_venta, error = validar_precio(precio_venta_str)
                 if error:
                     messages.error(request, f'❌ Precio venta: {error}')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    libro_json = json.dumps(_serializar_libro_para_busqueda(libro_obj)) if libro_obj else None
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_encontrado': True,
+                        'libro_seleccionado_json': libro_json,
+                        'accion': 'nuevo_ejemplar',
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 precio_compra, error = validar_precio(precio_compra_str)
                 if not precio_compra:
                     if modo_compra_suelta and not lote_compra and not sin_proveedor:
                         messages.error(request, f'❌ Precio costo: {error or "El precio debe ser mayor a 0"}')
-                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                        libro_json = json.dumps(_serializar_libro_para_busqueda(libro_obj)) if libro_obj else None
+                        context.update({
+                            'form_data': request.POST,
+                            'mostrar_encontrado': True,
+                            'libro_seleccionado_json': libro_json,
+                            'accion': 'nuevo_ejemplar',
+                        })
+                        return render(request, 'inventario/agregar_libro.html', context)
                     precio_compra = Decimal('0.00')
 
                 if precio_venta < precio_compra:
                     messages.error(request, '❌ El precio de venta no puede ser menor que el precio de compra.')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    libro_json = json.dumps(_serializar_libro_para_busqueda(libro_obj)) if libro_obj else None
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_encontrado': True,
+                        'libro_seleccionado_json': libro_json,
+                        'accion': 'nuevo_ejemplar',
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 stock, error = validar_cantidad(stock_str)
                 if error:
                     messages.error(request, f'❌ Stock: {error}')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    libro_json = json.dumps(_serializar_libro_para_busqueda(libro_obj)) if libro_obj else None
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_encontrado': True,
+                        'libro_seleccionado_json': libro_json,
+                        'accion': 'nuevo_ejemplar',
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 estado_fisico_obj = EstadoFisico.objects.filter(nombre__iexact=estado_final).first()
                 if not estado_fisico_obj:
@@ -431,20 +502,41 @@ def agregar_libro(request):
                 cantidad, error = validar_cantidad(cantidad_str)
                 if error:
                     messages.error(request, f'❌ Cantidad: {error}')
-                    return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                    libro_json = json.dumps(_serializar_libro_para_busqueda(ejemplar.libro)) if ejemplar else None
+                    context.update({
+                        'form_data': request.POST,
+                        'mostrar_encontrado': True,
+                        'libro_seleccionado_json': libro_json,
+                        'accion': 'sumar_stock',
+                    })
+                    return render(request, 'inventario/agregar_libro.html', context)
 
                 if modo_compra_suelta and not sin_proveedor:
                     precio_compra, error = validar_precio(precio_compra_str)
                     if error:
                         if not lote_compra:
                             messages.error(request, f'❌ Precio costo: {error}')
-                            return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                            libro_json = json.dumps(_serializar_libro_para_busqueda(ejemplar.libro)) if ejemplar else None
+                            context.update({
+                                'form_data': request.POST,
+                                'mostrar_encontrado': True,
+                                'libro_seleccionado_json': libro_json,
+                                'accion': 'sumar_stock',
+                            })
+                            return render(request, 'inventario/agregar_libro.html', context)
                         else:
                             precio_compra = Decimal('0.00')
                     
                     if ejemplar.precio_venta < precio_compra:
                         messages.error(request, f'❌ El costo de adquisición (${precio_compra}) no puede ser mayor que el precio de venta actual (${ejemplar.precio_venta}).')
-                        return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+                        libro_json = json.dumps(_serializar_libro_para_busqueda(ejemplar.libro)) if ejemplar else None
+                        context.update({
+                            'form_data': request.POST,
+                            'mostrar_encontrado': True,
+                            'libro_seleccionado_json': libro_json,
+                            'accion': 'sumar_stock',
+                        })
+                        return render(request, 'inventario/agregar_libro.html', context)
                     adquisicion = _registrar_detalle_compra_suelta(
                         request,
                         proveedor_compra,
@@ -480,27 +572,38 @@ def agregar_libro(request):
 
         except Exception as e:
             messages.error(request, f'❌ Error: {str(e)}')
-            return _redirect_ingreso_ejemplar(modo_compra_suelta, proveedor_compra, lote_compra)
+            if accion == 'crear_todo':
+                context.update({
+                    'form_data': request.POST,
+                    'mostrar_nuevo': True,
+                })
+            elif accion == 'nuevo_ejemplar':
+                libro_id = request.POST.get('libro_id')
+                libro_obj = Libro.objects.filter(id=libro_id).first()
+                libro_json = json.dumps(_serializar_libro_para_busqueda(libro_obj)) if libro_obj else None
+                context.update({
+                    'form_data': request.POST,
+                    'mostrar_encontrado': True,
+                    'libro_seleccionado_json': libro_json,
+                    'accion': 'nuevo_ejemplar',
+                })
+            elif accion == 'sumar_stock':
+                ejemplar_id = request.POST.get('ejemplar_id')
+                ejemplar = Ejemplar.objects.filter(id=ejemplar_id).select_related('libro').first()
+                libro_json = json.dumps(_serializar_libro_para_busqueda(ejemplar.libro)) if ejemplar else None
+                context.update({
+                    'form_data': request.POST,
+                    'mostrar_encontrado': True,
+                    'libro_seleccionado_json': libro_json,
+                    'accion': 'sumar_stock',
+                })
+            else:
+                context.update({
+                    'form_data': request.POST,
+                })
+            return render(request, 'inventario/agregar_libro.html', context)
 
-    categorias = Categoria.objects.all()
-    estados_fisicos = EstadoFisico.objects.all()
-    proveedores = []
-    if modo_compra_suelta:
-        from proveedores.models import Proveedor
-        proveedores = Proveedor.objects.filter(activo=True).order_by('nombre')
-
-    return render(
-        request,
-        'inventario/agregar_libro.html',
-        {
-            'categorias': categorias,
-            'estados_fisicos': estados_fisicos,
-            'modo_compra_suelta': modo_compra_suelta,
-            'proveedores': proveedores,
-            'proveedor_compra': proveedor_compra,
-            'lote_compra': lote_compra,
-        }
-    )
+    return render(request, 'inventario/agregar_libro.html', context)
 
 
 @cajero_required
@@ -903,8 +1006,8 @@ def importar_inventario(request):
                         
                         decoded_file = base64.b64decode(raw_data)
                         libro_obj.portada.save(portada_nombre, ContentFile(decoded_file), save=True)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print("EXCEPTION IMPORTING PORTADA:", str(e))
                         
                 # Obtener o crear Estado Fisico
                 estado_nombre = item.get('estado_fisico', '').strip() or 'Nuevo'
