@@ -92,15 +92,27 @@
         <div class="mb-8">
             <h2 class="text-xs font-label uppercase tracking-wider mb-4" style="color: var(--text-muted);">Artículos Reservados</h2>
             <ul class="space-y-4">
-                {% for libro in reserva.libros.all %}
-                <li class="flex justify-between items-start gap-4">
-                    <div>
-                        <p class="text-sm font-headline italic leading-tight" style="color: var(--text);">{{ libro.titulo }}</p>
-                        <p class="text-[11px] font-label mt-0.5" style="color: var(--text-muted);">{{ libro.autor }}</p>
-                    </div>
-                    <span class="font-mono text-xs" style="color: var(--text-muted);">${{ libro.precio_referencia }}</span>
-                </li>
-                {% endfor %}
+                {% if reserva.ejemplares.exists %}
+                    {% for ejemplar in reserva.ejemplares.all %}
+                    <li class="flex justify-between items-start gap-4">
+                        <div>
+                            <p class="text-sm font-headline italic leading-tight" style="color: var(--text);">{{ ejemplar.libro.titulo }}</p>
+                            <p class="text-[11px] font-label mt-0.5" style="color: var(--text-muted);">{{ ejemplar.libro.autor }}</p>
+                        </div>
+                        <span class="font-mono text-xs" style="color: var(--text-muted);">${{ ejemplar.precio_venta }}</span>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    {% for libro in reserva.libros.all %}
+                    <li class="flex justify-between items-start gap-4">
+                        <div>
+                            <p class="text-sm font-headline italic leading-tight" style="color: var(--text);">{{ libro.titulo }}</p>
+                            <p class="text-[11px] font-label mt-0.5" style="color: var(--text-muted);">{{ libro.autor }}</p>
+                        </div>
+                        <span class="font-mono text-xs" style="color: var(--text-muted);">${{ libro.precio_referencia }}</span>
+                    </li>
+                    {% endfor %}
+                {% endif %}
             </ul>
         </div>
 
@@ -121,7 +133,7 @@
         <div class="p-4 rounded-lg flex gap-3" style="background-color: var(--bg-subtle); border: 1px solid var(--border);">
             <span class="material-symbols-outlined text-xl" style="color: var(--primary);">info</span>
             <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Guarda este boleto digital en tu galería. Los libros se mantendrán en reserva por un máximo de <span class="font-bold" style="color: var(--text);">48 horas</span>.
+                Guarda este boleto digital en tu galería. Los libros se mantendrán en reserva por un máximo de <span class="font-bold" style="color: var(--text);">72 horas</span>.
             </p>
         </div>
 

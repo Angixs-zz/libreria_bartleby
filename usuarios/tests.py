@@ -469,7 +469,7 @@ class DocumentosLegalesYRegistroTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Terminos y Condiciones')
-        self.assertContains(response, '48 horas')
+        self.assertContains(response, '72 horas')
 
     @staticmethod
     def _payload_registro(**overrides):
@@ -642,3 +642,66 @@ class PanelAuditoriaTests(TestCase):
 
         self.assertFalse(EventoAuditoria.objects.filter(pk=antiguo.pk).exists())
         self.assertTrue(EventoAuditoria.objects.filter(descripcion='Registro reciente.').exists())
+
+
+class PerfilUsuarioTests(TestCase):
+    def setUp(self):
+        self.cliente = User.objects.create_user(
+            username='lector_perfil',
+            password='password123',
+            email='lector_perfil@example.com',
+            first_name='Gabriel',
+            last_name='García'
+        )
+        self.cliente.perfil.telefono = '5512345678'
+        self.cliente.perfil.direccion = 'Aracataca'
+        self.cliente.perfil.save()
+
+    def test_actualizar_perfil_sin_cambiar_email(self):
+        """Si se actualiza el perfil pero el email sigue igual, el usuario sigue activo."""
+        self.client.force_login(self.cliente)
+        payload = {
+            'first_name': 'Gabriel José',
+            'last_name': 'García Márquez',
+            'email': 'lector_perfil@example.com',
+            'telefono': '5587654321',
+            'direccion': 'Macondo'
+        }
+        response = self.client.post(reverse('mi_perfil'), payload)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('mi_perfil'))
+        
+        # Verify update
+        self.cliente.refresh_from_db()
+        self.assertEqual(self.cliente.first_name, 'Gabriel José')
+        self.assertEqual(self.cliente.last_name, 'García Márquez')
+        self.assertEqual(self.cliente.email, 'lector_perfil@example.com')
+        self.assertEqual(self.cliente.perfil.telefono, '5587654321')
+        self.assertEqual(self.cliente.perfil.direccion, 'Macondo')
+        self.assertTrue(self.cliente.is_active)
+
+    def test_actualizar_perfil_cambiando_email_requiere_verificacion(self):
+        """Si un cliente cambia su email, se desactiva y se le redirige a verificar_codigo."""
+        self.client.force_login(self.cliente)
+        payload = {
+            'first_name': 'Gabriel José',
+            'last_name': 'García Márquez',
+            'email': 'lector_nuevo@example.com',
+            'telefono': '5587654321',
+            'direccion': 'Macondo'
+        }
+        response = self.client.post(reverse('mi_perfil'), payload)
+        
+        # Should redirect to verificar_codigo
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('verificar_codigo'))
+        
+        # Verify state
+        self.cliente.refresh_from_db()
+        self.assertFalse(self.cliente.is_active)
+        self.assertEqual(self.cliente.email, 'lector_nuevo@example.com')
+        self.assertIsNotNone(self.cliente.perfil.codigo_verificacion)
+        
+        # Session should contain user_id_verificar
+        self.assertEqual(self.client.session.get('user_id_verificar'), self.cliente.id)
+

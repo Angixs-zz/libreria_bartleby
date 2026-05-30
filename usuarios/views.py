@@ -271,18 +271,53 @@ def documento_legal(request, slug):
 @require_http_methods(["GET", "POST"])
 def mi_perfil_actividad(request):
     perfil, _ = PerfilUsuario.objects.get_or_create(usuario=request.user)
+    user = request.user
 
     if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, instance=perfil, user=request.user)
+        form = ProfileUpdateForm(request.POST, instance=perfil, user=user)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Tu perfil fue actualizado.')
-            return redirect('mi_perfil')
+            old_email = user.email
+            new_email = form.cleaned_data.get('email', '').strip()
+            
+            # Only trigger verification for client users when they actually change their email
+            email_changed = (old_email.lower() != new_email.lower())
+            
+            if email_changed and not user.is_staff and not user.is_superuser:
+                with transaction.atomic():
+                    # Save other fields on the profile
+                    perfil = form.save(commit=False)
+                    
+                    # Update User email and deactivate for verification
+                    user.first_name = form.cleaned_data.get('first_name', '')
+                    user.last_name = form.cleaned_data.get('last_name', '')
+                    user.email = new_email
+                    user.is_active = False
+                    user.save(update_fields=['first_name', 'last_name', 'email', 'is_active'])
+                    
+                    codigo = str(random.randint(100000, 999999))
+                    perfil.codigo_verificacion = codigo
+                    perfil.save()
+                    
+                try:
+                    enviar_codigo_verificacion_email(user, codigo)
+                    messages.success(request, 'Has cambiado tu correo. Te hemos enviado un código de verificación para reactivar tu cuenta.')
+                except Exception as exc:
+                    messages.warning(request, f'Se actualizó tu perfil, pero no se pudo enviar el correo de verificación ({exc}). Para pruebas, tu código es: {codigo}')
+                
+                # Log out the user to complete verification flow
+                user_id = user.id
+                from django.contrib.auth import logout
+                logout(request)
+                request.session['user_id_verificar'] = user_id
+                return redirect('verificar_codigo')
+            else:
+                form.save()
+                messages.success(request, 'Tu perfil fue actualizado.')
+                return redirect('mi_perfil')
         messages.error(request, 'No se pudo actualizar tu perfil. Revisa los datos capturados.')
     else:
-        form = ProfileUpdateForm(instance=perfil, user=request.user)
+        form = ProfileUpdateForm(instance=perfil, user=user)
 
-    user = request.user
     if user.is_superuser:
         perfil_tipo = 'admin'
     elif user.is_staff:
@@ -303,13 +338,13 @@ def mi_perfil_actividad(request):
         reservas_activas = Reserva.objects.filter(
             usuario=user,
             estado='pendiente'
-        ).prefetch_related('libros').order_by('fecha_vencimiento')
+        ).prefetch_related('libros', 'ejemplares__libro').order_by('fecha_vencimiento')
 
         reservas_historial = Reserva.objects.filter(
             usuario=user
         ).exclude(
             estado='pendiente'
-        ).prefetch_related('libros').order_by('-fecha_reserva')[:5]
+        ).prefetch_related('libros', 'ejemplares__libro').order_by('-fecha_reserva')[:5]
 
         compras_historial = Venta.objects.filter(
             cliente=user

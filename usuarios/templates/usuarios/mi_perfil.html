@@ -197,31 +197,41 @@
 
             <div class="col-12 col-xl-8">
                 {% if perfil_tipo == 'cliente' %}
-                    <div class="surface-card rounded-4 p-4 p-lg-5 mb-4">
+                    <div class="surface-card rounded-4 p-4 p-lg-5 mb-4 shadow-sm transition-all hover-shadow-md">
                         <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
                             <div>
                                 <p class="mini-label mb-2">Cliente</p>
                                 <h2 class="h2 fst-italic mb-1" style="font-family: 'Newsreader', serif; color: #4A5D23;">Mis Reservas Activas</h2>
-                                <p class="mb-0" style="color: var(--text-muted);">Solo se muestran apartados vinculados a tu cuenta.</p>
+                                <p class="mb-0 small" style="color: var(--text-muted);">Solo se muestran apartados vinculados a tu cuenta. Haz clic en el código de reserva para ver el ticket digital.</p>
                             </div>
                         </div>
 
                         {% if reservas_activas %}
                             <ul class="list-unstyled book-list mb-0">
                                 {% for reserva in reservas_activas %}
-                                    <li class="py-3">
-                                        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                    <li class="py-3 px-3 rounded-3 mb-3 transition-all" style="background-color: rgba(74, 93, 35, 0.02); border: 1px solid rgba(197, 200, 184, 0.4); hover: { background-color: rgba(74, 93, 35, 0.05); }">
+                                        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                                             <div>
-                                                <div class="fw-semibold mb-1">{{ reserva.codigo_ticket }}</div>
-                                                <div style="color: var(--text-muted);">
-                                                    {% for libro in reserva.libros.all %}
-                                                        {{ libro.titulo }}{% if not forloop.last %}, {% endif %}
-                                                    {% endfor %}
+                                                <div class="mb-1">
+                                                    <a href="{% url 'detalle_ticket' reserva.id %}" class="fw-bold text-decoration-none hover-underline d-inline-flex align-items-center gap-2" style="color: #4A5D23; font-family: 'Newsreader', serif; font-size: 1.25rem;">
+                                                        <i class="bi bi-ticket-perforated"></i> {{ reserva.codigo_ticket }}
+                                                    </a>
+                                                </div>
+                                                <div class="small fw-medium" style="color: var(--text-muted);">
+                                                    {% if reserva.ejemplares.exists %}
+                                                        {% for ejemplar in reserva.ejemplares.all %}
+                                                            <span class="text-body fw-semibold">"{{ ejemplar.libro.titulo }}"</span>{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        {% for libro in reserva.libros.all %}
+                                                            <span class="text-body fw-semibold">"{{ libro.titulo }}"</span>{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="text-lg-end">
                                                 <div class="mini-label mb-1">Fecha limite</div>
-                                                <div>{{ reserva.fecha_vencimiento|date:"d/m/Y H:i" }}</div>
+                                                <div class="fw-bold text-danger-emphasis"><i class="bi bi-clock-fill me-1"></i>{{ reserva.fecha_vencimiento|date:"d/m/Y H:i" }}</div>
                                             </div>
                                         </div>
                                     </li>
@@ -236,22 +246,35 @@
                         {% endif %}
                     </div>
 
-                    <div class="surface-card rounded-4 p-4 p-lg-5">
+                    <div class="surface-card rounded-4 p-4 p-lg-5 shadow-sm transition-all hover-shadow-md">
                         <p class="mini-label mb-2">Cliente</p>
                         <h2 class="h2 fst-italic mb-3" style="font-family: 'Newsreader', serif; color: #4A5D23;">Mi Historial</h2>
                         <div class="row g-4">
                             <div class="col-12 col-lg-6">
-                                <h3 class="h5 mb-3">Reservas anteriores</h3>
+                                <h3 class="h5 mb-3 d-flex align-items-center gap-2"><i class="bi bi-archive-fill text-muted"></i> Reservas anteriores</h3>
                                 {% if reservas_historial %}
                                     <ul class="list-unstyled activity-list mb-0">
                                         {% for reserva in reservas_historial %}
-                                            <li class="py-3">
-                                                <div class="fw-semibold mb-1">{{ reserva.get_estado_display }}</div>
-                                                <div class="small mb-1" style="color: var(--text-muted);">{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</div>
-                                                <div>
-                                                    {% for libro in reserva.libros.all %}
-                                                        {{ libro.titulo }}{% if not forloop.last %}, {% endif %}
-                                                    {% endfor %}
+                                            <li class="py-3 px-3 rounded-3 mb-2" style="background-color: rgba(197, 200, 184, 0.05); border: 1px solid rgba(197, 200, 184, 0.2);">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <a href="{% url 'detalle_ticket' reserva.id %}" class="fw-bold text-decoration-none hover-underline small" style="color: #4A5D23;">
+                                                        <i class="bi bi-ticket-perforated-fill me-1"></i>{{ reserva.codigo_ticket }}
+                                                    </a>
+                                                    <span class="badge rounded-pill text-capitalize {% if reserva.estado == 'completada' %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                                        {{ reserva.get_estado_display }}
+                                                    </span>
+                                                </div>
+                                                <div class="small mb-2" style="color: var(--text-muted);">{{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</div>
+                                                <div class="small fw-semibold">
+                                                    {% if reserva.ejemplares.exists %}
+                                                        {% for ejemplar in reserva.ejemplares.all %}
+                                                            "{{ ejemplar.libro.titulo }}"{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        {% for libro in reserva.libros.all %}
+                                                            "{{ libro.titulo }}"{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
                                                 </div>
                                             </li>
                                         {% endfor %}

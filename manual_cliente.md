@@ -630,34 +630,21 @@ El archivo se puede guardar en el telefono o computadora para mostrarlo al recog
 
 [Captura sugerida: archivo PNG descargado o vista previa del ticket guardado.]
 
-## 15. Cancelar una reserva pendiente
+## 15. Cancelación de reserva
 
-La cancelacion permite liberar libros que el cliente ya no desea recoger.
+El cliente puede cancelar una reserva únicamente cuando todavía se encuentra pendiente. Al cancelar, los libros reservados vuelven a estar disponibles en el catálogo para otros clientes.
 
-### 15.1 Condiciones
-
-Solo se pueden cancelar reservas en estado **Pendiente**.
-
-No se pueden cancelar:
-
-- Reservas completadas.
-- Reservas ya canceladas.
-- Reservas que el personal ya proceso como venta.
-
-### 15.2 Pasos para cancelar
+### 15.1 Pasos para la cancelación de reserva
 
 1. Entrar a **Mis reservas**.
-2. Ubicar la reserva pendiente.
-3. Seleccionar la opcion **Cancelar**, si aparece disponible.
-4. Confirmar la accion.
+2. Localizar la reserva pendiente que se desea cancelar.
+3. Seleccionar la opción **Cancelar reserva**.
+4. Confirmar la acción si el sistema lo solicita.
+5. Verificar que el estado de la reserva cambie a cancelada.
 
-El sistema cambia la reserva a cancelada y devuelve los ejemplares al catalogo.
+[Insertar captura de pantalla aquí: Opción para cancelar reserva pendiente]
 
-[Captura sugerida: boton Cancelar en una reserva pendiente, si la interfaz lo muestra.]
-
-[Captura sugerida: mensaje de reserva cancelada correctamente.]
-
-Nota: Si la pantalla actual no muestra boton de cancelacion, el cliente debe solicitar apoyo al personal de la libreria para liberar la reserva.
+Una reserva completada, entregada o ya vencida no puede cancelarse como una reserva pendiente.
 
 ## 16. Mi perfil
 

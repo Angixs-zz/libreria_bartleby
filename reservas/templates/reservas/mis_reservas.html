@@ -75,11 +75,22 @@
                                 Archivo Cerrado
                             </button>
                         {% else %}
-                            <a href="{% url 'detalle_ticket' reserva.id %}"
-                               class="flex items-center gap-2 px-5 py-2.5 bg-[#3e5219] text-white rounded-lg text-sm font-bold hover:bg-[#556b2f] transition-all shadow-md">
-                                <span class="material-symbols-outlined text-lg">confirmation_number</span>
-                                Ver Ticket
-                            </a>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <a href="{% url 'detalle_ticket' reserva.id %}"
+                                   class="flex items-center gap-2 px-5 py-2.5 bg-[#3e5219] text-white rounded-lg text-sm font-bold hover:bg-[#556b2f] transition-all shadow-md">
+                                    <span class="material-symbols-outlined text-lg">confirmation_number</span>
+                                    Ver Ticket
+                                </a>
+                                {% if reserva.estado == 'pendiente' %}
+                                    <form method="POST" action="{% url 'cancelar_reserva' reserva.id %}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva? Los ejemplares volverán a estar disponibles.');" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400">
+                                            <span class="material-symbols-outlined text-lg">cancel</span>
+                                            Cancelar Reserva
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
