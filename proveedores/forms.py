@@ -18,12 +18,7 @@ class ProveedorForm(forms.ModelForm):
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-    def clean_contacto(self):
-        contacto = self.cleaned_data.get('contacto')
-        valido, err = validar_nombre_humano(contacto)
-        if not valido:
-            raise forms.ValidationError(err)
-        return contacto
+
 
     def clean_telefono(self):
         telefono = self.cleaned_data.get('telefono')
