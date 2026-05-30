@@ -258,7 +258,13 @@
                                 <p class="text-sm m-0" style="color: var(--text-muted);">{{ evento.descripcion }}</p>
                             </div>
                             <div class="lg:text-right flex flex-col justify-center">
-                                <div class="text-sm font-bold" style="color: var(--text);">{{ evento.actor.get_full_name|default:evento.actor.username|default:"Sistema" }}</div>
+                                <div class="fw-bold">
+                                    {% if evento.actor %}
+                                        {{ evento.actor.get_full_name|default:evento.actor.username }}
+                                    {% else %}
+                                        Sistema
+                                    {% endif %}
+                                </div>
                                 <div class="text-xs" style="color: var(--text-muted);">{{ evento.creado_en|date:"d/m/Y H:i" }}</div>
                             </div>
                         </div>
