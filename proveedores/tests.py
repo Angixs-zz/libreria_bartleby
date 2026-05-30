@@ -152,3 +152,108 @@ class ProveedoresModuleTests(TestCase):
         self.assertContains(response, 'Historial de compras')
         self.assertEqual(response.context['gasto_total'], Decimal('200.00'))
         self.assertEqual(response.context['unidades_adquiridas'], 2)
+
+    def test_crear_proveedor_genera_codigo_y_envia_correo(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse('crear_proveedor'),
+            {
+                'nuevo-nombre': 'Editorial Luces',
+                'nuevo-contacto': 'Pedro Gomez',
+                'nuevo-telefono': '5552223344',
+                'nuevo-email': 'pedro@editorialluces.com',
+                'nuevo-direccion': 'Av Central 123',
+                'nuevo-activo': 'on',
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        proveedor = Proveedor.objects.get(nombre='Editorial Luces')
+        self.assertFalse(proveedor.email_verificado)
+        self.assertIsNotNone(proveedor.codigo_verificacion)
+        self.assertEqual(len(proveedor.codigo_verificacion), 6)
+
+    def test_editar_proveedor_con_cambio_de_email_reinicia_verificacion(self):
+        self.client.force_login(self.admin)
+
+        # Primer correo verificado
+        self.proveedor.email_verificado = True
+        self.proveedor.save()
+
+        # Editar correo
+        response = self.client.post(
+            reverse('editar_proveedor', args=[self.proveedor.id]),
+            {
+                f'proveedor-{self.proveedor.id}-nombre': self.proveedor.nombre,
+                f'proveedor-{self.proveedor.id}-contacto': self.proveedor.contacto,
+                f'proveedor-{self.proveedor.id}-telefono': self.proveedor.telefono,
+                f'proveedor-{self.proveedor.id}-email': 'nuevo_correo@proveedor.com',
+                f'proveedor-{self.proveedor.id}-activo': 'on',
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.proveedor.refresh_from_db()
+        self.assertFalse(self.proveedor.email_verificado)
+        self.assertIsNotNone(self.proveedor.codigo_verificacion)
+
+    def test_verificar_proveedor_email_con_codigo_correcto(self):
+        self.client.force_login(self.admin)
+
+        # Generar código de verificación
+        self.proveedor.codigo_verificacion = '987654'
+        self.proveedor.email_verificado = False
+        self.proveedor.save()
+
+        # Postear código correcto
+        response = self.client.post(
+            reverse('verificar_proveedor_email', args=[self.proveedor.id]),
+            {'codigo': '987654'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.proveedor.refresh_from_db()
+        self.assertTrue(self.proveedor.email_verificado)
+        self.assertIsNone(self.proveedor.codigo_verificacion)
+
+    def test_verificar_proveedor_email_con_codigo_incorrecto(self):
+        self.client.force_login(self.admin)
+
+        self.proveedor.codigo_verificacion = '987654'
+        self.proveedor.email_verificado = False
+        self.proveedor.save()
+
+        # Postear código incorrecto
+        response = self.client.post(
+            reverse('verificar_proveedor_email', args=[self.proveedor.id]),
+            {'codigo': '000000'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.proveedor.refresh_from_db()
+        self.assertFalse(self.proveedor.email_verificado)
+        self.assertEqual(self.proveedor.codigo_verificacion, '987654')
+
+    def test_reenviar_codigo_proveedor(self):
+        self.client.force_login(self.admin)
+
+        self.proveedor.codigo_verificacion = '123456'
+        self.proveedor.email_verificado = False
+        self.proveedor.save()
+
+        # Postear reenvío
+        response = self.client.post(
+            reverse('reenviar_codigo_proveedor', args=[self.proveedor.id]),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.proveedor.refresh_from_db()
+        self.assertFalse(self.proveedor.email_verificado)
+        self.assertIsNotNone(self.proveedor.codigo_verificacion)
+        self.assertNotEqual(self.proveedor.codigo_verificacion, '123456')

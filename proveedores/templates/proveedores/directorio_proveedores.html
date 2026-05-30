@@ -571,7 +571,22 @@
                                 </td>
                                 <td class="py-4 px-2">
                                     <div class="text-sm font-bold" style="color: var(--text);">{{ proveedor.telefono|default:"Sin teléfono" }}</div>
-                                    <div class="text-[11px]" style="color: var(--text-muted);">{{ proveedor.email|default:"Sin email" }}</div>
+                                    <div class="text-[11px] d-flex flex-column gap-1" style="color: var(--text-muted);">
+                                        <span>{{ proveedor.email|default:"Sin email" }}</span>
+                                        {% if proveedor.email %}
+                                            {% if proveedor.email_verificado %}
+                                                <span class="d-inline-flex align-items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-success">
+                                                    <span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                                    Verificado
+                                                </span>
+                                            {% else %}
+                                                <span class="d-inline-flex align-items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-warning">
+                                                    <span class="material-symbols-outlined text-[10px]">pending</span>
+                                                    No Verificado
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="py-4 px-2">
                                     {% if proveedor.activo %}
@@ -588,6 +603,11 @@
                                 <td class="py-4 px-2 text-right text-sm font-bold" style="color: #7a5a12;">${{ proveedor.gasto_acumulado }}</td>
                                 <td class="py-4 px-2 text-right">
                                     <div class="flex items-center justify-end gap-3">
+                                        {% if proveedor.email and not proveedor.email_verificado %}
+                                        <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #d97706;" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ proveedor.id }}">
+                                            Verificar
+                                        </button>
+                                        {% endif %}
                                         <a href="{% url 'detalle_proveedor' proveedor.id %}" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--primary);" title="Historial">
                                             Historial
                                         </a>
@@ -724,6 +744,75 @@
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn olive-btn">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Verificación de Email -->
+    <div class="modal fade" id="verificarEmailModal-{{ proveedor.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content provider-modal rounded-4">
+                <form method="post" action="{% url 'verificar_proveedor_email' proveedor.id %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <div class="provider-modal-title">
+                            <span class="provider-modal-icon material-symbols-outlined" style="background-color: rgba(217, 119, 6, 0.12); color: #d97706; border-color: rgba(217,119,6,0.24)">mark_email_unread</span>
+                            <div>
+                                <h2 class="modal-title section-title fs-4 mb-1" style="color: #d97706;">Confirmar Correo</h2>
+                                <p class="small mb-0" style="color: var(--text-muted);">{{ proveedor.nombre }}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-sm mb-4" style="color: var(--text-muted); line-height: 1.6;">
+                            Se ha enviado un código de activación de 6 dígitos al correo <strong>{{ proveedor.email }}</strong>. Por favor, solicítelo al proveedor e ingréselo a continuación.
+                        </p>
+                        <div class="provider-field">
+                            <label class="form-label mb-2">Código de 6 dígitos</label>
+                            <input type="text" name="codigo" maxlength="6" required placeholder="123456"
+                                   class="form-control text-center font-bold tracking-[0.4em] text-lg rounded-xl"
+                                   style="height: 3.2rem; background-color: var(--bg); border: 1px solid var(--border); color: var(--text);">
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-2" data-bs-toggle="modal" data-bs-target="#reenviarConfirmacionModal-{{ proveedor.id }}" style="font-size: 0.65rem;">
+                            Reenviar Código
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-2" data-bs-dismiss="modal" style="font-size: 0.65rem;">Cancelar</button>
+                            <button type="submit" class="btn btn-sm olive-btn py-2 px-3" style="font-size: 0.65rem;">
+                                Verificar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Auxiliar para reenviar código -->
+    <div class="modal fade" id="reenviarConfirmacionModal-{{ proveedor.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+            <div class="modal-content provider-modal rounded-4">
+                <form method="post" action="{% url 'reenviar_codigo_proveedor' proveedor.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body text-center p-6">
+                        <span class="material-symbols-outlined text-4xl mb-3" style="color: var(--primary);">send_and_archive</span>
+                        <h3 class="font-headline italic text-xl mb-3" style="color: var(--text);">¿Reenviar código?</h3>
+                        <p class="text-sm mb-4" style="color: var(--text-muted);">
+                            Se generará y enviará un nuevo código de activación al correo registrado: <strong>{{ proveedor.email }}</strong>.
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-2 px-4" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ proveedor.id }}" style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase;">
+                                Volver
+                            </button>
+                            <button type="submit" class="btn btn-sm olive-btn py-2 px-4" style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase;">
+                                Sí, enviar
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

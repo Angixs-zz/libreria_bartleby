@@ -170,7 +170,7 @@
         Exportar
       </a>
 
-      <a href="{% url 'agregar_libro' %}"
+      <a href="{% url 'agregar_libro_compra' %}"
          class="qnav-chip primary flex-shrink-0 btn-shine ripple-origin"
          style="font-size:0.78rem; padding: 0.75rem 1.4rem;">
         <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>
@@ -231,7 +231,7 @@
             <button class="filter-chip active" onclick="filtrarStock('todos', this)">Todos</button>
             <button class="filter-chip" onclick="filtrarStock('disponible', this)">Disponibles</button>
             <button class="filter-chip" onclick="filtrarStock('agotado', this)">Agotados</button>
-            <a href="{% url 'agregar_libro' %}" class="qnav-chip primary lg:hidden" style="padding:0.45rem 0.85rem;">
+            <a href="{% url 'agregar_libro_compra' %}" class="qnav-chip primary lg:hidden" style="padding:0.45rem 0.85rem;">
               <span class="material-symbols-outlined" style="font-size:0.9rem;">add</span> Nuevo
             </a>
           </div>
@@ -364,7 +364,7 @@
                         style="color:var(--border); font-variation-settings:'wght' 100;">inventory_2</span>
                   <h3 class="font-headline italic text-2xl mb-2" style="color:var(--text-muted);">El archivo está vacío</h3>
                   <p class="text-sm mb-6" style="color:var(--text-faint);">Aún no hay ejemplares en el inventario.</p>
-                  <a href="{% url 'agregar_libro' %}"
+                  <a href="{% url 'agregar_libro_compra' %}"
                      class="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold uppercase tracking-widest shadow-md transition-all hover:opacity-90"
                      style="background:var(--primary); color:#fff;">
                     <span class="material-symbols-outlined text-sm">add</span> Registrar primero
@@ -383,7 +383,7 @@
             <strong id="count-visible" style="color:var(--text);">{{ total_ejemplares }}</strong>
             lote{% if total_ejemplares != 1 %}s{% endif %} mostrados
           </p>
-          <a href="{% url 'agregar_libro' %}"
+          <a href="{% url 'agregar_libro_compra' %}"
              class="inline-flex items-center gap-1 text-xs font-bold hover:underline"
              style="color:var(--primary);">
             <span class="material-symbols-outlined text-sm">add_circle</span> Registrar nuevo

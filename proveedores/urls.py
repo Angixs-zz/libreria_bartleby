@@ -7,6 +7,8 @@ urlpatterns = [
     path('', views.directorio_proveedores, name='directorio_proveedores'),
     path('nuevo/', views.crear_proveedor, name='crear_proveedor'),
     path('<int:proveedor_id>/editar/', views.editar_proveedor, name='editar_proveedor'),
+    path('<int:proveedor_id>/verificar/', views.verificar_proveedor_email, name='verificar_proveedor_email'),
+    path('<int:proveedor_id>/reenviar-codigo/', views.reenviar_codigo_proveedor, name='reenviar_codigo_proveedor'),
     path('<int:proveedor_id>/', views.detalle_proveedor, name='detalle_proveedor'),
 
     # Adquisiciones

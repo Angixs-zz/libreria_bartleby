@@ -180,43 +180,53 @@
 
             <!-- Botón de acción principal -->
             {% if ejemplar.stock_disponible > 0 %}
-            <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0 mb-3" id="form-agregar-{{ ejemplar.id }}">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{% url 'detalle_libro' ejemplar.id %}">
+                {% if not request.user.is_staff and not request.user.is_superuser %}
+                <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0 mb-3" id="form-agregar-{{ ejemplar.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'detalle_libro' ejemplar.id %}">
 
-                <!-- Selector de cantidad -->
-                <div class="flex items-center gap-3 mb-4">
-                    <label class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">Cantidad:</label>
-                    <div class="flex items-center rounded-lg overflow-hidden" style="border: 1px solid var(--border);">
-                        <button type="button"
-                                onclick="ajustarCantidad('cant-{{ ejemplar.id }}', -1)"
-                                class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
-                                style="background-color: var(--bg-subtle); color: var(--text);">−</button>
-                        <input type="number"
-                               name="cantidad"
-                               id="cant-{{ ejemplar.id }}"
-                               value="1"
-                               min="1"
-                               max="{{ ejemplar.stock_disponible }}"
-                               class="w-14 text-center font-bold text-base border-none outline-none"
-                               style="background-color: var(--surface); color: var(--text);">
-                        <button type="button"
-                                onclick="ajustarCantidad('cant-{{ ejemplar.id }}', 1, {{ ejemplar.stock_disponible }})"
-                                class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
-                                style="background-color: var(--bg-subtle); color: var(--text);">+</button>
+                    <!-- Selector de cantidad -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <label class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">Cantidad:</label>
+                        <div class="flex items-center rounded-lg overflow-hidden" style="border: 1px solid var(--border);">
+                            <button type="button"
+                                    onclick="ajustarCantidad('cant-{{ ejemplar.id }}', -1)"
+                                    class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
+                                    style="background-color: var(--bg-subtle); color: var(--text);">−</button>
+                            <input type="number"
+                                   name="cantidad"
+                                   id="cant-{{ ejemplar.id }}"
+                                   value="1"
+                                   min="1"
+                                   max="{{ ejemplar.stock_disponible }}"
+                                   class="w-14 text-center font-bold text-base border-none outline-none"
+                                   style="background-color: var(--surface); color: var(--text);">
+                            <button type="button"
+                                    onclick="ajustarCantidad('cant-{{ ejemplar.id }}', 1, {{ ejemplar.stock_disponible }})"
+                                    class="px-3 py-2 text-lg font-bold transition-colors hover:opacity-70"
+                                    style="background-color: var(--bg-subtle); color: var(--text);">+</button>
+                        </div>
+                        <span class="text-xs" style="color: var(--text-faint);">
+                            Máx. {{ ejemplar.stock_disponible }}
+                        </span>
                     </div>
-                    <span class="text-xs" style="color: var(--text-faint);">
-                        Máx. {{ ejemplar.stock_disponible }}
-                    </span>
-                </div>
 
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold uppercase tracking-widest shadow-lg hover:opacity-90 hover:-translate-y-0.5 transition-all active:scale-95 btn-shine ripple-origin"
-                        style="background-color: var(--primary); color: white;">
-                    <span class="material-symbols-outlined">add_shopping_cart</span>
-                    Añadir a mi bolsa
-                </button>
-            </form>
+                    <button type="submit"
+                            class="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold uppercase tracking-widest shadow-lg hover:opacity-90 hover:-translate-y-0.5 transition-all active:scale-95 btn-shine ripple-origin"
+                            style="background-color: var(--primary); color: white;">
+                        <span class="material-symbols-outlined">add_shopping_cart</span>
+                        Añadir a mi bolsa
+                    </button>
+                </form>
+                {% else %}
+                <div class="p-5 rounded-xl border border-dashed mb-6 text-center"
+                     style="background-color: rgba(163,196,106,0.06); border-color: rgba(163,196,106,0.25);">
+                    <p class="text-sm font-body font-semibold mb-0" style="color: var(--text-muted);">
+                        <span class="material-symbols-outlined text-base align-middle mr-1" style="color: var(--primary);">info</span>
+                        Sesión de Personal Activa. Las reservas y apartados a través del catálogo son exclusivas para clientes.
+                    </p>
+                </div>
+                {% endif %}
             <script>
             function ajustarCantidad(inputId, delta, max) {
                 const input = document.getElementById(inputId);

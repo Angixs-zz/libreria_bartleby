@@ -14,6 +14,8 @@ class Proveedor(models.Model):
     contacto = models.CharField(max_length=200, blank=True, help_text="Nombre de la persona de contacto")
     telefono = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
+    email_verificado = models.BooleanField(default=False)
+    codigo_verificacion = models.CharField(max_length=6, blank=True, null=True)
     direccion = models.TextField(blank=True)
     activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)

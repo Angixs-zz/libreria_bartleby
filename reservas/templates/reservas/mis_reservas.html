@@ -18,6 +18,16 @@
 {% endblock %}
 
 
+{% block extra_head %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    .swal2-popup {
+        font-family: 'Newsreader', 'Inter', sans-serif !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12 md:py-20 mt-10">
 
@@ -82,9 +92,9 @@
                                     Ver Ticket
                                 </a>
                                 {% if reserva.estado == 'pendiente' %}
-                                    <form method="POST" action="{% url 'cancelar_reserva' reserva.id %}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva? Los ejemplares volverán a estar disponibles.');" class="m-0">
+                                    <form id="cancel-form-{{ reserva.id }}" method="POST" action="{% url 'cancelar_reserva' reserva.id %}" class="m-0">
                                         {% csrf_token %}
-                                        <button type="submit" class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400">
+                                        <button type="button" onclick="confirmarCancelacion('{{ reserva.id }}', '{{ reserva.codigo_ticket }}')" class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400">
                                             <span class="material-symbols-outlined text-lg">cancel</span>
                                             Cancelar Reserva
                                         </button>
@@ -137,4 +147,31 @@
     {% endif %}
 
 </main>
+
+{% block extra_js %}
+<script>
+function confirmarCancelacion(reservaId, codigoTicket) {
+    Swal.fire({
+        title: '¿Confirmar cancelación?',
+        html: `¿Estás seguro de que deseas cancelar la reserva <strong style="color: #4A5D23;">${codigoTicket}</strong>?<br><span style="font-size: 0.85em; opacity: 0.8; margin-top: 10px; display: block;">Los ejemplares apartados volverán a estar disponibles de inmediato en el catálogo general.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4A5D23',
+        cancelButtonColor: '#8a3b2e',
+        confirmButtonText: 'Sí, cancelar reserva',
+        cancelButtonText: 'No, mantenerla',
+        background: getComputedStyle(document.documentElement).getPropertyValue('--surface') || '#fff',
+        color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#333',
+        customClass: {
+            popup: 'rounded-2xl border shadow-xl',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('cancel-form-' + reservaId).submit();
+        }
+    });
+}
+</script>
 {% endblock %}
+{% endblock %}
+

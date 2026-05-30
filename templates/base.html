@@ -613,7 +613,7 @@ details.nav-dropdown[open] summary .dropdown-arrow {
           </span>
       </button>
 
-      {% if not user.is_staff %}
+      {% if not user.is_staff and not user.is_superuser %}
         <!-- Carrito + Reservas -->
         <div class="flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl p-1 sm:p-1.5" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08); box-shadow: 0 2px 10px inset rgba(0,0,0,0.2);">
           {% if user.is_authenticated %}

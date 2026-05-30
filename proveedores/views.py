@@ -102,7 +102,24 @@ def directorio_proveedores(request):
 def crear_proveedor(request):
     form = ProveedorForm(request.POST, prefix='nuevo')
     if form.is_valid():
-        proveedor = form.save()
+        proveedor = form.save(commit=False)
+        if proveedor.email:
+            proveedor.email_verificado = False
+            import random
+            codigo = str(random.randint(100000, 999999))
+            proveedor.codigo_verificacion = codigo
+        else:
+            proveedor.email_verificado = True
+        proveedor.save()
+
+        # Enviar correo de verificación si cuenta con email
+        if proveedor.email:
+            try:
+                from usuarios.email_service import enviar_codigo_verificacion_proveedor_email
+                enviar_codigo_verificacion_proveedor_email(proveedor, proveedor.codigo_verificacion)
+            except Exception:
+                pass
+
         registrar_auditoria(
             actor=request.user,
             accion='crear',
@@ -112,7 +129,10 @@ def crear_proveedor(request):
             entidad_nombre=proveedor.nombre,
             descripcion=f'Se registró el proveedor "{proveedor.nombre}".',
         )
-        messages.success(request, 'Proveedor registrado correctamente.')
+        if proveedor.email:
+            messages.success(request, 'Proveedor registrado. Se ha enviado un código de verificación a su correo.')
+        else:
+            messages.success(request, 'Proveedor registrado correctamente.')
     else:
         messages.error(request, 'No se pudo registrar el proveedor. Revisa los datos ingresados.')
     return redirect('directorio_proveedores')
@@ -123,9 +143,28 @@ def crear_proveedor(request):
 @require_http_methods(["POST"])
 def editar_proveedor(request, proveedor_id):
     proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    email_anterior = proveedor.email
     form = ProveedorForm(request.POST, instance=proveedor, prefix=f'proveedor-{proveedor.id}')
     if form.is_valid():
-        proveedor = form.save()
+        proveedor = form.save(commit=False)
+        # Si el correo cambió, forzar verificación
+        if proveedor.email != email_anterior:
+            if proveedor.email:
+                proveedor.email_verificado = False
+                import random
+                codigo = str(random.randint(100000, 999999))
+                proveedor.codigo_verificacion = codigo
+                try:
+                    from usuarios.email_service import enviar_codigo_verificacion_proveedor_email
+                    enviar_codigo_verificacion_proveedor_email(proveedor, codigo)
+                except Exception:
+                    pass
+                messages.info(request, 'El correo ha cambiado. Se ha enviado un nuevo código de activación.')
+            else:
+                proveedor.email_verificado = True
+                proveedor.codigo_verificacion = None
+        proveedor.save()
+
         registrar_auditoria(
             actor=request.user,
             accion='editar',
@@ -135,9 +174,56 @@ def editar_proveedor(request, proveedor_id):
             entidad_nombre=proveedor.nombre,
             descripcion=f'Se actualizó el proveedor "{proveedor.nombre}".',
         )
-        messages.success(request, f'Se actualizo el proveedor "{proveedor.nombre}".')
+        messages.success(request, f'Se actualizó el proveedor "{proveedor.nombre}".')
     else:
         messages.error(request, 'No se pudo actualizar el proveedor. Revisa los campos del formulario.')
+    return redirect('directorio_proveedores')
+
+
+@login_required
+@admin_required
+@require_http_methods(["POST"])
+def verificar_proveedor_email(request, proveedor_id):
+    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    codigo_ingresado = request.POST.get('codigo', '').strip()
+    if proveedor.codigo_verificacion and proveedor.codigo_verificacion == codigo_ingresado:
+        proveedor.email_verificado = True
+        proveedor.codigo_verificacion = None
+        proveedor.save()
+        registrar_auditoria(
+            actor=request.user,
+            accion='editar',
+            modulo='proveedores',
+            entidad_tipo='proveedor',
+            entidad_id=proveedor.id,
+            entidad_nombre=proveedor.nombre,
+            descripcion=f'Se verificó exitosamente el correo del proveedor "{proveedor.nombre}".',
+        )
+        messages.success(request, f'El correo del proveedor "{proveedor.nombre}" ha sido verificado con éxito.')
+    else:
+        messages.error(request, 'El código de activación ingresado es incorrecto.')
+    return redirect('directorio_proveedores')
+
+
+@login_required
+@admin_required
+@require_http_methods(["POST"])
+def reenviar_codigo_proveedor(request, proveedor_id):
+    proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
+    if proveedor.email:
+        import random
+        codigo = str(random.randint(100000, 999999))
+        proveedor.codigo_verificacion = codigo
+        proveedor.email_verificado = False
+        proveedor.save()
+        try:
+            from usuarios.email_service import enviar_codigo_verificacion_proveedor_email
+            enviar_codigo_verificacion_proveedor_email(proveedor, codigo)
+        except Exception:
+            pass
+        messages.success(request, f'Se ha reenviado un nuevo código de activación a {proveedor.email}.')
+    else:
+        messages.error(request, 'Este proveedor no tiene registrado un correo electrónico.')
     return redirect('directorio_proveedores')
 
 

@@ -181,6 +181,7 @@
                             Reservado
                         </span>
                         {% else %}
+                        {% if not request.user.is_staff and not request.user.is_superuser %}
                         <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0"
                               onclick="event.stopPropagation()">
                             {% csrf_token %}
@@ -190,6 +191,7 @@
                                 Añadir
                             </button>
                         </form>
+                        {% endif %}
                         {% endif %}
                     </div>
 

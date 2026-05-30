@@ -506,7 +506,22 @@
                             <tr class="transition-colors hover:bg-black/5 dark:hover:bg-white/5" style="border-bottom: 1px solid var(--border);">
                                 <td class="py-4 px-2">
                                     <div class="text-sm font-bold" style="color: var(--text);">{{ empleado.get_full_name|default:empleado.username }}</div>
-                                    <div class="text-[11px]" style="color: var(--text-muted);">{{ empleado.email|default:"Sin correo" }}</div>
+                                    <div class="text-[11px] d-flex flex-column gap-1" style="color: var(--text-muted);">
+                                        <span>{{ empleado.email|default:"Sin correo" }}</span>
+                                        {% if empleado.email %}
+                                            {% if not empleado.perfil.codigo_verificacion %}
+                                                <span class="d-inline-flex align-items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-success">
+                                                    <span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                                    Verificado
+                                                </span>
+                                            {% else %}
+                                                <span class="d-inline-flex align-items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-warning">
+                                                    <span class="material-symbols-outlined text-[10px]">pending</span>
+                                                    Pendiente Validación
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="py-4 px-2">
                                     <span class="text-sm font-bold" style="color: var(--text);">{{ empleado.username }}</span>
@@ -539,28 +554,45 @@
                                     {% if empleado.is_superuser %}
                                         <span class="text-[11px] font-bold" style="color: var(--text-muted);">Cuenta protegida</span>
                                     {% elif empleado.is_active %}
-                                        <div class="flex items-center justify-end gap-3">
-                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--text-muted);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                        <div class="flex items-center justify-end gap-2">
+                                            {% if empleado.perfil.codigo_verificacion %}
+                                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(217, 119, 6, 0.08); color: #b45309;" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ empleado.id }}">
+                                                <span class="material-symbols-outlined text-[14px]">mark_email_read</span>
+                                                Verificar Correo
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                                <span class="material-symbols-outlined text-[14px]">edit_square</span>
                                                 Editar
                                             </button>
-                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #0d6efd;" data-bs-toggle="modal" data-bs-target="#resetPasswordModal-{{ empleado.id }}">
-                                                Reset
+                                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(13, 110, 253, 0.08); color: #0a58ca;" data-bs-toggle="modal" data-bs-target="#resetPasswordModal-{{ empleado.id }}">
+                                                <span class="material-symbols-outlined text-[14px]">key</span>
+                                                Cambiar Contraseña
                                             </button>
                                             <form method="post" action="{% url 'desactivar_personal' empleado.id %}" class="inline m-0">
                                                 {% csrf_token %}
-                                                <button type="submit" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #dc2626;">
-                                                    Baja
+                                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(220, 38, 38, 0.08); color: #b02a37;">
+                                                    <span class="material-symbols-outlined text-[14px]">person_off</span>
+                                                    Desactivar
                                                 </button>
                                             </form>
                                         </div>
                                     {% else %}
-                                        <div class="flex items-center justify-end gap-3">
-                                            <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--text-muted);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                        <div class="flex items-center justify-end gap-2">
+                                            {% if empleado.perfil.codigo_verificacion %}
+                                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(217, 119, 6, 0.08); color: #b45309;" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ empleado.id }}">
+                                                <span class="material-symbols-outlined text-[14px]">mark_email_read</span>
+                                                Verificar Correo
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text);" data-bs-toggle="modal" data-bs-target="#editarPersonalModal-{{ empleado.id }}">
+                                                <span class="material-symbols-outlined text-[14px]">edit_square</span>
                                                 Editar
                                             </button>
                                             <form method="post" action="{% url 'reactivar_personal' empleado.id %}" class="inline m-0">
                                                 {% csrf_token %}
-                                                <button type="submit" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--primary);">
+                                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(25, 135, 84, 0.08); color: #146c43;">
+                                                    <span class="material-symbols-outlined text-[14px]">person_check</span>
                                                     Reactivar
                                                 </button>
                                             </form>
@@ -722,6 +754,55 @@
                 </div>
             </div>
         </div>
+    {% if empleado.perfil.codigo_verificacion %}
+        <div class="modal fade" id="verificarEmailModal-{{ empleado.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered">
+                <div class="modal-content staff-modal rounded-4 overflow-hidden">
+                    <form method="post" action="{% url 'verificar_personal_email' empleado.id %}">
+                        {% csrf_token %}
+                        <div class="modal-header relative border-0 pb-0 bg-transparent">
+                            <button type="button" class="staff-modal-close absolute top-6 right-6" data-bs-dismiss="modal" aria-label="Cerrar">
+                                <span class="material-symbols-outlined text-[20px]">close</span>
+                            </button>
+                            <div class="text-center w-full mt-4">
+                                <span class="material-symbols-outlined text-[48px] mb-3" style="color: #d97706; font-variation-settings: 'FILL' 1;">mark_email_read</span>
+                                <h2 class="modal-title fs-3 font-headline italic" style="color: var(--primary);">Verificar Correo Institucional</h2>
+                                <p class="text-sm px-4 mt-2" style="color: var(--text-muted);">
+                                    Se ha enviado un código de validación al nuevo correo: <br>
+                                    <strong style="color: var(--text);">{{ empleado.email }}</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="modal-body text-center pt-2">
+                            <div class="mx-auto" style="max-width: 280px;">
+                                <label class="form-label text-[10px] uppercase font-extrabold tracking-widest mb-2" style="color: var(--text-muted);">Código de Verificación</label>
+                                <input type="text" name="codigo" class="form-control text-center fs-2 font-monospace fw-bold tracking-widest py-3 rounded-xl" 
+                                       placeholder="------" maxlength="6" required autocomplete="off"
+                                       style="background: var(--bg-subtle) !important; border: 2px dashed rgba(217,119,6,0.4) !important; color: var(--primary) !important;">
+                            </div>
+                            <p class="text-[11px] mt-4 mb-0" style="color: var(--text-muted);">
+                                Ingresa el código proporcionado por el empleado para confirmar su identidad y reactivar su cuenta.
+                            </p>
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0 pb-4 d-flex flex-column gap-2 bg-transparent">
+                            <button type="submit" class="staff-modal-action w-100 justify-content-center py-3 text-sm" style="background-color: #d97706; border-color: #d97706; color: white; box-shadow: 0 8px 20px rgba(217,119,6,0.2);">
+                                Validar y Reactivar
+                            </button>
+                            <button type="button" class="btn btn-link text-[10px] font-extrabold uppercase tracking-widest mt-1 text-decoration-none hover:underline" style="color: var(--text-muted);"
+                                    onclick="document.getElementById('form-reenviar-{{ empleado.id }}').submit();">
+                                Reenviar código al correo
+                            </button>
+                        </div>
+                    </form>
+                    <form id="form-reenviar-{{ empleado.id }}" method="post" action="{% url 'reenviar_codigo_personal' empleado.id %}" class="d-none">
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
 {% endfor %}
 

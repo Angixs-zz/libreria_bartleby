@@ -644,6 +644,8 @@ def editar_personal(request, user_id):
         messages.error(request, 'La cuenta del Director no se edita desde este panel.')
         return redirect('panel_personal')
 
+    email_anterior = usuario.email
+
     form = StaffUpdateForm(
         request.POST,
         instance=usuario.perfil,
@@ -655,6 +657,33 @@ def editar_personal(request, user_id):
         form.save()
         usuario.perfil.rol = 'cajero'
         usuario.perfil.save(update_fields=['rol'])
+        
+        # Validación de cambio de correo
+        if usuario.email != email_anterior:
+            if usuario.email:
+                import random
+                codigo = str(random.randint(100000, 999999))
+                usuario.perfil.codigo_verificacion = codigo
+                usuario.perfil.save(update_fields=['codigo_verificacion'])
+                
+                # Desactivar temporalmente hasta la validación
+                usuario.is_active = False
+                usuario.save(update_fields=['is_active'])
+
+                try:
+                    from .email_service import enviar_codigo_verificacion_personal_email
+                    enviar_codigo_verificacion_personal_email(usuario, codigo)
+                except Exception as e:
+                    print(f"[ERROR ENVIANDO EMAIL STAFF] {e}")
+                    
+                messages.warning(request, f'Se actualizó el correo. La cuenta de "{usuario.username}" fue desactivada temporalmente. Se ha enviado un código de validación.')
+            else:
+                usuario.perfil.codigo_verificacion = None
+                usuario.perfil.save(update_fields=['codigo_verificacion'])
+                messages.success(request, f'Se actualizaron los datos de "{usuario.username}".')
+        else:
+            messages.success(request, f'Se actualizaron los datos de "{usuario.username}".')
+
         registrar_auditoria(
             actor=request.user,
             accion='editar',
@@ -668,7 +697,6 @@ def editar_personal(request, user_id):
                 'telefono': usuario.perfil.telefono,
             },
         )
-        messages.success(request, f'Se actualizaron los datos de "{usuario.username}".')
         return redirect('panel_personal')
     else:
         context = _obtener_contexto_panel_personal(
@@ -682,6 +710,58 @@ def editar_personal(request, user_id):
             errores.extend(field_errors)
         messages.error(request, 'No se pudo actualizar el empleado: ' + ' '.join(errores))
         return render(request, 'usuarios/panel_personal.html', context)
+
+
+@login_required
+@director_required
+@require_http_methods(["POST"])
+def verificar_personal_email(request, user_id):
+    usuario = get_object_or_404(User.objects.select_related('perfil'), pk=user_id)
+    codigo_ingresado = request.POST.get('codigo', '').strip()
+    
+    if usuario.perfil.codigo_verificacion and usuario.perfil.codigo_verificacion == codigo_ingresado:
+        usuario.is_active = True
+        usuario.save(update_fields=['is_active'])
+        
+        usuario.perfil.codigo_verificacion = None
+        usuario.perfil.save(update_fields=['codigo_verificacion'])
+        
+        registrar_auditoria(
+            actor=request.user,
+            accion='editar',
+            modulo='usuarios',
+            entidad_tipo='usuario_staff',
+            entidad_id=usuario.id,
+            entidad_nombre=usuario.username,
+            descripcion=f'Se verificó exitosamente el nuevo correo de "{usuario.username}".',
+        )
+        messages.success(request, f'El correo de "{usuario.username}" ha sido verificado con éxito y la cuenta ha sido reactivada.')
+    else:
+        messages.error(request, 'El código de activación ingresado es incorrecto.')
+    return redirect('panel_personal')
+
+
+@login_required
+@director_required
+@require_http_methods(["POST"])
+def reenviar_codigo_personal(request, user_id):
+    usuario = get_object_or_404(User.objects.select_related('perfil'), pk=user_id)
+    if usuario.email:
+        import random
+        codigo = str(random.randint(100000, 999999))
+        usuario.perfil.codigo_verificacion = codigo
+        usuario.perfil.save(update_fields=['codigo_verificacion'])
+        
+        try:
+            from .email_service import enviar_codigo_verificacion_personal_email
+            enviar_codigo_verificacion_personal_email(usuario, codigo)
+        except Exception as e:
+            print(f"[ERROR REENVIANDO EMAIL STAFF] {e}")
+            
+        messages.success(request, f'Se ha reenviado un nuevo código de validación a {usuario.email}.')
+    else:
+        messages.error(request, 'Este empleado no tiene registrado un correo electrónico.')
+    return redirect('panel_personal')
 
 
 @login_required

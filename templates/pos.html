@@ -309,9 +309,10 @@
                     <p class="text-xs font-body mt-0.5" style="color:var(--text-faint);">×${item.cantidad}</p>
                 </div>
                 <button onclick="quitarItem(${i})"
-                        class="ml-2 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:text-red-500 flex-shrink-0"
-                        style="color:var(--text-faint);">
-                    <span class="material-symbols-outlined text-xl">close</span>
+                        class="ml-4 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 text-xs font-bold font-label uppercase flex items-center gap-1 flex-shrink-0 transition-all"
+                        title="Quitar de la venta">
+                    <span class="material-symbols-outlined text-sm font-bold">delete</span>
+                    Quitar
                 </button>
             </div>`;
         });

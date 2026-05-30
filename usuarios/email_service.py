@@ -56,8 +56,10 @@ def enviar_correo(destinatario, asunto, html, texto):
     email_host = getattr(settings, 'EMAIL_HOST', '')
     email_backend = getattr(settings, 'EMAIL_BACKEND', '')
 
-    # Si detectamos Brevo y no estamos usando la consola de desarrollo, intentamos enviar vía API HTTPS (puerto 443)
-    if api_key and ('xsmtpsib-' in api_key or 'xkeysib-' in api_key or 'smtp-relay.brevo.com' in email_host) and 'console.EmailBackend' not in email_backend:
+    # Si detectamos Brevo y no estamos usando la consola de desarrollo ni en entorno de pruebas, intentamos enviar vía API HTTPS (puerto 443)
+    if api_key and ('xsmtpsib-' in api_key or 'xkeysib-' in api_key or 'smtp-relay.brevo.com' in email_host) \
+            and 'console.EmailBackend' not in email_backend \
+            and 'locmem.EmailBackend' not in email_backend:
         url = "https://api.brevo.com/v3/smtp/email"
         headers = {
             "accept": "application/json",
@@ -121,6 +123,41 @@ def enviar_codigo_verificacion_email(user, codigo):
             </div>
             <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #5a5f52; margin-bottom: 0;">
                 Ingresa este codigo en la pantalla de verificacion para activar tu cuenta.
+            </p>
+        </div>
+    </div>
+    """
+    return enviar_correo(user.email, asunto, html, texto)
+
+
+def enviar_codigo_verificacion_personal_email(user, codigo):
+    print("\n\n\n" + "*" * 60)
+    print(f"      CÓDIGO DE ACTUALIZACIÓN STAFF: >>> {codigo} <<<")
+    print(f"      (Para: {user.email})")
+    print("*" * 60 + "\n\n\n")
+    asunto = 'Validacion de correo - Libreria Bartleby'
+    texto = (
+        f'Hola {user.first_name or user.username},\n\n'
+        f'El codigo para validar la actualizacion de tu correo institucional es: {codigo}\n\n'
+        'Entregalo a la Direccion para completar el proceso.'
+    )
+    html = f"""
+    <div style="font-family: Georgia, serif; background: #faf9f5; padding: 32px; color: #1b1c1a;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #d8dccf; border-radius: 18px; padding: 32px;">
+            <p style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #6b705f; margin-bottom: 12px;">
+                Libreria Bartleby &middot; Panel Administrativo
+            </p>
+            <h1 style="font-size: 32px; font-style: italic; color: #198754; margin: 0 0 16px 0;">
+                Verifica tu nuevo correo
+            </h1>
+            <p style="font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #404437;">
+                Hola {user.first_name or user.username}, el codigo para validar la actualizacion de tu correo institucional es:
+            </p>
+            <div style="margin: 28px 0; padding: 18px 20px; background: #f4f4f0; border-radius: 14px; text-align: center; font-size: 34px; letter-spacing: 0.35em; color: #198754; font-weight: 700;">
+                {codigo}
+            </div>
+            <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #5a5f52; margin-bottom: 0;">
+                Por favor, entrega este codigo al administrador en turno para confirmar el cambio.
             </p>
         </div>
     </div>
@@ -193,3 +230,38 @@ def enviar_codigo_recuperacion_email(user, codigo):
     </div>
     """
     return enviar_correo(user.email, asunto, html, texto)
+
+
+def enviar_codigo_verificacion_proveedor_email(proveedor, codigo):
+    print("\n\n\n" + "*" * 60)
+    print(f"      CÓDIGO DE ACTIVACIÓN PROVEEDOR: >>> {codigo} <<<")
+    print(f"      (Para: {proveedor.email})")
+    print("*" * 60 + "\n\n\n")
+    asunto = 'Verificacion de contacto - Libreria Bartleby'
+    texto = (
+        f'Estimado/a {proveedor.contacto or proveedor.nombre},\n\n'
+        f'Su codigo de verificacion de proveedor es: {codigo}\n\n'
+        'Por favor proporcione este codigo al personal de la libreria para activar su registro de proveedor.'
+    )
+    html = f"""
+    <div style="font-family: Georgia, serif; background: #faf9f5; padding: 32px; color: #1b1c1a;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #d8dccf; border-radius: 18px; padding: 32px;">
+            <p style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #6b705f; margin-bottom: 12px;">
+                Libreria Bartleby
+            </p>
+            <h1 style="font-size: 32px; font-style: italic; color: #3e5219; margin: 0 0 16px 0;">
+                Verificacion de Proveedor
+            </h1>
+            <p style="font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #404437;">
+                Hola {proveedor.contacto or proveedor.nombre}, su codigo de verificacion es:
+            </p>
+            <div style="margin: 28px 0; padding: 18px 20px; background: #f4f4f0; border-radius: 14px; text-align: center; font-size: 34px; letter-spacing: 0.35em; color: #3e5219; font-weight: 700;">
+                {codigo}
+            </div>
+            <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #5a5f52; margin-bottom: 0;">
+                Proporcione este codigo de seguridad en la sucursal o ingreselo para activar el canal de contacto de su cuenta.
+            </p>
+        </div>
+    </div>
+    """
+    return enviar_correo(proveedor.email, asunto, html, texto)
