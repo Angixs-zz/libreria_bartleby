@@ -602,19 +602,23 @@
                                 <td class="py-4 px-2 text-right text-sm font-bold" style="color: var(--text);">{{ proveedor.total_adquisiciones }}</td>
                                 <td class="py-4 px-2 text-right text-sm font-bold" style="color: #7a5a12;">${{ proveedor.gasto_acumulado }}</td>
                                 <td class="py-4 px-2 text-right">
-                                    <div class="flex items-center justify-end gap-3">
+                                    <div class="flex items-center justify-end gap-2">
                                         {% if proveedor.email and not proveedor.email_verificado %}
-                                        <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #d97706;" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ proveedor.id }}">
+                                        <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(217, 119, 6, 0.08); color: #b45309;" data-bs-toggle="modal" data-bs-target="#verificarEmailModal-{{ proveedor.id }}">
+                                            <span class="material-symbols-outlined text-[14px]">mark_email_read</span>
                                             Verificar
                                         </button>
                                         {% endif %}
-                                        <a href="{% url 'detalle_proveedor' proveedor.id %}" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--primary);" title="Historial">
+                                        <a href="{% url 'detalle_proveedor' proveedor.id %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(62, 82, 25, 0.08); color: var(--primary);" title="Historial">
+                                            <span class="material-symbols-outlined text-[14px]">history</span>
                                             Historial
                                         </a>
-                                        <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: #198754;" title="Registrar lote">
+                                        <a href="{% url 'registrar_adquisicion' %}?proveedor={{ proveedor.id }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: rgba(25, 135, 84, 0.08); color: #146c43;" title="Registrar lote">
+                                            <span class="material-symbols-outlined text-[14px]">inventory_2</span>
                                             Lote
                                         </a>
-                                        <button type="button" class="text-[10px] font-bold uppercase tracking-wider transition-all hover:underline" style="color: var(--text-muted);" data-bs-toggle="modal" data-bs-target="#editarProveedorModal-{{ proveedor.id }}">
+                                        <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all hover:-translate-y-0.5" style="background-color: var(--bg-subtle); border: 1px solid var(--border); color: var(--text);" data-bs-toggle="modal" data-bs-target="#editarProveedorModal-{{ proveedor.id }}">
+                                            <span class="material-symbols-outlined text-[14px]">edit_square</span>
                                             Editar
                                         </button>
                                     </div>
@@ -699,51 +703,59 @@
 {% for proveedor in proveedores %}
     <div class="modal fade" id="editarProveedorModal-{{ proveedor.id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content rounded-4">
+            <div class="modal-content provider-modal rounded-4">
                 <form method="post" action="{% url 'editar_proveedor' proveedor.id %}">
                     {% csrf_token %}
-                    <div class="modal-header border-0 pb-0">
-                        <div>
-                            <h2 class="modal-title section-title fs-3">Editar proveedor</h2>
-                            <p class="small mb-0" style="color: var(--text-muted);">{{ proveedor.nombre }}</p>
+                    <div class="modal-header">
+                        <div class="provider-modal-title">
+                            <span class="provider-modal-icon material-symbols-outlined">edit_square</span>
+                            <div>
+                                <h2 class="modal-title section-title fs-3 mb-1">Editar proveedor</h2>
+                                <p class="small mb-0" style="color: var(--text-muted);">{{ proveedor.nombre }}</p>
+                            </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
                         {% with form=editar_forms|get_item:proveedor.id %}
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Nombre</label>
-                                    {{ form.nombre }}
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Contacto</label>
-                                    {{ form.contacto }}
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Telefono</label>
-                                    {{ form.telefono }}
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email</label>
-                                    {{ form.email }}
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Direccion</label>
-                                    {{ form.direccion }}
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        {{ form.activo }}
-                                        <label class="form-check-label" for="{{ form.activo.id_for_label }}">Proveedor activo</label>
-                                    </div>
+                        <div class="provider-form-grid">
+                            <div class="provider-field">
+                                <label class="form-label">Nombre</label>
+                                {{ form.nombre }}
+                            </div>
+                            <div class="provider-field">
+                                <label class="form-label">Contacto</label>
+                                {{ form.contacto }}
+                            </div>
+                            <div class="provider-field">
+                                <label class="form-label">Telefono</label>
+                                {{ form.telefono }}
+                            </div>
+                            <div class="provider-field">
+                                <label class="form-label">Email</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="provider-field provider-field-wide">
+                                <label class="form-label">Direccion</label>
+                                {{ form.direccion }}
+                            </div>
+                            <div class="provider-field provider-field-wide">
+                                <div class="provider-status">
+                                    {{ form.activo }}
+                                    <label class="form-check-label" for="{{ form.activo.id_for_label }}">Proveedor activo</label>
                                 </div>
                             </div>
+                        </div>
                         {% endwith %}
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn olive-btn">Guardar cambios</button>
+                        <div class="provider-actions w-100">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn olive-btn">
+                                <span class="material-symbols-outlined align-middle me-1" style="font-size:1rem;">save</span>
+                                Guardar cambios
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

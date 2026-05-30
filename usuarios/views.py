@@ -38,7 +38,14 @@ from .forms import (
     ClienteNotaInternaForm,
 )
 from .models import PerfilUsuario, NotaClienteInterna, EventoAuditoria
-from .auditoria import AUDITORIA_RETENCION_DIAS, registrar_auditoria
+from .auditoria import (
+    AUDITORIA_RETENCION_DIAS,
+    registrar_auditoria,
+    LIMITES_AUDITORIA,
+    ACCIONES_AUDITORIA,
+    MODULOS_AUDITORIA,
+    obtener_limite_auditoria,
+)
 from .email_service import enviar_codigo_verificacion_email, enviar_codigo_login_email
 
 
