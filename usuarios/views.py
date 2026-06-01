@@ -177,8 +177,14 @@ def verificar_codigo(request):
             User.objects.filter(id=user.id).update(is_active=True)
             PerfilUsuario.objects.filter(usuario=user).update(codigo_verificacion=None)
             request.session.pop('user_id_verificar', None)
-            messages.success(request, "¡Cuenta activada con éxito! Ya puedes entrar.")
-            return redirect('login')
+            
+            # Iniciar sesión automáticamente
+            from django.contrib.auth import login
+            user.refresh_from_db()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            messages.success(request, "¡Cuenta verificada con éxito!")
+            return redirect('mi_perfil')
 
         messages.error(request, "El código es incorrecto. Inténtalo de nuevo.")
 
