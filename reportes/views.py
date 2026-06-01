@@ -478,6 +478,46 @@ class _ReportPdfCanvas:
             self.y -= row_h
         self.y -= 16
 
+    def bar_chart(self, title, labels, values, height=120, color=(0.64, 0.77, 0.42)):
+        self.ensure_space(height + 40)
+        x = 42
+        width = 520
+        curr_y = self.y
+        self.text(x, curr_y, title, size=10, font='F2', color=(0.24, 0.32, 0.10))
+        
+        chart_x = x + 35
+        chart_y = curr_y - height + 15
+        chart_w = width - 40
+        chart_h = height - 30
+        
+        max_val = max(values) if values else 0
+        if max_val == 0: max_val = 1
+        
+        ticks = 4
+        for i in range(ticks + 1):
+            tick_y = chart_y + (i * chart_h / ticks)
+            tick_val = (i * max_val / ticks)
+            self.text(x, tick_y - 3, f"${int(tick_val)}", size=6, color=(0.45, 0.47, 0.42))
+            self.line(chart_x - 3, tick_y, chart_x + chart_w, tick_y, color=(0.92, 0.92, 0.90))
+
+        self.line(chart_x, chart_y, chart_x + chart_w, chart_y, color=(0.78, 0.79, 0.72))
+        self.line(chart_x, chart_y, chart_x, chart_y + chart_h, color=(0.78, 0.79, 0.72))
+        
+        if labels and values:
+            n = len(labels)
+            step_x = chart_w / n
+            bar_w = step_x * 0.7
+            
+            for i, (lbl, val) in enumerate(zip(labels, values)):
+                bx = chart_x + (i * step_x) + (step_x * 0.15)
+                bh = (val / max_val) * chart_h
+                self.rect(bx, chart_y, bar_w, max(bh, 1), fill=color, stroke=(0.45, 0.55, 0.30))
+                
+                if n <= 15 or i % max(1, int(n/8)) == 0:
+                    self.text(bx, chart_y - 10, str(lbl)[:8], size=6, color=(0.45, 0.47, 0.42))
+        
+        self.y -= (height + 20)
+
 
 def _build_pdf_document(page_streams):
     objects = []
@@ -533,6 +573,9 @@ def _build_report_pdf(data):
         {'label': 'Flujo neto', 'value': f"${data['flujo_neto']}", 'hint': 'Ventas menos compras', 'color': (0.24, 0.32, 0.10) if not data['flujo_neto_negativo'] else (0.86, 0.15, 0.15)},
         {'label': 'Margen', 'value': f"{data['margen_operativo']}%", 'hint': 'Ganancia sobre ventas', 'color': (0.10, 0.53, 0.33)},
     ])
+
+    canvas.section('Evolucion de Ventas')
+    canvas.bar_chart('Ingresos por periodo', data['chart_labels'], data['chart_totals'])
 
     canvas.section('Indicadores de inventario', 'Lectura rapida para decidir compras, prioridad de inventario y seguimiento comercial.')
     canvas.kpi_grid([
