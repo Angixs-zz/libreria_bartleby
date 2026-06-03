@@ -174,25 +174,33 @@
                     <div class="mt-auto flex justify-between items-center pt-4" style="border-top: 1px solid var(--border);">
                         <span class="text-lg font-body font-bold" style="color: var(--primary);">${{ ejemplar.precio_venta }}</span>
 
-                        {% if venc %}
-                        <span class="px-4 py-2 rounded-lg text-xs font-label flex items-center gap-1"
-                              style="background-color: rgba(186,26,26,0.08); color:#ba1a1a; border: 1px solid rgba(186,26,26,0.2);">
-                            <span class="material-symbols-outlined text-sm">schedule</span>
-                            Reservado
-                        </span>
-                        {% else %}
-                        {% if not request.user.is_staff and not request.user.is_superuser %}
-                        <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0"
-                              onclick="event.stopPropagation()">
-                            {% csrf_token %}
-                            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 text-white btn-shine ripple-origin"
-                                    style="background-color: var(--primary);">
-                                <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
-                                Añadir
-                            </button>
-                        </form>
-                        {% endif %}
-                        {% endif %}
+                        <div class="flex items-center gap-2">
+                            {% if venc %}
+                            <span class="px-4 py-2 rounded-lg text-xs font-label flex items-center gap-1"
+                                  style="background-color: rgba(186,26,26,0.08); color:#ba1a1a; border: 1px solid rgba(186,26,26,0.2);">
+                                <span class="material-symbols-outlined text-sm">schedule</span>
+                                Reservado
+                            </span>
+                            {% else %}
+                            {% if not request.user.is_staff and not request.user.is_superuser %}
+                            <form method="POST" action="{% url 'agregar_al_carrito' ejemplar.id %}" class="m-0"
+                                  onclick="event.stopPropagation()">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 rounded-lg text-xs font-label hover:opacity-90 transition-all flex items-center gap-2 text-white btn-shine ripple-origin"
+                                        style="background-color: var(--primary);">
+                                    <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                                    Añadir
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% endif %}
+
+                            {% if request.user.is_staff or request.user.is_superuser %}
+                            <a href="{% url 'detalle_ejemplar' ejemplar.id %}" onclick="event.stopPropagation()" class="p-2 rounded-lg transition-all hover:bg-black/5 flex items-center justify-center" style="color: var(--text-muted); border: 1px solid var(--border);" title="Editar ejemplar">
+                                <span class="material-symbols-outlined text-sm">edit</span>
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
 
                 </div>

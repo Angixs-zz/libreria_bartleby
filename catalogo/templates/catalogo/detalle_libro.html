@@ -134,6 +134,13 @@
                     <span class="material-symbols-outlined text-xs">verified</span>
                     {{ ejemplar.estado_fisico.nombre }}
                 </span>
+
+                {% if request.user.is_staff or request.user.is_superuser %}
+                <a href="{% url 'detalle_ejemplar' ejemplar.id %}" class="badge hover:opacity-80 transition-opacity" style="background-color: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);" title="Editar ejemplar">
+                    <span class="material-symbols-outlined text-xs">edit</span>
+                    Editar
+                </a>
+                {% endif %}
             </div>
 
             <!-- Título y autor -->
