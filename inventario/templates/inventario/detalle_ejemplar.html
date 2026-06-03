@@ -20,41 +20,6 @@
 
 {% block extra_head %}
 <style>
-.field-group {
-    margin-bottom: 1.5rem;
-}
-.field-label {
-    display: block;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    margin-bottom: 0.4rem;
-    margin-top: 0;
-}
-.field-input {
-    width: 100%;
-    background-color: var(--bg-subtle);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 0.65rem 0.9rem;
-    color: var(--text);
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.9rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.field-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(163,196,106,0.15);
-}
-.field-input[type="number"] { -moz-appearance: textfield; }
-.field-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-
-select.field-input { cursor: pointer; }
-textarea.field-input { resize: vertical; min-height: 90px; }
-
 .section-card {
     background-color: var(--surface);
     border: 1px solid var(--border);
@@ -226,35 +191,35 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="sm:col-span-2 field-group">
-                            <label class="field-label" for="titulo">Título</label>
-                            <input type="text" id="titulo" name="titulo" class="field-input"
+                        <div class="sm:col-span-2 mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="titulo">Título</label>
+                            <input type="text" id="titulo" name="titulo" class="w-full border-0 py-2.5 text-lg font-headline italic focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);"
                                    value="{{ ejemplar.libro.titulo }}">
                         </div>
 
-                        <div class="field-group">
-                            <label class="field-label" for="autor">Autor</label>
-                            <input type="text" id="autor" name="autor" class="field-input"
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="autor">Autor</label>
+                            <input type="text" id="autor" name="autor" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);"
                                    value="{{ ejemplar.libro.autor }}">
                         </div>
 
-                        <div class="field-group">
-                            <label class="field-label" for="isbn">ISBN</label>
-                            <input type="text" id="isbn" name="isbn" class="field-input"
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="isbn">ISBN</label>
+                            <input type="text" id="isbn" name="isbn" class="w-full border-0 py-2.5 font-mono focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);"
                                    value="{{ ejemplar.libro.isbn|default:'' }}"
                                    placeholder="ISBN-10 o ISBN-13">
                         </div>
 
-                        <div class="field-group">
-                            <label class="field-label" for="editorial">Editorial</label>
-                            <input type="text" id="editorial" name="editorial" class="field-input"
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="editorial">Editorial</label>
+                            <input type="text" id="editorial" name="editorial" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);"
                                    value="{{ ejemplar.libro.editorial|default:'' }}"
                                    placeholder="Ej. Anagrama, 2018">
                         </div>
 
-                        <div class="field-group">
-                            <label class="field-label" for="categoria_texto">Categoría</label>
-                            <input type="text" id="categoria_texto" name="categoria_texto" class="field-input"
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="categoria_texto">Categoría</label>
+                            <input type="text" id="categoria_texto" name="categoria_texto" class="w-full border-0 py-2.5 focus:ring-0 bg-transparent" style="border-bottom: 1px solid var(--border); color: var(--text);"
                                    value="{{ ejemplar.libro.categoria.nombre|default:'' }}"
                                    list="categorias-list"
                                    placeholder="Ej. Narrativa, Poesía...">
@@ -265,9 +230,9 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                             </datalist>
                         </div>
 
-                        <div class="sm:col-span-2 field-group">
-                            <label class="field-label" for="descripcion">Descripción / Sinopsis</label>
-                            <textarea id="descripcion" name="descripcion" class="field-input"
+                        <div class="sm:col-span-2 mb-4">
+                            <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="descripcion">Descripción / Sinopsis</label>
+                            <textarea id="descripcion" name="descripcion" class="w-full rounded-lg p-3 text-sm font-body resize-none" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
                                       rows="4">{{ ejemplar.libro.descripcion|default:'' }}</textarea>
                         </div>
 
@@ -313,16 +278,16 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                         Datos del Lote
                     </h2>
 
-                    <div class="field-group">
-                        <label class="field-label">SKU</label>
-                        <div class="field-input font-mono text-sm" style="background-color: var(--bg); cursor: default; color: var(--text-faint);">
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);">SKU</label>
+                        <div class="w-full rounded-lg p-3 font-mono text-sm" style="background-color: var(--bg); border: 1px solid var(--border); cursor: default; color: var(--text-faint);">
                             {{ ejemplar.sku }}
                         </div>
                     </div>
 
-                    <div class="field-group">
-                        <label class="field-label" for="estado_fisico">Estado Físico</label>
-                        <select id="estado_fisico_select" name="estado_fisico_select" class="field-input" onchange="if(this.value==='__nuevo__'){document.getElementById('estado_fisico_texto').classList.remove('hidden');document.getElementById('estado_fisico_texto').focus();document.getElementById('estado_fisico_texto').required=true;}else{document.getElementById('estado_fisico_texto').classList.add('hidden');document.getElementById('estado_fisico_texto').required=false;document.getElementById('estado_fisico_texto').value='';}">
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="estado_fisico">Estado Físico</label>
+                        <select id="estado_fisico_select" name="estado_fisico_select" class="w-full rounded-lg p-3 text-sm font-body" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" onchange="if(this.value==='__nuevo__'){document.getElementById('estado_fisico_texto').classList.remove('hidden');document.getElementById('estado_fisico_texto').focus();document.getElementById('estado_fisico_texto').required=true;}else{document.getElementById('estado_fisico_texto').classList.add('hidden');document.getElementById('estado_fisico_texto').required=false;document.getElementById('estado_fisico_texto').value='';}">
                             {% for estado in estados_fisicos %}
                             <option value="{{ estado.nombre }}" {% if ejemplar.estado_fisico.nombre == estado.nombre %}selected{% endif %}>
                                 {{ estado.nombre }}
@@ -330,39 +295,39 @@ textarea.field-input { resize: vertical; min-height: 90px; }
                             {% endfor %}
                             <option value="__nuevo__" class="font-bold text-[#3e5219]">+ Crear nueva condición...</option>
                         </select>
-                        <input type="text" id="estado_fisico_texto" name="estado_fisico_texto" class="hidden mt-2 field-input border-dashed"
-                               placeholder="Escribe el nuevo estado..." style="border-color: var(--primary);">
+                        <input type="text" id="estado_fisico_texto" name="estado_fisico_texto" class="hidden mt-2 w-full rounded-lg p-3 text-sm font-body border-dashed"
+                               placeholder="Escribe el nuevo estado..." style="background-color: var(--bg); border: 1px dashed var(--primary); color: var(--text);">
                     </div>
 
-                    <div class="field-group">
-                        <label class="field-label" for="descripcion_estado">Notas del Estado</label>
-                        <textarea id="descripcion_estado" name="descripcion_estado" class="field-input" rows="3"
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="descripcion_estado">Notas del Estado</label>
+                        <textarea id="descripcion_estado" name="descripcion_estado" class="w-full rounded-lg p-3 text-sm font-body resize-none" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);" rows="3"
                                   placeholder="Detalles sobre el estado físico...">{{ ejemplar.descripcion_estado|default:'' }}</textarea>
                     </div>
 
-                    <div class="field-group">
-                        <label class="field-label" for="stock">Stock en Inventario</label>
-                        <input type="number" id="stock" name="stock" class="field-input"
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="stock">Stock en Inventario</label>
+                        <input type="number" id="stock" name="stock" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
                                value="{{ ejemplar.stock }}" min="0">
                     </div>
 
-                    <div class="field-group">
-                        <label class="field-label" for="precio_venta">Precio de Venta ($)</label>
-                        <input type="number" id="precio_venta" name="precio_venta" class="field-input"
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1 uppercase" style="color: var(--primary);" for="precio_venta">Precio de Venta ($)</label>
+                        <input type="number" id="precio_venta" name="precio_venta" class="w-full rounded-lg p-2 font-mono" style="background-color: var(--bg); border: 1px solid var(--border); color: var(--text);"
                                value="{{ ejemplar.precio_venta }}" step="0.01" min="0.01">
                     </div>
 
-                    <div class="field-group">
+                    <div class="mb-4">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="field-label" for="precio_compra" style="margin-bottom: 0;">Precio de Compra ($)</label>
+                            <label class="block text-xs font-bold uppercase" style="color: var(--primary); margin-bottom: 0;" for="precio_compra">Precio de Compra ($)</label>
                             <span class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-muted);">
                                 <span class="material-symbols-outlined text-[12px]">lock</span>
                                 Registrado
                             </span>
                         </div>
-                        <input type="number" id="precio_compra" name="precio_compra" class="field-input font-mono"
+                        <input type="number" id="precio_compra" name="precio_compra" class="w-full rounded-lg p-2 font-mono opacity-60"
                                value="{{ ejemplar.precio_compra }}" step="0.01" min="0" readonly
-                               style="background-color: var(--bg); cursor: not-allowed; color: var(--text-faint); border-color: var(--border);">
+                               style="background-color: var(--bg-subtle); cursor: not-allowed; color: var(--text-muted); border: 1px solid var(--border);">
                     </div>
 
                     <!-- Fechas (solo lectura) -->
