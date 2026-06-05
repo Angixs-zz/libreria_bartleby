@@ -147,9 +147,9 @@ Disponible desde **Reservas** o **Gestor de reservas**.
 1. Entrar a **Reservas**.
 2. Revisar la lista de apartados pendientes.
 3. Usar los indicadores de urgencia:
-   - Verde: quedan mas de 24 horas.
-   - Amarillo: quedan entre 6 y 24 horas.
-   - Rojo: quedan 6 horas o menos, o la reserva esta vencida.
+   - Verde: quedan mas de 48 horas (reserva de 72 horas).
+   - Amarillo: quedan entre 24 y 48 horas.
+   - Rojo: quedan menos de 24 horas, o la reserva esta vencida.
 
 ### Entregar una reserva
 

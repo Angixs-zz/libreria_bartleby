@@ -76,10 +76,13 @@
                          style="border-bottom: 1px solid var(--border);">
                         <span class="material-symbols-outlined mr-3 text-xl transition-colors group-focus-within:!text-[var(--primary)]"
                               style="color: var(--text-faint);">lock</span>
-                        <input name="password" type="password" required
+                        <input name="password" id="login-password" type="password" required
                                class="w-full bg-transparent border-none focus:ring-0 font-body p-0 text-sm md:text-base"
                                style="color: var(--text);"
                                placeholder="••••••••"/>
+                        <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="focus:outline-none ml-2 flex items-center justify-center transition-colors hover:opacity-70" tabindex="-1" style="color: var(--text-muted);">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
                     </div>
                 </div>
 
@@ -105,4 +108,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('span');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
+</script>
 {% endblock %}

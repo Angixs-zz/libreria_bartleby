@@ -150,15 +150,21 @@
                             {{ form.direccion }}
                             {{ form.direccion.errors }}
                         </div>
-                        <div>
+                        <div class="relative">
                             <label for="{{ form.password1.id_for_label }}">Contraseña</label>
                             {{ form.password1 }}
                             {{ form.password1.errors }}
+                            <button type="button" class="absolute right-3 top-10 focus:outline-none flex items-center justify-center transition-colors hover:opacity-70" style="color: var(--text-muted);" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}', this)" tabindex="-1">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </button>
                         </div>
-                        <div>
+                        <div class="relative">
                             <label for="{{ form.password2.id_for_label }}">Confirmar</label>
                             {{ form.password2 }}
                             {{ form.password2.errors }}
+                            <button type="button" class="absolute right-3 top-10 focus:outline-none flex items-center justify-center transition-colors hover:opacity-70" style="color: var(--text-muted);" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}', this)" tabindex="-1">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </button>
                         </div>
                         {% if form.non_field_errors %}
                             <div class="md:col-span-2">
@@ -218,6 +224,26 @@
 
         checkbox.addEventListener("change", updateBtnState);
         updateBtnState(); // Estado inicial
+        
+        // Bloquear letras en el campo de teléfono
+        const telefonoInput = document.getElementById("{{ form.telefono.id_for_label }}");
+        if (telefonoInput) {
+            telefonoInput.addEventListener("input", function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
     });
+
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('span');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
 </script>
 {% endblock %}

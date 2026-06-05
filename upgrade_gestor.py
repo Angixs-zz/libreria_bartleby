@@ -54,8 +54,8 @@ content = content.replace(css_old, css_new)
 
 # Upgrade the reserva card layout
 content = content.replace(
-    'class="reserva-card-item rounded-xl overflow-hidden transition-all hover:shadow-md bg-white dark:bg-[#1b1c1a] border border-gray-200 dark:border-gray-800 {% if h > 24 %}reserva-verde{% elif h > 6 %}reserva-amber{% else %}reserva-roja{% endif %}">',
-    'class="reserva-card-item rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/90 dark:bg-[#1b1c1a]/90 backdrop-blur-md border border-gray-100 dark:border-gray-800 {% if h > 24 %}reserva-verde{% elif h > 6 %}reserva-amber{% else %}reserva-roja{% endif %}">'
+    'class="reserva-card-item rounded-xl overflow-hidden transition-all hover:shadow-md bg-white dark:bg-[#1b1c1a] border border-gray-200 dark:border-gray-800 {% if h > 48 %}reserva-verde{% elif h > 24 %}reserva-amber{% else %}reserva-roja{% endif %}">',
+    'class="reserva-card-item rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/90 dark:bg-[#1b1c1a]/90 backdrop-blur-md border border-gray-100 dark:border-gray-800 {% if h > 48 %}reserva-verde{% elif h > 24 %}reserva-amber{% else %}reserva-roja{% endif %}">'
 )
 
 content = content.replace(

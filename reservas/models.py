@@ -55,9 +55,9 @@ class Reserva(models.Model):
     def urgencia(self):
         """'verde', 'amarillo' o 'rojo' para el código de colores del panel."""
         h = self.horas_restantes
-        if h > 24:
+        if h > 48:
             return 'verde'
-        elif h > 6:
+        elif h > 24:
             return 'amarillo'
         else:
             return 'rojo'
