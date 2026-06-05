@@ -214,8 +214,36 @@
                     <p class="font-body" style="color: var(--text-faint);">Aún no hay ejemplares disponibles para la venta.</p>
                 </div>
                 {% endfor %}
-
             </div>
+
+            <!-- Paginación -->
+            {% if ejemplares.has_other_pages %}
+            <div class="mt-12 flex justify-center">
+                <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+                    {% if ejemplares.has_previous %}
+                    <a href="?page={{ ejemplares.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if genero_seleccionado %}&genero={{ genero_seleccionado }}{% endif %}{% if precio_min_seleccionado %}&precio_min={{ precio_min_seleccionado }}{% endif %}{% if precio_max_seleccionado %}&precio_max={{ precio_max_seleccionado }}{% endif %}" class="relative inline-flex items-center rounded-l-md px-2 py-2 hover:opacity-80 transition-opacity" style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-muted);">
+                        <span class="sr-only">Anterior</span>
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% for i in paginator.page_range %}
+                        {% if ejemplares.number == i %}
+                            <span aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold text-white" style="background-color: var(--primary);">{{ i }}</span>
+                        {% else %}
+                            <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}{% if genero_seleccionado %}&genero={{ genero_seleccionado }}{% endif %}{% if precio_min_seleccionado %}&precio_min={{ precio_min_seleccionado }}{% endif %}{% if precio_max_seleccionado %}&precio_max={{ precio_max_seleccionado }}{% endif %}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold hover:opacity-80 transition-opacity" style="background-color: var(--surface); border: 1px solid var(--border); border-left: none; color: var(--text);">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if ejemplares.has_next %}
+                    <a href="?page={{ ejemplares.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if genero_seleccionado %}&genero={{ genero_seleccionado }}{% endif %}{% if precio_min_seleccionado %}&precio_min={{ precio_min_seleccionado }}{% endif %}{% if precio_max_seleccionado %}&precio_max={{ precio_max_seleccionado }}{% endif %}" class="relative inline-flex items-center rounded-r-md px-2 py-2 hover:opacity-80 transition-opacity" style="background-color: var(--surface); border: 1px solid var(--border); border-left: none; color: var(--text-muted);">
+                        <span class="sr-only">Siguiente</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </section>
 

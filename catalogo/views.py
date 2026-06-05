@@ -98,7 +98,7 @@ def lista_libros(request):
     )
 
     # Paginación
-    paginator = Paginator(ejemplares, 20)
+    paginator = Paginator(ejemplares, 10)
     try:
         ejemplares_page = paginator.page(page)
     except (PageNotAnInteger, EmptyPage):

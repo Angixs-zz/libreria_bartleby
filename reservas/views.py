@@ -36,6 +36,9 @@ def mis_reservas(request):
     - completada: entregada al cliente
     - cancelada: cancelada o vencida
     """
+    # Liberar automáticamente las que ya vencieron
+    InventarioService.cancelar_reservas_vencidas()
+
     reservas = Reserva.objects.filter(
         usuario=request.user
     ).prefetch_related('ejemplares').order_by('-fecha_vencimiento')
@@ -119,7 +122,11 @@ def gestor_reservas(request):
 
     Nota: Las reservas vencidas se cancelan automáticamente
     con el comando: python manage.py cancel_expired_reservations
+    o al acceder a esta vista.
     """
+    # Liberar automáticamente las que ya vencieron
+    InventarioService.cancelar_reservas_vencidas()
+
     pendientes = Reserva.objects.filter(
         estado='pendiente'
     ).prefetch_related('ejemplares').select_related('usuario').order_by(

@@ -816,6 +816,7 @@ def gestion_inventario(request):
     - Ejemplares agotados
     - Reservas pendientes
     """
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     ejemplares = Ejemplar.objects.select_related('libro').order_by('-creado_en')
     
     # Estadísticas
@@ -823,8 +824,17 @@ def gestion_inventario(request):
     agotados = ejemplares.filter(stock=0).count()
     reservas_pendientes = Reserva.objects.filter(estado='pendiente').count()
 
+    # Paginación
+    page = request.GET.get('page', 1)
+    paginator = Paginator(ejemplares, 10)
+    try:
+        ejemplares_page = paginator.page(page)
+    except (PageNotAnInteger, EmptyPage):
+        ejemplares_page = paginator.page(1)
+
     context = {
-        'ejemplares': ejemplares,
+        'ejemplares': ejemplares_page,
+        'paginator': paginator,
         'total_ejemplares': total_ejemplares,
         'agotados': agotados,
         'reservas_pendientes': reservas_pendientes,

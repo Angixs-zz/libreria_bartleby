@@ -57,7 +57,8 @@ class InventarioService:
         # Calcular stock disponible (stock actual - ejemplares reservados)
         reservados = Reserva.objects.filter(
             ejemplares=ejemplar,
-            estado='pendiente'
+            estado='pendiente',
+            fecha_vencimiento__gt=timezone.now()
         ).count()
         
         stock_libre = ejemplar.stock - reservados
@@ -137,7 +138,8 @@ class InventarioService:
             cantidad_pedida = conteo[ejemplar.id]
             reservados = Reserva.objects.filter(
                 ejemplares=ejemplar,
-                estado='pendiente'
+                estado='pendiente',
+                fecha_vencimiento__gt=timezone.now()
             ).count()
 
             stock_libre = ejemplar.stock - reservados
@@ -377,7 +379,8 @@ class InventarioService:
         
         reservados = Reserva.objects.filter(
             ejemplares=ejemplar,
-            estado='pendiente'
+            estado='pendiente',
+            fecha_vencimiento__gt=timezone.now()
         ).count()
         
         return max(0, ejemplar.stock - reservados)
